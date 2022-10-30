@@ -44,7 +44,31 @@ Directory
 NLX:  Not an abbreviation, just a name
 
 
-# 2. Chapter
+# 2. Architecture
+
+## 2.1. Request flow
+
+```
+           org A             |             org B
+HTTP client -> NLX outway -> | -> NLX inway -> HTTP service
+```
+
+
+## 2.2. Service discovery
+```
+  org A   |   central org  |    org B
+NLX inway -> NLX directory -> NLX outway
+```
+
+## 2.3. Gateway management
+```
+NLX management API -> NLX inways
+                   -> NLX outways
+```
+
+
+
+
 
 # 3. Chapter
 
