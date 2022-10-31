@@ -12,7 +12,7 @@
 #        <center>NLX Core</center>
 
 # Abstract
-
+Abstract
 
 # Status of This Memo
 Information about the current status of this document, any errata,and how to provide feedback on it may be obtained at XX.
@@ -24,7 +24,15 @@ Copyright (c) 2022 VNG and the persons identified as the document authors. All r
 
 # 1. Introduction
 
-The core part of the NLX standard describes how to automate the creation and management of connections between API clients and providers when those exist in different security contexts. 
+The core part of the NLX standard describes how to automate the creation and management of connections between HTTP clients and HTTP services. (to do: scope, use case, landscape).
+
+Chapter 2 describes the architecture of systems that follow the NLX standard.
+Chapter 3 describes the features and behavior of involved components in detail.
+
+NLX core MAY be extended by using one or more of the following extensions, each described in a dedicated RFC:
+- [NLX Authorization](authorization/README.md)
+- [NLX Logging](logging/README.md)
+- [NLX Delegation](delegation/README.md)
 
 ## 1.1. Requirements Language
 
@@ -39,12 +47,39 @@ This section lists terms and abbreviations that are used in this document.
 Directory
 : An NLX directory holds information about all services in the NLX system so they can be discovered. 
 
+Inway
+: API Gateway as defined in [RFC X] that handles incoming connections to one or more services and confirms to the NLX Core standard.
+
+Outway
+: API Gateway as defined in [RFC X] that handles outgoing connections to Inways and confirms to the NLX Core standard.
+
+HTTP Service
+: HTTP services as defined in [RFC X] that are provided via an Inway
+
+NLX System
+: System of components that confirm to the NLX standard and 
+
 ### 1.2.2. Abbreviations
 
-NLX:  Not an abbreviation, just a name
+API
+: Application Programming Interface, as described in RFC X
+
+HTTP
+: Hyper Text Transfer Protocol, as described in RFC X
+
+NLX
+: Not an abbreviation, just a name
 
 
 # 2. Architecture
+
+The purpose of NLX Core is to standardise setting up and managing connections to HTTP services. Involved inways and outways are managed via a Management API and make use of a directory that enables service discovery. 
+
+This chapter describes the basic architecture of NLX systems 
+
+
+
+
 
 ## 2.1. Request flow
 
@@ -61,10 +96,19 @@ NLX inway -> NLX directory -> NLX outway
 ```
 
 ## 2.3. Gateway management
+
+Gateways 
+
 ```
 NLX management API -> NLX inways
                    -> NLX outways
 ```
+
+## 2.4. Using a service
+
+
+
+## 2.5. Providing a service
 
 
 
