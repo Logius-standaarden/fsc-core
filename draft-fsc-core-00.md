@@ -80,18 +80,28 @@ Section 3 describes the interfaces and behavior of FSC functionality in detail.
 
 The Federated Service Connectivity (FSC) specification describes a way to implement technically interoperable API gateway functionality, covering federated authentication, secure connecting and transaction logging in a large-scale, dynamic API landscape. The standard includes the exchange of information and requests about the management of connections and authorizations, in order to make it possible to automate those activities. 
 
-The Core part of the Federated Service Connectivity (FSC) specification achieves technical interoperability for the creation and management of connections between HTTP clients and HTTP services and the discovery of said services.
+The Core part of the Federated Service Connectivity (FSC) specification achieves inter-organizational, technical interoperability 
+- to discover services
+- to route requests to services in other contexts (e.g. from within organization A to organization B)
+- to request and managing connection rights needed to connect to said services
 
-It is RECOMMENDED to use FSC core with the following extensions, each described in a dedicated RFC:
+All functionality required to achieve technical interoperability is provided by APIs as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling upscaling of inter-organizational usage of services.
+
+
+## Overall Operation of FSC Core
+
+The FSC specification is used to create FSC Systems. One System consists of all (parts of) organizations that federate trust for the purpose of using each others services. The System consists of multiple decentral contexts and a central FSC Directory in which all services of the system are listed. Services are discovered by consulting this Directory. Every Directory lists all services in the scope of one System. The Directory contains routing information for every listed service, which is used to connect to the service. 
+
+A typical use case is a cooporation of many organisations that provide access to API's to each other.
+Organizations can participate in multiple FSC Systems at once.
+
+To connect to services, Connection Rights are required. The FSC specification describes how Connection Rights are requested, granted and revoked. Once a Connection Right is granted, a connection from HTTP Client to HTTP Service will be automatically created when an HTTP request to the HTTPS service is made.
+
+It is RECOMMENDED to use FSC Core with the following extensions, each described in a dedicated RFC:
 - [FSC Authorization](authorization/README.md), to delegate the autorisation of connections to a Policy Decision Point
 - [FSC Logging](logging/README.md), to standardize and link transaction logs
 - [FSC Delegation](delegation/README.md), to delegate the right to connect
 - [FSC Control](control/README.md), to get in control from a security and audit perspective
-
-## Overall Operation
-
-
-
 
 
 ## Requirements Language
@@ -120,11 +130,13 @@ HTTP Service
 Manager
 : The FSC Manager configures all inways and outways based on access requests and grants
 
-NLX System
+FSC System
 : System of inways, outways and managers that confirm to the FSC standard
 
 Protocol Buffers
 : XX
+
+
 
 
 # Architecture
@@ -133,15 +145,27 @@ The purpose of FSC Core is to standardise setting up and managing connections to
 
 This chapter describes the basic architecture of FSC systems.
 
-FSC is typically used when the need to connect spans multiple organizations; when clients in organization A need to connect to organization B. Use within a single organization can be beneficial as well, especially when already using FSC to connect with other organization. In this RFC the word `context` is used as general concept instead of `organization` or `department` or `security context`.
+FSC is typically used when the need to connect spans multiple organizations; when clients in organization A need to connect to organization B. Use within a single organization can be beneficial as well, eg. when following the principles of Zero Trust Networking. In this RFC the word `context` is used as general concept instead of `organization` or `department` or `security context`.
 
 
 ## Request flow
+
 
 ```
           context A          |            context B
 HTTP client -> FSC Outway -> | -> FSC Inway -> HTTP service
 ```
+
+## Service discovery
+
+Every FSC System has an FSC Directory that defines the scope of said system.
+All HTTP Services that are served via an Inway are announced to the FSC Directory.
+All Outways will 
+```
+context A   |    central     | context B
+FSC Inway  -> FSC Directory -> FSC Outway
+```
+
 
 
 ## TLS Certificates
@@ -151,11 +175,7 @@ All connections within an FSC system are mTLS connections based on x.509 certifi
 - external certificates, provided by an organization that is trusted to issue certificates with the correct organization identities. Every participant in an FSC system MUST accept the same Root Certificate as trusted to base the identification and authentication of organisations on.
 
 
-## Service discovery
-```
-context A   |    central     | context B
-FSC Inway  -> FSC Directory -> FSC Outway
-```
+
 
 ## Management
 
