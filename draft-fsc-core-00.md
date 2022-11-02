@@ -72,16 +72,27 @@ Copyright (c) 2022 VNG and the persons identified as the document authors. All r
 
 # Introduction
 
-The Core part of the FSC standard describes the creation and management of connections between HTTP clients and HTTP services. (to do: scope, use case, landscape). 
-
+This section gives an introduction to this RFC. 
 Section 2 describes the architecture of systems that follow the FSC standard.
 Section 3 describes the interfaces and behavior of FSC functionality in detail.
 
+## Purpose
+
+The Federated Service Connectivity (FSC) specification describes a way to implement technically interoperable API gateway functionality, covering federated authentication, secure connecting and transaction logging in a large-scale, dynamic API landscape. The standard includes the exchange of information and requests about the management of connections and authorizations, in order to make it possible to automate those activities. 
+
+The Core part of the Federated Service Connectivity (FSC) specification achieves technical interoperability for the creation and management of connections between HTTP clients and HTTP services and the discovery of said services.
+
 It is RECOMMENDED to use FSC core with the following extensions, each described in a dedicated RFC:
-- [FSC Authorization](authorization/README.md)
-- [FSC Logging](logging/README.md)
-- [FSC Delegation](delegation/README.md)
-- [FSC Control](control/README.md)
+- [FSC Authorization](authorization/README.md), to delegate the autorisation of connections to a Policy Decision Point
+- [FSC Logging](logging/README.md), to standardize and link transaction logs
+- [FSC Delegation](delegation/README.md), to delegate the right to connect
+- [FSC Control](control/README.md), to get in control from a security and audit perspective
+
+## Overall Operation
+
+
+
+
 
 ## Requirements Language
 
@@ -89,24 +100,19 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## Terminology
 
-This section lists terms and abbreviations that are used in this document.
+This specification lists terms and abbreviations that are used in this document.
 
-### Terminology Used in This Document
-
-Access request
+Access grant
 : XX
 
 Directory
 : An FSC directory holds information about all services in the FSC system so they can be discovered. 
 
-Grant
-: XX
-
 Inway
 : API Gateway, technically a reverse proxy, that handles incoming connections to one or more services and confirms to the FSC Core standard.
 
 Outway
-: HTTP Proxy as defined in [RFC X] that handles outgoing connections to Inways and confirms to the FSC Core standard.
+: HTTP Proxy as defined in [RFC 7230](https://www.rfc-editor.org/rfc/rfc7230#section-2.3) that handles outgoing connections to Inways and confirms to the FSC Core standard.
 
 HTTP Service
 : HTTP services as defined in [RFC X] that are provided via an Inway
@@ -115,24 +121,10 @@ Manager
 : The FSC Manager configures all inways and outways based on access requests and grants
 
 NLX System
-: System of inways and outways that confirm to the FSC standard
+: System of inways, outways and managers that confirm to the FSC standard
 
 Protocol Buffers
 : XX
-
-### Abbreviations
-
-API
-: Application Programming Interface, as described in RFC X
-
-gRPC
-: XX
-
-FSC
-: Federated Service Connectivity, the name of this draft standard
-
-HTTP
-: Hyper Text Transfer Protocol, as specified in [RFC 2068](https://www.rfc-editor.org/rfc/rfc2068)
 
 
 # Architecture
@@ -185,7 +177,7 @@ FSC Manager -> FSC Inways    |    FSC Inways  <- FSC Manager
 
 
 
-# Specifications for functionality  XX
+# Functional specifications
 
 ## Outway functionality
 ### Interfaces
@@ -204,13 +196,12 @@ It is RECOMMENDED to implement the Manager functionality seperate from the Inway
 ### Interfaces
 
 #### AccessRequestService
-The Manager functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `AccessRequestService`. This service **MUST** implement three Remote Procedure Calls (rpc):
+The Manager functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `AccessRequestService`. This service **MUST** offers three Remote Procedure Calls (rpc):
 - `RequestAccess`, used to request access
 - `GetAccessRequestState`, used to request information about an Access Request
 - `GetAccessGrant`, used to fetch an AccessGrant
 
-All rpc's **MUST** use Protocol Buffers to exchange messages as specified on [developers.google.com](https://developers.google.com/protocol-buffers/). The messages are specified below. 
-
+All rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below. 
 
 
 ##### rpc RequestAccess
@@ -297,12 +288,54 @@ message AccessGrant {
 }
 ```
 
+#### Error handling
+
+(This part will most likely change, with only the relevant errors in each part of the FSC standard)
+
+The gRPC service **MUST** implement error handling with the following 
+
+```
+enum ErrorReason {
+  // Do not use this default value.
+  ERROR_REASON_UNSPECIFIED = 0;
+
+  // The order that is being used is revoked
+  ERROR_REASON_ORDER_REVOKED = 1;
+
+  // The order could not be found
+  ERROR_REASON_ORDER_NOT_FOUND = 2;
+
+  // The order does not exist for your organization
+  ERROR_REASON_ORDER_NOT_FOUND_FOR_ORG = 3;
+
+  // The service is not found in the order
+  ERROR_REASON_ORDER_DOES_NOT_CONTAIN_SERVICE = 4;
+
+  // The order is expired
+  ERROR_REASON_ORDER_EXPIRED = 5;
+
+  // Something went wrong while trying to retrieve the claim
+  ERROR_REASON_UNABLE_TO_RETRIEVE_CLAIM = 6;
+
+  // Something went wrong while trying to sign the claim
+  ERROR_REASON_UNABLE_TO_SIGN_CLAIM = 7;
+}
+```
+
+
+
+
 ### Behavior
 
 The gRPC service **MUST** enforce the use of mTLS connections.
-The gRPC service **SHALL** only accept TLS certificates that are valid and issued under the Root Certificate that defines the scope of the FSC System. Which Root Certificate to accept is based on an agreement between the organizations that cooporate in the FSC System.
+The gRPC service **SHALL** accept only TLS certificates that are valid and issued under the Root Certificate that defines the scope of the FSC System. Which Root Certificate to accept is based on an agreement between the organizations that cooporate in the FSC System.
 
-XX Manager Behavior
+
+
+
+
+
+
 
 ## Directory functionality
 ### Interfaces
