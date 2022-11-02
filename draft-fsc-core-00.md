@@ -145,7 +145,7 @@ The purpose of FSC Core is to standardise setting up and managing connections to
 
 This chapter describes the basic architecture of FSC systems.
 
-FSC is typically used when the need to connect spans multiple organizations; when clients in organization A need to connect to organization B. Use within a single organization can be beneficial as well, eg.when following the principles of Zero Trust Networking. In this RFC the word `context` is used as general concept instead of `organization` or `department` or `security context`.
+FSC is typically used when the need to connect spans multiple organizations; when clients in organization A need to connect to organization B. Use within a single organization can be beneficial as well, eg. when following the principles of Zero Trust Networking. In this RFC the word `context` is used as general concept instead of `organization` or `department` or `security context`.
 
 
 ## Request flow
