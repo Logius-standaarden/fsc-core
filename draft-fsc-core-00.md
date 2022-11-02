@@ -1,20 +1,17 @@
 %%%
 title = "FSC - core"
 abbrev = "FSC - core"
-docName = "fsc-core"
-category = "info"
-ipr = "trust200902"
-area = "General"
+ipr = "none"
+submissiontype = "independent"
+area = "Internet"
 workgroup = ""
 keyword = ["Internet-Draft"]
 
-
 [seriesInfo]
-status = "informational"
 name = "Internet-Draft"
 value = "draft-fsc-core-00"
-stream = "IETF"
-
+stream = "independent"
+status = "informational"
 # date = 2022-11-01T00:00:00Z
 
 [[author]]
@@ -63,15 +60,15 @@ organization = "AceWorks"
 
 TODO
 
-{mainmatter}
-
-# Status of This Memo
+.# Status of This Memo
 Information about the current status of this document, any errata,and how to provide feedback on it may be obtained at XX.
 
-# Copyright Notice
+.# Copyright Notice
 
-This document is an early concept and has not received any review yet. Everything can change at any moment. Comments are welcome.
+This document is an early concept and has not received any review yet. Evwerything can change at any moment. Comments are welcome.
 Copyright (c) 2022 VNG and the persons identified as the document authors. All rights reserved.
+
+{mainmatter}
 
 # Introduction
 
