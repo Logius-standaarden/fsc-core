@@ -70,13 +70,13 @@ Copyright (c) 2022 VNG and the persons identified as the document authors. All r
 
 {mainmatter}
 
-# 1. Introduction
+# Introduction
 
 This section gives an introduction to this RFC. 
 Section 2 describes the architecture of systems that follow the FSC standard.
 Section 3 describes the interfaces and behavior of FSC functionality in detail.
 
-## 1.1 Purpose
+## Purpose
 
 The Federated Service Connectivity (FSC) specification describes a way to implement technically interoperable API gateway functionality, covering federated authentication, secure connecting and transaction logging in a large-scale, dynamic API landscape. The standard includes the exchange of information and requests about the management of connections and authorizations, in order to make it possible to automate those activities. 
 
