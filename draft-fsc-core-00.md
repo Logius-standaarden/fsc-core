@@ -54,6 +54,14 @@ organization = "AceWorks"
   [author.address]
    email = "henk.van.maanen@aceworks.nl"
 
+[[author]]
+initials = "G.J."
+surname = "Riemer"
+fullname = "Geert-Johan Riemer"
+organization = "Utlimate Spellchek Serveces Riemer"
+  [author.address]
+   email = "fsc@geertjohan.net"
+
 %%%
 
 .# Abstract
@@ -65,22 +73,22 @@ Information about the current status of this document, any errata,and how to pro
 
 .# Copyright Notice
 
-This document is an early concept and has not received any review yet. Evwerything can change at any moment. Comments are welcome.
+This document is an early concept and has not received any review yet. Everything can change at any moment. Comments are welcome.
 Copyright (c) 2022 VNG and the persons identified as the document authors. All rights reserved.
 
 {mainmatter}
 
 # Introduction
 
-This section gives an introduction to this RFC. 
+This section gives an introduction to this RFC.
 Section 2 describes the architecture of systems that follow the FSC standard.
 Section 3 describes the interfaces and behavior of FSC functionality in detail.
 
 ## Purpose
 
-The Federated Service Connectivity (FSC) specification describes a way to implement technically interoperable API gateway functionality, covering federated authentication, secure connecting and transaction logging in a large-scale, dynamic API landscape. The standard includes the exchange of information and requests about the management of connections and authorizations, in order to make it possible to automate those activities. 
+The Federated Service Connectivity (FSC) specification describes a way to implement technically interoperable API gateway functionality, covering federated authentication, secure connecting and transaction logging in a large-scale, dynamic API landscape. The standard includes the exchange of information and requests about the management of connections and authorizations, in order to make it possible to automate those activities.
 
-The Core part of the Federated Service Connectivity (FSC) specification achieves inter-organizational, technical interoperability 
+The Core part of the Federated Service Connectivity (FSC) specification achieves inter-organizational, technical interoperability
 - to discover services
 - to route requests to services in other contexts (e.g. from within organization A to organization B)
 - to request and managing connection rights needed to connect to said services
@@ -90,15 +98,15 @@ All functionality required to achieve technical interoperability is provided by 
 
 ## Overall Operation of FSC Core
 
-The FSC specification is used to create FSC Systems. One System consists of all (parts of) organizations that federate trust for the purpose of using each others services. The System consists of multiple decentral contexts and a central FSC Directory in which all services of the system are listed. Services are discovered by consulting this Directory. Every Directory lists all services in the scope of one System. The Directory contains routing information for every listed service, which is used to connect to the service. 
+The FSC specification is used to create FSC Systems. One System consists of all (parts of) organizations that federate trust for the purpose of using each others services. The System consists of multiple decentral contexts and a central FSC Directory in which all services of the system are listed. Services are discovered by consulting this Directory. Every Directory lists all services in the scope of one System. The Directory contains routing information for every listed service, which is used to connect to the service.
 
-A typical use case is a cooporation of many organisations that provide access to API's to each other.
+A typical use case is a cooperation of many organizations that provide access to API's to each other.
 Organizations can participate in multiple FSC Systems at once.
 
 To connect to services, Connection Rights are required. The FSC specification describes how Connection Rights are requested, granted and revoked. Once a Connection Right is granted, a connection from HTTP Client to HTTP Service will be automatically created when an HTTP request to the HTTPS service is made.
 
 It is RECOMMENDED to use FSC Core with the following extensions, each described in a dedicated RFC:
-- [FSC Authorization](authorization/README.md), to delegate the autorisation of connections to a Policy Decision Point
+- [FSC Authorization](authorization/README.md), to delegate the authorization of connections to a Policy Decision Point
 - [FSC Logging](logging/README.md), to standardize and link transaction logs
 - [FSC Delegation](delegation/README.md), to delegate the right to connect
 - [FSC Control](control/README.md), to get in control from a security and audit perspective
@@ -116,7 +124,7 @@ Access grant
 : XX
 
 Directory
-: An FSC directory holds information about all services in the FSC system so they can be discovered. 
+: An FSC directory holds information about all services in the FSC system so they can be discovered.
 
 Inway
 : API Gateway, technically a reverse proxy, that handles incoming connections to one or more services and confirms to the FSC Core standard.
@@ -128,10 +136,10 @@ HTTP Service
 : HTTP services as defined in [RFC X] that are provided via an Inway
 
 Manager
-: The FSC Manager configures all inways and outways based on access requests and grants
+: The FSC Manager configures all Inways and Outways based on access requests and grants
 
 FSC System
-: System of inways, outways and managers that confirm to the FSC standard
+: System of Inways, Outways and managers that confirm to the FSC standard
 
 Protocol Buffers
 : XX
@@ -141,7 +149,7 @@ Protocol Buffers
 
 # Architecture
 
-The purpose of FSC Core is to standardise setting up and managing connections to HTTP services. Involved inways and outways are managed via a Manager and make use of a directory that enables service discovery. 
+The purpose of FSC Core is to standardize setting up and managing connections to HTTP services. Involved Inways and Outways are managed via a Manager and make use of a directory that enables service discovery.
 
 This chapter describes the basic architecture of FSC systems.
 
@@ -160,7 +168,7 @@ HTTP client -> FSC Outway -> | -> FSC Inway -> HTTP service
 
 Every FSC System has an FSC Directory that defines the scope of said system.
 All HTTP Services that are served via an Inway are announced to the FSC Directory.
-All Outways will 
+All Outways will
 ```
 context A   |    central     | context B
 FSC Inway  -> FSC Directory -> FSC Outway
@@ -171,15 +179,15 @@ FSC Inway  -> FSC Directory -> FSC Outway
 ## TLS Certificates
 
 All connections within an FSC system are mTLS connections based on x.509 certificates as defined in [RFC 3280](https://www.rfc-editor.org/rfc/rfc3280). Two types of certificates are acknowdleged:
-- internal certificates, typically provided and managed by the internal PKI of an organization. 
-- external certificates, provided by an organization that is trusted to issue certificates with the correct organization identities. Every participant in an FSC system MUST accept the same Root Certificate as trusted to base the identification and authentication of organisations on.
+- internal certificates, typically provided and managed by the internal PKI of an organization.
+- external certificates, provided by an organization that is trusted to issue certificates with the correct organization identities. Every participant in an FSC system MUST accept the same Root Certificate as trusted to base the identification and authentication of organizations on.
 
 
 
 
 ## Management
 
-All inways and outways in a local environment are managed by a local FSC Manager. This manager XX.
+All Inways and Outways in a local environment are managed by a local FSC Manager. This manager XX.
 
 ```
           context A          |            context B
@@ -241,7 +249,7 @@ If an error occurs within the scope of the FSC network, the Outway **MUST** retu
 ```
   responses:
     '540':
-      description: A FCS network error has occured 
+      description: A FCS network error has occurred
       content:
         application/json:
           schema:
@@ -259,7 +267,7 @@ If an error occurs within the scope of the FSC network, the Outway **MUST** retu
               code:
                 type: string
                 description: A unique code describing the error.
-```                        
+```
 
 ###### Error codes
 
@@ -277,7 +285,7 @@ The code field of the error response **MUST** contain one of the following codes
 
 Manager functionality in FSC Core is (XX list functionality)
 
-It is RECOMMENDED to implement the Manager functionality seperate from the Inway functionality, in order to be able to have many local Inways that are configured by one local Manager.
+It is RECOMMENDED to implement the Manager functionality separate from the Inway functionality, in order to be able to have many local Inways that are configured by one local Manager.
 
 ### Interfaces
 
@@ -287,7 +295,7 @@ The Manager functionality **MUST** implement an gRPC service, as specified on [g
 - `GetAccessRequestState`, used to request information about an Access Request
 - `GetAccessGrant`, used to fetch an AccessGrant
 
-All rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below. 
+All rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
 
 
 ##### rpc RequestAccess
@@ -378,7 +386,7 @@ message AccessGrant {
 
 (This part will most likely change, with only the relevant errors in each part of the FSC standard)
 
-The gRPC service **MUST** implement error handling according to the interface described in 
+The gRPC service **MUST** implement error handling according to the interface described in
 
 ```
 enum ErrorReason {
@@ -414,7 +422,7 @@ enum ErrorReason {
 ### Behavior
 
 The gRPC service **MUST** enforce the use of mTLS connections.
-The gRPC service **SHALL** accept only TLS certificates that are valid and issued under the Root Certificate that defines the scope of the FSC System. Which Root Certificate to accept is based on an agreement between the organizations that cooporate in the FSC System.
+The gRPC service **SHALL** accept only TLS certificates that are valid and issued under the Root Certificate that defines the scope of the FSC System. Which Root Certificate to accept is based on an agreement between the organizations that cooperate in the FSC System.
 
 
 
@@ -430,8 +438,8 @@ The gRPC service **SHALL** accept only TLS certificates that are valid and issue
 ## gRPC error handling
 
 According to gRPC specification a gRPC service will, in case of an error, return a response structured according to the `Status` interface. In case of an error that should generate a specific FSC error code the `status` message is enriched with an `ErrorInfo` message containing the FSC specific error code.
-The FSC specific error code **MUST** be set as the value of the `reason` field of the `ErrorInfo` interface. 
-The `ErrorInfo` interface **MUST** be used as the value of the `details` field of the `Status` interface. 
+The FSC specific error code **MUST** be set as the value of the `reason` field of the `ErrorInfo` interface.
+The `ErrorInfo` interface **MUST** be used as the value of the `details` field of the `Status` interface.
 
 
 The `Status` interface:  <https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto>
