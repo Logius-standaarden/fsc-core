@@ -378,7 +378,7 @@ message AccessGrant {
 
 (This part will most likely change, with only the relevant errors in each part of the FSC standard)
 
-The gRPC service **MUST** implement error handling with the following 
+The gRPC service **MUST** implement error handling according to the interface described in 
 
 ```
 enum ErrorReason {
@@ -427,7 +427,21 @@ The gRPC service **SHALL** accept only TLS certificates that are valid and issue
 ### Interfaces
 ### Behavior
 
+## gRPC error handling
+
+According to gRPC specification a gRPC service will, in case of an error, return a response structured according to the `Status` interface. In case of an error that should generate a specific FSC error code the `status` message is enriched with an `ErrorInfo` message containing the FSC specific error code.
+The FSC specific error code **MUST** be set as the value of the `reason` field of the `ErrorInfo` interface. 
+The `ErrorInfo` interface **MUST** be used as the value of the `details` field of the `Status` interface. 
+
+
+The `Status` interface:  <https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto>
+The `ErrorInfo` interface: <https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto>
+
+
 # References
+
+
+
 
 # Acknowledgements
 
