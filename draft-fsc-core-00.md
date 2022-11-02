@@ -85,7 +85,7 @@ The Core part of the Federated Service Connectivity (FSC) specification achieves
 - to route requests to services in other contexts (e.g. from within organization A to organization B)
 - to request and managing connection rights needed to connect to said services
 
-All functionality required to achieve technical interoperability is provided by API's as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling upscaling of inter-organizational usage of services.
+All functionality required to achieve technical interoperability is provided by APIs as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling upscaling of inter-organizational usage of services.
 
 
 ## Overall Operation of FSC Core
