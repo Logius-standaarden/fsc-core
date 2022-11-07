@@ -18,9 +18,9 @@ status = "informational"
 initials = "E."
 surname = "Hotting"
 fullname = "Eelco Hotting"
-organization = "VNG"
+organization = "Hotting IT"
   [author.address]
-   email = "eelco.hotting@vng.nl"
+   email = "rfc@hotting.it"
 
 [[author]]
 initials = "E."
@@ -81,12 +81,12 @@ Copyright (c) 2022 VNG and the persons identified as the document authors. All r
 # Introduction
 
 This section gives an introduction to this RFC.
-Section 2 describes the architecture of systems that follow the FSC standard.
-Section 3 describes the interfaces and behavior of FSC functionality in detail.
+Section 2 describes the architecture of a system that follows the FSC specication.
+Section 3 describes the interfaces and behavior of FSC components in detail.
 
 ## Purpose
 
-The Federated Service Connectivity (FSC) specification describes a way to implement technically interoperable API gateway functionality, covering federated authentication, secure connecting and transaction logging in a large-scale, dynamic API landscape. The standard includes the exchange of information and requests about the management of connections and authorizations, in order to make it possible to automate those activities.
+The Federated Service Connectivity (FSC) specifications describe a way to implement technically interoperable API gateway functionality, covering federated authentication, secure connecting and transaction logging in a large-scale, dynamic API landscape. The standard includes the exchange of information and requests about the management of connections and authorizations, in order to make it possible to automate those activities.
 
 The Core part of the Federated Service Connectivity (FSC) specification achieves inter-organizational, technical interoperability
 - to discover services
@@ -98,18 +98,28 @@ All functionality required to achieve technical interoperability is provided by 
 
 ## Overall Operation of FSC Core
 
-The FSC specification is used to create FSC Systems. One System consists of all (parts of) organizations that federate trust for the purpose of using each others services. The System consists of multiple decentral contexts and a central FSC Directory in which all services of the system are listed. Services are discovered by consulting this Directory. Every Directory lists all services in the scope of one System. The Directory contains routing information for every listed service, which is used to connect to the service.
+All Peers in a Group announce their HTTP services to the group by listing them in the Directory. Every Group uses one Directory that defines the scope of the Group. All Peers use the list of services as provided by the Directory to discover which services are available in the Group. With this information, Peers can propose Peer to Peer Contracts. Contracts contain Grants that specify which Outways from Peers may connect to which services from Peers. Each Contract may contain multiple Grants, defining the rights to connect between Peers. 
 
-A typical use case is a cooperation of many organizations that provide access to API's to each other.
-Organizations can participate in multiple FSC Systems at once.
+Inways are reverse proxies that announce services to the Directory and route incoming connections to those services.
+Outways are forward proxies that discover all available services in the Group and route outgoing connections to services.
+The Directory lists routing information for all services in the Group.
 
-To connect to services, Connection Rights are required. The FSC specification describes how Connection Rights are requested, granted and revoked. Once a Connection Right is granted, a connection from HTTP Client to HTTP Service will be automatically created when an HTTP request to the HTTPS service is made.
+To connect to a service, the Peer needs a Grant that specifies the connection. The FSC Core specification describes how Grants are requested, granted and revoked. Once a right to connect is granted, a connection from HTTP Client to HTTP Service will be automatically created everytime when an HTTP request to the HTTPS service is made.
 
-It is RECOMMENDED to use FSC Core with the following extensions, each described in a dedicated RFC:
-- [FSC Policies](policies/README.md), to use more advanced policies as conditions in contracts
+FSC Core specifies the basics for setting up and managing connections in e Group. It is RECOMMENDED to use FSC Core with the following extensions, each specified in a dedicated RFC:
+- [FSC Policies](policies/README.md), to use more advanced policies as conditions in Contracts
 - [FSC Logging](logging/README.md), to standardize and link transaction logs
-- [FSC Delegation](delegation/README.md), to delegate the right to connect
-- [FSC Control](control/README.md), to get in control from a security and audit perspective
+- [FSC Delegation](delegation/README.md), to delegate the right to connect to a service
+- [FSC Control](control/README.md), to get in control from a management, security and audit perspective
+
+
+### Use cases
+
+A typical use case is a cooperation of many organizations that use APIs to exchange data or provide business services to eachother. 
+
+Organizations can participate in multiple FSC Groups at once. This likely happens when using different environments for production, test and more - each environment will require it's own Group.
+
+An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a service in the Directory of each group using a different Inway for each Group. 
 
 
 ## Requirements Language
@@ -120,53 +130,97 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 This specification lists terms and abbreviations as used in this document.
 
+Peer
+: Actor that both provides and requests services from other Peers. This is an abstraction of e.g. an organization, a department or a security context. 
+
+Group
+: System of Peers using Inways, Outways and Contract Managers that confirm to the FSC specification to make use of eachothers services 
+
 Directory
-: An FSC directory holds information about all services in the FSC system so they can be discovered.
+: An Directory holds information about all services in the FSC Group so they can be discovered.
 
 Inway
-: API Gateway, technically a reverse proxy, that handles incoming connections to one or more services and confirms to the FSC Core standard.
+: Reverse proxy that handles incoming connections to one or more services and confirms to the FSC Core specification.
 
 Outway
-: HTTP Proxy as defined in [RFC 7230](https://www.rfc-editor.org/rfc/rfc7230#section-2.3) that handles outgoing connections to Inways and confirms to the FSC Core standard.
+: Forward proxy that handles outgoing connections to Inways and confirms to the FSC Core specification.
 
 Contract
-: 
+: Document containing the Grants between Peers, defining which interactions between Peers are possible
 
 Contract Manager
 : The FSC Contract Manager configures all Inways and Outways based on information from an Directory and Contracts
 
-FSC Group
-: System of Peers using Inways, Outways and Contract Managers that confirm to the FSC specification to make use of eachothers services 
+Grant
+: XX
 
 
 # Architecture
 
-The purpose of FSC Core is to standardize setting up and managing connections to HTTP services. Involved Inways and Outways are managed via a Manager and make use of a directory that enables service discovery.
-
 This chapter describes the basic architecture of FSC systems.
 
-FSC is typically used when the need to connect spans multiple organizations; when clients in organization A need to connect to organization B. Use within a single organization can be beneficial as well, eg. when following the principles of Zero Trust Networking. In this RFC the word `context` is used as general concept instead of `organization` or `department` or `security context`.
 
 
 ## Request flow
 
+@startuml
+title: Basic request flow
 
-```
-          context A          |            context B
-HTTP client -> FSC Outway -> | -> FSC Inway -> HTTP service
-```
+skinparam sequenceBoxBorderColor #transparent
+skinparam boxPadding 50
+hide footbox
+
+box "Requesting Peer"
+participant "Client" as client
+participant "Outway" as outway
+end box
+
+box "Providing Peer"
+participant "Inway" as inway
+participant "Service" as service
+end box
+
+client -> outway ++
+outway -> inway ++
+inway -> service ++ 
+service --> inway -- 
+inway --> outway --
+outway --> client -- 
+
+@enduml
 
 ## Service discovery
 
-Every FSC System has an FSC Directory that defines the scope of said system.
-All HTTP Services that are served via an Inway are announced to the FSC Directory.
-All Outways will
-```
-context A   |    central     | context B
-FSC Inway  -> FSC Directory -> FSC Outway
-```
+Every Group is defined by a Directory that contains routing information for all services in the Group. 
+Inways announce the services to the Directory.
+Outways discover services by requesting a list from the Directory.
 
+@startuml
+title: Register and discover a service
 
+skinparam sequenceBoxBorderColor #transparent
+skinparam boxPadding 50
+hide footbox
+
+box "Providing Peer"
+  participant "Inway" as inway
+end box
+
+box "Group"
+  participant "Directory" as directory
+end box
+
+box "Requesting Peer"
+  participant "Outway" as outway
+end box
+
+inway -> directory ++ : register service
+return
+
+outway -> directory ++ : discover service
+return
+
+@enduml
 
 ## TLS Certificates
 
@@ -174,10 +228,42 @@ All connections within an FSC system are mTLS connections based on x.509 certifi
 - internal certificates, typically provided and managed by the internal PKI of an organization.
 - external certificates, provided by an organization that is trusted to issue certificates with the correct organization identities. Every participant in an FSC system MUST accept the same Root Certificate as trusted to base the identification and authentication of organizations on.
 
+@startuml
+
+' This sequence diagram needs to be replaced with Archimate XX
+
+title: Internal and external certificates
+
+skinparam sequenceBoxBorderColor #transparent
+skinparam boxPadding 50
+hide footbox
+
+box "Requesting Peer"
+participant "Client" as client
+participant "Outway" as outway
+end box
+
+box "Group"
+participant "Directory" as directory
+end box
 
 
+box "Providing Peer"
+participant "Inway" as inway
+participant "Service" as service
+end box
 
-## Management
+client <-> outway  : internal X.509 certificate
+outway <-> inway  : external X.509 certificate
+inway <-> service  : internal X.509 certificate
+
+outway <-> directory  : external X.509 certificate
+inway <-> directory  : external X.509 certificate
+
+@enduml
+
+
+## Contract Management
 
 All Inways and Outways in a local environment are managed by a local FSC Manager. This manager XX.
 
@@ -189,6 +275,49 @@ FSC Manager -> FSC Inways    |    FSC Inways  <- FSC Manager
             -> FSC Outways   |    FSC Outways <-
 ```
 
+@startuml
+
+title: Local Peer configuration
+
+skinparam sequenceBoxBorderColor #transparent
+skinparam boxPadding 50
+hide footbox
+
+box "Peer"
+participant "Inway" as inway
+participant "Outway" as outway
+participant "Contract Manager" as manager
+end box
+
+inway -> manager : request configuration
+return
+
+outway -> manager : request configuration
+return
+
+@enduml
+
+
+
+@startuml
+
+title: Contract Management
+
+skinparam sequenceBoxBorderColor #transparent
+skinparam boxPadding 50
+hide footbox
+
+box "Peer"
+participant "Inway" as inway
+participant "Outway" as outway
+participant "Contract Manager" as manager
+end box
+
+@enduml
+
+
+
+
 ## Connecting to a service
 
 ## Providing a service
@@ -199,7 +328,7 @@ FSC Manager -> FSC Inways    |    FSC Inways  <- FSC Manager
 
 # Functional specifications
 
-## Outway functionality
+## Outway
 
 ### Behavior
 
@@ -269,11 +398,11 @@ The code field of the error response **MUST** contain one of the following codes
 - `UNSUPPORTED_METHOD`: Outway called with an unsupported method, the CONNECT method is not supported.
 - `SERVER_ERROR`: General error code
 
-## Inway functionality
+## Inway
 ### Interfaces
 ### Behavior
 
-## Manager functionality
+## Contract Manager
 
 Manager functionality in FSC Core is (XX list functionality)
 
@@ -417,7 +546,7 @@ The gRPC service **SHALL** accept only TLS certificates that are valid and issue
 
 
 
-## Directory functionality
+## Directory
 
 ### Behavior
 
