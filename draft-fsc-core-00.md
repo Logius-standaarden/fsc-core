@@ -106,7 +106,7 @@ Organizations can participate in multiple FSC Systems at once.
 To connect to services, Connection Rights are required. The FSC specification describes how Connection Rights are requested, granted and revoked. Once a Connection Right is granted, a connection from HTTP Client to HTTP Service will be automatically created when an HTTP request to the HTTPS service is made.
 
 It is RECOMMENDED to use FSC Core with the following extensions, each described in a dedicated RFC:
-- [FSC Authorization](authorization/README.md), to delegate the authorization of connections to a Policy Decision Point
+- [FSC Policies](policies/README.md), to use more advanced policies as conditions in contracts
 - [FSC Logging](logging/README.md), to standardize and link transaction logs
 - [FSC Delegation](delegation/README.md), to delegate the right to connect
 - [FSC Control](control/README.md), to get in control from a security and audit perspective
@@ -118,10 +118,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## Terminology
 
-This specification lists terms and abbreviations that are used in this document.
-
-Access grant
-: XX
+This specification lists terms and abbreviations as used in this document.
 
 Directory
 : An FSC directory holds information about all services in the FSC system so they can be discovered.
@@ -132,19 +129,14 @@ Inway
 Outway
 : HTTP Proxy as defined in [RFC 7230](https://www.rfc-editor.org/rfc/rfc7230#section-2.3) that handles outgoing connections to Inways and confirms to the FSC Core standard.
 
-HTTP Service
-: HTTP services as defined in [RFC X] that are provided via an Inway
+Contract
+: 
 
-Manager
-: The FSC Manager configures all Inways and Outways based on access requests and grants
+Contract Manager
+: The FSC Contract Manager configures all Inways and Outways based on information from an Directory and Contracts
 
-FSC System
-: System of Inways, Outways and managers that confirm to the FSC standard
-
-Protocol Buffers
-: XX
-
-
+FSC Group
+: System of Peers using Inways, Outways and Contract Managers that confirm to the FSC specification to make use of eachothers services 
 
 
 # Architecture
