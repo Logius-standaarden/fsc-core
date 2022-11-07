@@ -297,7 +297,6 @@ The Manager functionality **MUST** implement an gRPC service, as specified on [g
 
 All rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
 
-
 ##### rpc RequestAccess
 
 The Remote Procedure Call `RequestAccess` **MUST** be implemented with the following interface and messages:
@@ -426,16 +425,205 @@ The gRPC service **SHALL** accept only TLS certificates that are valid and issue
 
 
 
-
-
-
-
-
 ## Directory functionality
-### Interfaces
+
 ### Behavior
 
-## gRPC error handling
+#### Authentication
+
+The clients **MUST** use mTLS when connecting to the Directory. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) that acts as Trust Anchor of the Group.
+
+### Inway registration
+
+The Directory **MUST** offer a registration point for Inways. An Inway will register itself and the services it is offering to the FSC Group.
+
+### Service listing
+
+The Directory **MUST** be able to offer a list of the services available in the FSC Group. This service list will be used by Outways in the FCS Group to route HTTP Requests to the correct service.
+
+The Directory **MUST** be able to provide the URI of each Inway
+
+The Directory **MUST** know which services each Inway is offering to the FSC Group.
+
+The Directory **MUST** validate if a mTLS connection can be setup to the URI of an Inway. If the Directory is able to set up a connection the Inway **MUST** be given the state `UP`, if not the state of the Inway **MUST** be `DOWN`
+
+### Interfaces
+
+#### Directory Service
+
+The Directory functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `Directory`. This service **MUST** offer twelve Remote Procedure Calls (rpc):
+- `RegisterInway`, registers an Inway and the services the Inway is offering to the FSC Group
+- `RegisterOutway`, registers an Outway to the FSC Group
+- `ListServices`, lists the services available on the FSC Groups
+- `ListPeers`, list peers active on the FSC Group
+- `GetPeerContractManager`, returns the Contract Manager of a peer
+- `SetPeerContactDetails`, sets contact details of a peer
+- `GetGroupInfo`, return the version of the FSC standard used by the FSC Group
+
+All rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
+
+##### rpc RegisterInway
+
+The Remote Procedure Call `RegisterInway` **MUST** be implemented with the following interface and messages:
+```
+rpc RegisterInway(RegisterInwayRequest) returns (RegisterInwayResponse);
+
+message RegisterInwayRequest {
+  message RegisterService {
+    string name = 1;
+    string documentation_url = 2;
+    string api_specification_type = 3; // Deprecated. Type is deduced from api_specification_document_url
+    string api_specification_document_url = 4;
+    bool internal = 7;
+    string public_support_contact = 8;
+    string tech_support_contact = 9;
+    int32 one_time_costs = 10;
+    int32 monthly_costs = 11;
+    int32 request_costs = 12;
+  }
+
+  string inway_address = 1;
+  repeated RegisterService services = 2;
+  string inway_name = 3;
+  bool is_organization_inway = 4;
+  string management_api_proxy_address = 5;
+}
+
+message RegisterInwayResponse {
+  string error = 1;
+}
+```
+
+##### rpc RegisterOutway
+
+The Remote Procedure Call `RegisterOutway` **MUST** be implemented with the following interface and messages:
+
+```
+rpc RegisterOutway(RegisterOutwayRequest) returns (RegisterOutwayResponse);
+
+message RegisterOutwayRequest {
+  string name = 1;
+}
+
+message RegisterOutwayResponse {
+  string error = 1;
+}
+```
+
+##### rpc ListServices
+
+The Remote Procedure Call `ListServices` **MUST** be implemented with the following interface and messages:
+```
+rpc ListServices(ListServicesRequest) returns (ListServicesResponse);
+
+
+message ListServicesRequest {}
+
+message ListServicesResponse {
+  message Costs {
+    int32 one_time = 1;
+    int32 monthly = 2;
+    int32 request = 3;
+  }
+
+  message Service {
+    string name = 1;
+    string documentation_url = 2;
+    string api_specification_type = 3;
+    bool internal = 4;
+    string public_support_contact = 5;
+    repeated Inway inways = 6;
+    Costs costs = 7;
+    Organization organization = 8;
+  }
+
+  repeated Service services = 1;
+}
+
+message Organization {
+  string serial_number = 1;
+  string name = 2;
+}
+
+message Inway {
+  enum State {
+    STATE_UNSPECIFIED = 0;
+    STATE_UP = 1;
+    STATE_DOWN = 2;
+  }
+  string address = 1;
+  State state = 2;
+}
+```
+
+##### rpc ListPeers
+
+The Remote Procedure Call `ListPeers` **MUST** be implemented with the following interface and messages:
+```
+rpc ListPeers(ListPeersRequest) returns (ListPeersResponse);
+
+message ListPeersRequest {}
+
+message ListPeersResponse {
+  repeated Peer peers = 1;
+}
+
+message Peer {
+  string serial_number = 1;
+  string name = 2;
+}
+```
+
+##### rpc GetPeerContractManagerAddress
+
+The Remote Procedure Call `GetPeerContractManagerAddress` **MUST** be implemented with the following interface and messages:
+```
+rpc GetPeerContractManagerAddress(GetPeerContractManagerAddressRequest) returns (GetPeerContractManagerAddressResponse);
+
+message GetPeerContractManagerAddressRequest {
+  string peer_serial_number = 1;
+}
+
+message GetPeerContractManagerAddressResponse {
+  string address = 1;
+}
+```
+
+
+##### rpc SetPeerContactDetails
+
+The Remote Procedure Call `SetPeerContactDetails` **MUST** be implemented with the following interface and messages:
+```
+rpc SetPeerContactDetails(SetPeerContactDetailsRequest) returns (SetPeerContactDetailsResponse);
+
+
+message SetPeerContactDetailsRequest {
+  string email_address = 1;
+}
+
+message SetPeerContactDetailsResponse {}
+```
+
+##### rpc GetGroupInfo
+
+The Remote Procedure Call `GetGroupInfo` **MUST** be implemented with the following interface and messages:
+```
+rpc GetGroupInfo(GetGroupInfoRequest) returns (GetGroupInfoResponse);
+
+message GetGroupInfoRequest {}
+
+message GetGroupInfoResponse {
+  string fsc_version = 1;
+  repeated Extension extenstions = 2;
+}
+
+message Extension {
+    string name = 1;
+    string version = 2;
+}
+```
+
+# gRPC error handling
 
 According to gRPC specification a gRPC service will, in case of an error, return a response structured according to the `Status` interface. In case of an error that should generate a specific FSC error code the `status` message is enriched with an `ErrorInfo` message containing the FSC specific error code.
 The FSC specific error code **MUST** be set as the value of the `reason` field of the `ErrorInfo` interface.
