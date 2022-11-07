@@ -415,14 +415,10 @@ enum ErrorReason {
 }
 ```
 
-
-
-
 ### Behavior
 
 The gRPC service **MUST** enforce the use of mTLS connections.
 The gRPC service **SHALL** accept only TLS certificates that are valid and issued under the Root Certificate that defines the scope of the FSC System. Which Root Certificate to accept is based on an agreement between the organizations that cooperate in the FSC System.
-
 
 
 ## Directory functionality
@@ -433,11 +429,13 @@ The gRPC service **SHALL** accept only TLS certificates that are valid and issue
 
 The clients **MUST** use mTLS when connecting to the Directory. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) that acts as Trust Anchor of the Group.
 
-### Inway registration
+#### Inway registration
 
 The Directory **MUST** offer a registration point for Inways. An Inway will register itself and the services it is offering to the FSC Group.
 
-### Service listing
+The Directory **MUST** be able to provide the Inway addresses of a peer.
+
+#### Service listing
 
 The Directory **MUST** be able to offer a list of the services available in the FSC Group. This service list will be used by Outways in the FCS Group to route HTTP Requests to the correct service.
 
@@ -453,11 +451,8 @@ The Directory **MUST** validate if a mTLS connection can be setup to the URI of 
 
 The Directory functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `Directory`. This service **MUST** offer twelve Remote Procedure Calls (rpc):
 - `RegisterInway`, registers an Inway and the services the Inway is offering to the FSC Group
-- `RegisterOutway`, registers an Outway to the FSC Group
-- `ListServices`, lists the services available on the FSC Groups
-- `ListPeers`, list peers active on the FSC Group
-- `GetPeerContractManager`, returns the Contract Manager of a peer
-- `SetPeerContactDetails`, sets contact details of a peer
+- `ListServices`, lists the services available on the FSC Group
+- `ListPeerInways`, lists the Inways of a peer
 - `GetGroupInfo`, return the version of the FSC standard used by the FSC Group
 
 All rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
@@ -471,41 +466,15 @@ rpc RegisterInway(RegisterInwayRequest) returns (RegisterInwayResponse);
 message RegisterInwayRequest {
   message RegisterService {
     string name = 1;
-    string documentation_url = 2;
-    string api_specification_type = 3; // Deprecated. Type is deduced from api_specification_document_url
-    string api_specification_document_url = 4;
-    bool internal = 7;
-    string public_support_contact = 8;
-    string tech_support_contact = 9;
-    int32 one_time_costs = 10;
-    int32 monthly_costs = 11;
-    int32 request_costs = 12;
   }
 
   string inway_address = 1;
-  repeated RegisterService services = 2;
-  string inway_name = 3;
-  bool is_organization_inway = 4;
-  string management_api_proxy_address = 5;
+  string contract_manager_address = 2;
+  repeated RegisterService services = 3;
+  string inway_name = 4;
 }
 
 message RegisterInwayResponse {
-  string error = 1;
-}
-```
-
-##### rpc RegisterOutway
-
-The Remote Procedure Call `RegisterOutway` **MUST** be implemented with the following interface and messages:
-
-```
-rpc RegisterOutway(RegisterOutwayRequest) returns (RegisterOutwayResponse);
-
-message RegisterOutwayRequest {
-  string name = 1;
-}
-
-message RegisterOutwayResponse {
   string error = 1;
 }
 ```
@@ -520,21 +489,11 @@ rpc ListServices(ListServicesRequest) returns (ListServicesResponse);
 message ListServicesRequest {}
 
 message ListServicesResponse {
-  message Costs {
-    int32 one_time = 1;
-    int32 monthly = 2;
-    int32 request = 3;
-  }
 
   message Service {
-    string name = 1;
-    string documentation_url = 2;
-    string api_specification_type = 3;
-    bool internal = 4;
-    string public_support_contact = 5;
-    repeated Inway inways = 6;
-    Costs costs = 7;
-    Organization organization = 8;
+    Organization organization = 1;
+    string name = 2;
+    repeated Inway inways = 3;
   }
 
   repeated Service services = 1;
@@ -556,52 +515,24 @@ message Inway {
 }
 ```
 
-##### rpc ListPeers
+##### rpc ListPeerInways
 
-The Remote Procedure Call `ListPeers` **MUST** be implemented with the following interface and messages:
+The Remote Procedure Call `ListPeerInways` **MUST** be implemented with the following interface and messages:
 ```
-rpc ListPeers(ListPeersRequest) returns (ListPeersResponse);
+rpc ListPeerInways(ListPeerInwaysRequest) returns (ListPeerInwaysResponse);
 
-message ListPeersRequest {}
-
-message ListPeersResponse {
-  repeated Peer peers = 1;
-}
-
-message Peer {
-  string serial_number = 1;
-  string name = 2;
-}
-```
-
-##### rpc GetPeerContractManagerAddress
-
-The Remote Procedure Call `GetPeerContractManagerAddress` **MUST** be implemented with the following interface and messages:
-```
-rpc GetPeerContractManagerAddress(GetPeerContractManagerAddressRequest) returns (GetPeerContractManagerAddressResponse);
-
-message GetPeerContractManagerAddressRequest {
+message ListPeerInwaysRequest {
   string peer_serial_number = 1;
 }
 
-message GetPeerContractManagerAddressResponse {
-  string address = 1;
-}
-```
-
-
-##### rpc SetPeerContactDetails
-
-The Remote Procedure Call `SetPeerContactDetails` **MUST** be implemented with the following interface and messages:
-```
-rpc SetPeerContactDetails(SetPeerContactDetailsRequest) returns (SetPeerContactDetailsResponse);
-
-
-message SetPeerContactDetailsRequest {
-  string email_address = 1;
+message ListPeerInwaysResponse {
+  repeated Inway inways = 1;
 }
 
-message SetPeerContactDetailsResponse {}
+message Inway {
+    string address
+    string contract_manager_address
+}
 ```
 
 ##### rpc GetGroupInfo
