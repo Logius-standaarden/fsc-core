@@ -278,8 +278,116 @@ The code field of the error response **MUST** contain one of the following codes
 - `SERVER_ERROR`: General error code
 
 ## Inway functionality
-### Interfaces
+
 ### Behavior
+
+#### Authentication
+
+The Inway **MUST** use mTLS when connecting to the Directory. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) that acts as Trust Anchor of the network.
+
+The Inway **MUST** only accept connections using mTLS. The X.509 certificates **MUST** be signed by the chosen Certificate Authority (CA) that acts as Trust Anchor of the network.
+
+#### Authorization
+
+The Inway **MUST** validate that an active access grant exists for the public key of the mTLS connection making the request. If no access grant exists the Inway **MUST** deny the request.
+
+#### Health check
+
+The Inway **MUST** be able to receive health checks from the Directory. The Directory will make a periodic health checks to known Inways by sending an HTTP request for each service the Inway is offering to the FSC network.
+
+Upon receiving the health check the Inway **MUST** validate that it is offering the service to the FSC network.
+
+#### Registration
+
+The Inway **MUST** register itself and the services it is offering to the Directory.
+
+The Inway **SHOULD** register the services it is offering to the FSC Group to the Directory every 30 seconds.
+
+#### Routing
+
+The Inway **MUST** be able to route HTTP requests to the correct service. A service on the FSC network can be identified by the unique combination of a serial-number and a service-name. An Inway receives the service-name through the path component [@RFC3986, section 3.3](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) of an HTTP request.
+The first segment of the path **MUST** contain the service-name.
+
+The Inway **MUST** delete the service-name from the path of the HTTP Request before forwarding the request to the service.
+e.g `/service-name/get/data` -> `/get/data`
+
+### Interfaces
+
+#### Proxy Endpoint
+
+The Inway **MUST** implement a HTTP endpoint which proxies the received request to the correct service.
+
+```
+openapi: 3.0.0
+paths:
+  /{service_name}: 
+    description: receives request of all HTTP Methods and proxies the received request to the service specificied in the path
+    responses:
+      default:
+        description: must return the HTTP Response of the service.
+      540:
+        description: An FSC network error has occured 
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: A message describing the error
+                source:
+                  type: string
+                  description: The component causing the error. In this case 'inway'
+                location:
+                  type: string
+                  description: The location of the error.
+                code:
+                  type: string
+                  description: A unique code describing the error.
+```
+
+##### Error response
+
+If the service called generates an error, the Inway **MUST** return the error response of the API to the client without altering the response.
+
+If an error occurs within the scope of the FSC network, the Inway **MUST** return the HTTP status code 540 with an error response defined in the section Proxy Endpoint.
+
+The code field of the error response **MUST** contain one of the following codes:
+
+- `ACCESS_DENIED`: No access grant exists for the public key used by the client making the request.
+- `EMPTY_PATH`: the path of the HTTP request does not contain a service-name
+- `INVALID_CERTIFICATE`: The x509 certificates does not meet the requirements of FSC.
+- `MISSING_PEER_CERTIFICATE`: the Inway is unable to extract the x509 certificate from the connection.
+- `SERVER_ERROR`: General error code
+- `SERVICE_DOES_NOT_EXIST`: the service is unknown to the Inway
+- `SERVICE_UNREACHABLE`: the Inway knows the service but is unable to proxy the request to the service
+
+#### Health check
+
+The Inway **MUST** implement a health endpoint. This endpoint is called by the Directory to determine if a service is being offered by the Inway.
+
+```
+openapi: 3.0.0
+paths:
+  /.fsc/health/{service_name}: 
+    get: 
+      summary: Returns if the service is available and reachable,
+        responses: 
+          200:          
+            description: healh status object,
+            content: 
+              application/json: 
+                schema:
+                  type: object
+                  properties:
+                    healthy:
+                      type: bool
+                      description: true if the service is healthy 
+                      
+```
+
+
+#### Documentation
 
 ## Manager functionality
 
