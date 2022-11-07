@@ -81,7 +81,7 @@ Copyright (c) 2022 VNG and the persons identified as the document authors. All r
 # Introduction
 
 This section gives an introduction to this RFC.
-Section 2 describes the architecture of a system that follows the FSC specication.
+Section 2 describes the architecture of a system that follows the FSC specification.
 Section 3 describes the interfaces and behavior of FSC components in detail.
 
 ## Purpose
@@ -98,7 +98,7 @@ All functionality required to achieve technical interoperability is provided by 
 
 ## Overall Operation of FSC Core
 
-All Peers in a Group announce their HTTP services to the group by listing them in the Directory. Every Group uses one Directory that defines the scope of the Group. All Peers use the list of services as provided by the Directory to discover which services are available in the Group. With this information, Peers can propose Peer to Peer Contracts. Contracts contain Grants that specify which Outways from Peers may connect to which services from Peers. Each Contract may contain multiple Grants, defining the rights to connect between Peers. 
+All Peers in a Group announce their HTTP services to the group by listing them in the Directory. Every Group uses one Directory that defines the scope of the Group. All Peers use the list of services as provided by the Directory to discover which services are available in the Group. With this information, Peers can propose Peer to Peer Contracts. Contracts contain Grants that specify which Outways from Peers may connect to which services from Peers. Each Contract may contain multiple Grants, defining the rights to connect between Peers.
 
 Inways are reverse proxies that announce services to the Directory and route incoming connections to those services.
 Outways are forward proxies that discover all available services in the Group and route outgoing connections to services.
@@ -106,7 +106,7 @@ The Directory lists routing information for all services in the Group.
 
 To connect to a service, the Peer needs a Grant that specifies the connection. The FSC Core specification describes how Grants are requested, granted and revoked. Once a right to connect is granted, a connection from HTTP Client to HTTP Service will be automatically created everytime when an HTTP request to the HTTPS service is made.
 
-FSC Core specifies the basics for setting up and managing connections in e Group. It is RECOMMENDED to use FSC Core with the following extensions, each specified in a dedicated RFC:
+FSC Core specifies the basics for setting up and managing connections in a Group. It is RECOMMENDED to use FSC Core with the following extensions, each specified in a dedicated RFC:
 - [FSC Policies](policies/README.md), to use more advanced policies as conditions in Contracts
 - [FSC Logging](logging/README.md), to standardize and link transaction logs
 - [FSC Delegation](delegation/README.md), to delegate the right to connect to a service
@@ -115,11 +115,11 @@ FSC Core specifies the basics for setting up and managing connections in e Group
 
 ### Use cases
 
-A typical use case is a cooperation of many organizations that use APIs to exchange data or provide business services to eachother. 
+A typical use case is a cooperation of many organizations that use APIs to exchange data or provide business services to eachother.
 
-Organizations can participate in multiple FSC Groups at once. This likely happens when using different environments for production, test and more - each environment will require it's own Group.
+Organizations can participate in multiple FSC Groups at once. This likely happens when using different environments for production, test and more - each environment will require its own Group.
 
-An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a service in the Directory of each group using a different Inway for each Group. 
+An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a service in the Directory of each group using a different Inway for each Group.
 
 
 ## Requirements Language
@@ -131,13 +131,13 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 This specification lists terms and abbreviations as used in this document.
 
 Peer
-: Actor that both provides and requests services from other Peers. This is an abstraction of e.g. an organization, a department or a security context. 
+: Actor that both provides and requests services. This is an abstraction of e.g. an organization, a department or a security context.
 
 Group
-: System of Peers using Inways, Outways and Contract Managers that confirm to the FSC specification to make use of eachothers services 
+: System of Peers using Inways, Outways and Contract Managers that confirm to the FSC specification to make use of each other's services.
 
 Directory
-: An Directory holds information about all services in the FSC Group so they can be discovered.
+: A Directory holds information about all services in the FSC Group so they can be discovered.
 
 Inway
 : Reverse proxy that handles incoming connections to one or more services and confirms to the FSC Core specification.
@@ -146,174 +146,144 @@ Outway
 : Forward proxy that handles outgoing connections to Inways and confirms to the FSC Core specification.
 
 Contract
-: Document containing the Grants between Peers, defining which interactions between Peers are possible
+: Document containing the Grants between Peers, defining which interactions between Peers are possible.
 
 Contract Manager
-: The FSC Contract Manager configures all Inways and Outways based on information from an Directory and Contracts
+: The Contract Manager manages Contracts and configures all Inways and Outways based on information from an Directory and Contracts.
 
 Grant
 : XX
 
+Trust Anchor
+: The Trust Anchor is an XX.
 
 # Architecture
 
 This chapter describes the basic architecture of FSC systems.
-
-
 
 ## Request flow
 
 @startuml
 title: Basic request flow
 
+box "Requesting Peer"
+  participant "Client" as client
+  participant "Outway" as outway
+end box
+box "Providing Peer"
+  participant "Inway" as inway
+  participant "Service" as service
+end box
+client -> outway ++
+outway -> inway ++
+inway -> service ++
+service --> inway --
+inway --> outway --
+outway --> client --
+
 skinparam sequenceBoxBorderColor #transparent
 skinparam boxPadding 50
 hide footbox
-
-box "Requesting Peer"
-participant "Client" as client
-participant "Outway" as outway
-end box
-
-box "Providing Peer"
-participant "Inway" as inway
-participant "Service" as service
-end box
-
-client -> outway ++
-outway -> inway ++
-inway -> service ++ 
-service --> inway -- 
-inway --> outway --
-outway --> client -- 
-
 @enduml
 
 ## Service discovery
 
-Every Group is defined by a Directory that contains routing information for all services in the Group. 
-Inways announce the services to the Directory.
+Every Group is defined by a Directory that contains routing information for all services in the Group.
+Inways register services in the Directory.
 Outways discover services by requesting a list from the Directory.
 
 @startuml
 title: Register and discover a service
 
-skinparam sequenceBoxBorderColor #transparent
-skinparam boxPadding 50
-hide footbox
-
 box "Providing Peer"
   participant "Inway" as inway
 end box
-
 box "Group"
   participant "Directory" as directory
 end box
-
 box "Requesting Peer"
   participant "Outway" as outway
 end box
-
 inway -> directory ++ : register service
 return
-
 outway -> directory ++ : discover service
 return
 
-@enduml
-
-## TLS Certificates
-
-All connections within an FSC system are mTLS connections based on x.509 certificates as defined in [RFC 3280](https://www.rfc-editor.org/rfc/rfc3280). Two types of certificates are acknowdleged:
-- internal certificates, typically provided and managed by the internal PKI of an organization.
-- external certificates, provided by an organization that is trusted to issue certificates with the correct organization identities. Every participant in an FSC system MUST accept the same Root Certificate as trusted to base the identification and authentication of organizations on.
-
-@startuml
-
-' This sequence diagram needs to be replaced with Archimate XX
-
-title: Internal and external certificates
-
 skinparam sequenceBoxBorderColor #transparent
 skinparam boxPadding 50
 hide footbox
-
-box "Requesting Peer"
-participant "Client" as client
-participant "Outway" as outway
-end box
-
-box "Group"
-participant "Directory" as directory
-end box
-
-
-box "Providing Peer"
-participant "Inway" as inway
-participant "Service" as service
-end box
-
-client <-> outway  : internal X.509 certificate
-outway <-> inway  : external X.509 certificate
-inway <-> service  : internal X.509 certificate
-
-outway <-> directory  : external X.509 certificate
-inway <-> directory  : external X.509 certificate
-
 @enduml
 
+## mTLS connections and Trust Anchor (#trustanchor)
+
+All connections between Inways and Outways and all connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. All components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor. The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing the name and `Serial Number` [@RFC5280 4.1.2.2] in each certificate.
+
+@startuml
+title mTLS connections with Trust Anchor X.509 certificates
+
+frame "Group" {
+  frame "Requesting Peer" {
+    [Outway]
+  }
+  frame "Providing Peer" {
+     [Inway]
+  }
+  [Directory]
+}
+[Outway] -[bold,#green]r-> [Inway]
+[Outway] -[bold,#green]d-> [Directory]
+[Inway] -[bold,#green]d-> [Directory]
+
+skinparam boxPadding 50
+skinparam linetype polyline
+skinparam linetype ortho
+@enduml
 
 ## Contract Management
 
-All Inways and Outways in a local environment are managed by a local FSC Manager. This manager XX.
+All connections between Peers are based on Grants. A Grant is the right to make a connection from an Outway to a serivce behind an Inway. Grants are encapsulated in Contracts and agreed upon by all involved Peers. To create a new contract, the Contract Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Contract Management functionality, see [Adminsitrating a Peer](#administrating)). For each desired connection, a Grant is formulated that contains identifying information about both the Outway from the requesting Peer and the service of the Providing Peer. One Contract may contain multiple Grants, typically those match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). A Contract becomes valid once all Peers mentioned in the Contract have agreed upon its content by cryptographically signing it. Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
 
-```
-          context A          |            context B
-        FSC Manager       -> | -> FSC Inway   -> FSC Manager
-
-FSC Manager -> FSC Inways    |    FSC Inways  <- FSC Manager
-            -> FSC Outways   |    FSC Outways <-
-```
+Contracts are immutable. To change a contract, a new Contract is made that replaces the old one. Contracts can be invalidated which revokes the Grants in the Contract.
 
 @startuml
+title: Contract Management
 
-title: Local Peer configuration
+box "Peer"
+  participant "Contract Manager" as cm1
+end box
+box "Peer"
+  participant "Contract Manager" as cm2
+end box
+cm1 -> cm2 ++ : Contract proposal (signed by initiating Peer)
+return Valid Contract (signed by all Peers)
 
 skinparam sequenceBoxBorderColor #transparent
 skinparam boxPadding 50
 hide footbox
+@enduml
+
+All Inways and Outways of a Peer are managed by the local Contract Manager. The Contract Manager stores all Contracts that involve the Peer and translates the content of the Contracts in configuration for the local Inway and Outway functionality.
+
+@startuml
+title: Local Peer configuration
 
 box "Peer"
-participant "Inway" as inway
-participant "Outway" as outway
-participant "Contract Manager" as manager
+  participant "Contract Manager" as manager
+  participant "Inway" as inway
+  participant "Outway" as outway
 end box
-
 inway -> manager : request configuration
 return
-
 outway -> manager : request configuration
 return
 
-@enduml
-
-
-
-@startuml
-
-title: Contract Management
-
 skinparam sequenceBoxBorderColor #transparent
 skinparam boxPadding 50
 hide footbox
-
-box "Peer"
-participant "Inway" as inway
-participant "Outway" as outway
-participant "Contract Manager" as manager
-end box
-
 @enduml
+
+@startuml
+
 
 
 
@@ -323,10 +293,18 @@ end box
 ## Providing a service
 
 
+## Administrating a Peer (#administrating)
+
+XX
 
 
+# Specifications
 
-# Functional specifications
+## General 
+
+### TLS configuration
+
+For most use cases it is **RECOMMENDED** to use a X.509 certificates that checks if a certificate is issued to the right Organization (Organization Validation) 
 
 ## Outway
 
@@ -537,8 +515,6 @@ enum ErrorReason {
 ```
 
 
-
-
 ### Behavior
 
 The gRPC service **MUST** enforce the use of mTLS connections.
@@ -710,7 +686,6 @@ message GetPeerContractManagerAddressResponse {
 }
 ```
 
-
 ##### rpc SetPeerContactDetails
 
 The Remote Procedure Call `SetPeerContactDetails` **MUST** be implemented with the following interface and messages:
@@ -743,7 +718,6 @@ message Extension {
     string version = 2;
 }
 ```
-
 # gRPC error handling
 
 According to gRPC specification a gRPC service will, in case of an error, return a response structured according to the `Status` interface. In case of an error that should generate a specific FSC error code the `status` message is enriched with an `ErrorInfo` message containing the FSC specific error code.
@@ -754,11 +728,7 @@ The `ErrorInfo` interface **MUST** be used as the value of the `details` field o
 The `Status` interface:  <https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto>
 The `ErrorInfo` interface: <https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto>
 
-
 # References
-
-
-
 
 # Acknowledgements
 
