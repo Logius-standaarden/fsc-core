@@ -1,7 +1,7 @@
 %%%
 title = "FSC - core"
 abbrev = "FSC - core"
-ipr = "none"
+ipr = "trust200902"
 submissiontype = "independent"
 area = "Internet"
 workgroup = ""
@@ -67,14 +67,6 @@ organization = "Utlimate Spellchek Serveces Riemer"
 .# Abstract
 
 TODO
-
-.# Status of This Memo
-Information about the current status of this document, any errata,and how to provide feedback on it may be obtained at XX.
-
-.# Copyright Notice
-
-This document is an early concept and has not received any review yet. Everything can change at any moment. Comments are welcome.
-Copyright (c) 2022 VNG and the persons identified as the document authors. All rights reserved.
 
 {mainmatter}
 
