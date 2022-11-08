@@ -316,7 +316,7 @@ The Outway **MUST** use mTLS when connecting to the Directory or Inways. The x50
 
 #### Routing
 
-The Outway **MUST** be able to route HTTP requests to the correct service on the FSC network. A service on the FSC network can be identified by the unique combination of a serial-number and a service-name. An Outway receives the serial-number and service-name through the path component [@RFC3986, section 3.3](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) of an HTTP request.
+The Outway **MUST** be able to route HTTP requests to the correct service on the FSC network. A service on the FSC network can be identified by the unique combination of a serial-number and a service-name. An Outway receives the serial-number and service-name through the path component as described in  [@!RFC3986, section 3.3](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) of an HTTP request.
 The first segment of the path **MUST** contain the serial-number, the second segment of the path **MUST** contain the service-name.
 
 The Outway **MUST** retrieve the available services from the Directory.
