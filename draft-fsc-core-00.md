@@ -88,7 +88,7 @@ Section 3 describes the interfaces and behavior of FSC components in detail.
 
 The Federated Service Connectivity (FSC) specifications describe a way to implement technically interoperable API gateway functionality, covering federated authentication, secure connecting and transaction logging in a large-scale, dynamic API landscape. The standard includes the exchange of information and requests about the management of connections and authorizations, in order to make it possible to automate those activities.
 
-The Core part of the Federated Service Connectivity (FSC) specification achieves inter-organizational, technical interoperability
+The Core part of the FSC specification achieves inter-organizational, technical interoperability:
 - to discover services
 - to route requests to services in other contexts (e.g. from within organization A to organization B)
 - to request and managing connection rights needed to connect to said services
@@ -98,7 +98,7 @@ All functionality required to achieve technical interoperability is provided by 
 
 ## Overall Operation of FSC Core
 
-All Peers in a Group announce their HTTP services to the group by listing them in the Directory. Every Group uses one Directory that defines the scope of the Group. All Peers use the list of services as provided by the Directory to discover which services are available in the Group. With this information, Peers can propose Peer to Peer Contracts. Contracts contain Grants that specify which Outways from Peers may connect to which services from Peers. Each Contract may contain multiple Grants, defining the rights to connect between Peers.
+All Peers in a Group announce their HTTP services to the Group by listing them in the Directory. Every Group uses one Directory that defines the scope of the Group. All Peers use the list of services as provided by the Directory to discover which services are available in the Group. With this information, Peers can propose Peer to Peer Contracts. Contracts contain Grants that specify which Outways from Peers may connect to which services from Peers. Each Contract may contain multiple Grants, defining the rights to connect between Peers.
 
 Inways are reverse proxies that announce services to the Directory and route incoming connections to those services.
 Outways are forward proxies that discover all available services in the Group and route outgoing connections to services.
@@ -216,7 +216,7 @@ hide footbox
 
 ## mTLS connections and Trust Anchor (#trustanchor)
 
-All connections between Inways and Outways and all connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. All components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor. The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing the name and `Serial Number` [@RFC5280 4.1.2.2] in each certificate.
+All connections between Inways and Outways and all connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. All components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor. The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing `Subject.organization` and `Subject.serialnumber` [@RFC5280 4.1.2.6] in each certificate.
 
 @startuml
 title mTLS connections with Trust Anchor X.509 certificates
@@ -241,7 +241,7 @@ skinparam linetype ortho
 
 ## Contract Management
 
-All connections between Peers are based on Grants. A Grant is the right to make a connection from an Outway to a serivce behind an Inway. Grants are encapsulated in Contracts and agreed upon by all involved Peers. To create a new contract, the Contract Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Contract Management functionality, see [Adminsitrating a Peer](#administrating)). For each desired connection, a Grant is formulated that contains identifying information about both the Outway from the requesting Peer and the service of the Providing Peer. One Contract may contain multiple Grants, typically those match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). A Contract becomes valid once all Peers mentioned in the Contract have agreed upon its content by cryptographically signing it. Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
+Connections between Peers are based on Grants. A Grant is the right to make a connection from an Outway to a service offered in the Group. Grants are encapsulated in Contracts and agreed upon by the involved Peers. To create a new contract, the Contract Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Contract Management functionality, see [Adminsitrating a Peer](#administrating)). For each desired connection, a Grant is formulated that contains identifying information about both the Outway from the requesting Peer and the service of the Providing Peer. One Contract may contain multiple Grants, typically those match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). A Contract becomes valid once all Peers mentioned in the Contract have agreed upon its content by cryptographically signing it. Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
 
 Contracts are immutable. To change a contract, a new Contract is made that replaces the old one. Contracts can be invalidated which revokes the Grants in the Contract.
 
@@ -262,7 +262,7 @@ skinparam boxPadding 50
 hide footbox
 @enduml
 
-All Inways and Outways of a Peer are managed by the local Contract Manager. The Contract Manager stores all Contracts that involve the Peer and translates the content of the Contracts in configuration for the local Inway and Outway functionality.
+Inways and Outways of a Peer are in part configured by the Contract Manager. The Contract Manager stores Contracts involving the Peer and translates the content of the Contracts in configuration for the local Inway and Outway functionality.
 
 @startuml
 title: Local Peer configuration
