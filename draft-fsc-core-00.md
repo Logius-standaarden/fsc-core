@@ -214,7 +214,17 @@ XX
 
 ### TLS configuration
 
-For most use cases it is **RECOMMENDED** to use a X.509 certificates that checks if a certificate is issued to the right Organization (Organization Validation) 
+Connections within an FSC Group are mTLS connections based on X.509 certificates as defined in [@RFC5280](https://www.rfc-editor.org/rfc/rfc5280).
+
+The certificates must be provided by a Trust Anchor which **SHOULD** validate a Peers identity. Each Group has a single Trust Anchor. Every Peer in a Group **MUST** accept the same Trust Anchor.
+
+The certificate guarantees the identity of a Peer.
+
+FSC places specific requirements on the subject fields of the certificate. [@!RFC5280, section 4.2.1.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.2.1.6) which are listed below
+
+- SerialNumber: A unique identifier which serves as the Peers identity in the FSC Group. This value is used in combination with a Service name to route request to the correct Service.
+- CommonName: This should correspond to the Fully Qualified Domain Name (FQDN) of an Inway or Outway.  For an Outway this FQDN does not have to be resolvable.
+- Subject Alternative Name[@!RFC5280, section 4.2.1.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.2.1.6): This should contain to the Fully Qualified Domain Names (FQDN) of an Inway or Outway. For an Outway this FQDN does not have to be resolvable.
 
 ## Outway
 
