@@ -155,28 +155,10 @@ This chapter describes the basic architecture of FSC systems.
 
 ## Request flow
 
-@startuml
-title: Basic request flow
-
-box "Requesting Peer"
-  participant "Client" as client
-  participant "Outway" as outway
-end box
-box "Providing Peer"
-  participant "Inway" as inway
-  participant "Service" as service
-end box
-client -> outway ++
-outway -> inway ++
-inway -> service ++
-service --> inway --
-inway --> outway --
-outway --> client --
-
-skinparam sequenceBoxBorderColor #transparent
-skinparam boxPadding 50
-hide footbox
-@enduml
+!---
+![Request Flow](request-flow.svg "Request Flow")
+![Request Flow](request-flow.ascii-art "Request Flow")
+!---
 
 ## Service discovery
 
@@ -184,52 +166,19 @@ Every Group is defined by a Directory that contains routing information for all 
 Inways register services in the Directory.
 Outways discover services by requesting a list from the Directory.
 
-@startuml
-title: Register and discover a service
-
-box "Providing Peer"
-  participant "Inway" as inway
-end box
-box "Group"
-  participant "Directory" as directory
-end box
-box "Requesting Peer"
-  participant "Outway" as outway
-end box
-inway -> directory ++ : register service
-return
-outway -> directory ++ : discover service
-return
-
-skinparam sequenceBoxBorderColor #transparent
-skinparam boxPadding 50
-hide footbox
-@enduml
+!---
+![Service discovery](service-discovery.svg "Service discovery")
+![Service discovery](service-discovery.ascii-art "Service discovery")
+!---
 
 ## mTLS connections and Trust Anchor {#trustanchor}
 
 All connections between Inways and Outways and all connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. All components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor. The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing `Subject.organization` and `Subject.serialnumber` [@!RFC5280, section 4.1.2.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.6) in each certificate.
 
-@startuml
-title mTLS connections with Trust Anchor X.509 certificates
-
-frame "Group" {
-  frame "Requesting Peer" {
-    [Outway]
-  }
-  frame "Providing Peer" {
-     [Inway]
-  }
-  [Directory]
-}
-[Outway] -[bold,#green]r-> [Inway]
-[Outway] -[bold,#green]d-> [Directory]
-[Inway] -[bold,#green]d-> [Directory]
-
-skinparam boxPadding 50
-skinparam linetype polyline
-skinparam linetype ortho
-@enduml
+!---
+![mTLS Connections](mtls-connections.svg "mTLS Connections")
+![mTLS Connections](mtls-connections.ascii-art "mTLS Connections")
+!---
 
 ## Contract Management
 
@@ -237,48 +186,17 @@ Connections between Peers are based on Grants. A Grant is the right to make a co
 
 Contracts are immutable. To change a contract, a new Contract is made that replaces the old one. Contracts can be invalidated which revokes the Grants in the Contract.
 
-@startuml
-title: Contract Management
-
-box "Peer"
-  participant "Contract Manager" as cm1
-end box
-box "Peer"
-  participant "Contract Manager" as cm2
-end box
-cm1 -> cm2 ++ : Contract proposal (signed by initiating Peer)
-return Valid Contract (signed by all Peers)
-
-skinparam sequenceBoxBorderColor #transparent
-skinparam boxPadding 50
-hide footbox
-@enduml
+!---
+![Contract Management](contract-management.svg "Contract Management")
+![Contract Management](contract-management.ascii-art "Contract Management")
+!---
 
 Inways and Outways of a Peer are in part configured by the Contract Manager. The Contract Manager stores Contracts involving the Peer and translates the content of the Contracts in configuration for the local Inway and Outway functionality.
 
-@startuml
-title: Local Peer configuration
-
-box "Peer"
-  participant "Contract Manager" as manager
-  participant "Inway" as inway
-  participant "Outway" as outway
-end box
-inway -> manager : request configuration
-return
-outway -> manager : request configuration
-return
-
-skinparam sequenceBoxBorderColor #transparent
-skinparam boxPadding 50
-hide footbox
-@enduml
-
-@startuml
-
-
-
-
+!---
+![Peer Configuration](peer-configuration.svg "Peer Configuration")
+![Peer Configuration](peer-configuration.ascii-art "Peer Configuration")
+!---
 
 ## Connecting to a service
 
