@@ -374,107 +374,226 @@ The code field of the error response **MUST** contain one of the following codes
 
 ## Contract Manager
 
-Manager functionality in FSC Core is (XX list functionality)
+The Contract Manager  functionality in FSC Core is (XX list functionality)
 
-It is RECOMMENDED to implement the Manager functionality separate from the Inway functionality, in order to be able to have many local Inways that are configured by one local Manager.
+It is RECOMMENDED to implement the Contract Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Manager.
+
+### Behavior
+
+#### Authentication
+
+The Contract Manager **MUST** only accept mTLS connections from Other Contract Managers. The x509 certificate **MUST** be signed by the Thrust Anchor of the Group.
+
+#### Creating Contract Proposals
+
+The Contract Manager is responsible for propagating the Contract Proposal to the Peers involved in the contract.
+
+#### Signing Contracts
+
+The Contract Manager **MUST** validate the signature.
+
+The Contract Manager **MUST** generate an error response if a signature is invalid.
+
+When a Peer signs a Contract, the Contract Manager **MUST** propagate the signature to each of the Peers included in the contract.  
+
+A Contract is deemed valid when each of the involved peers has digitally signed the contract.
+
+#### Rejecting Contracts
+
+The Contract Manager **MUST** validate the signature of the rejection.
+
+The Contract Manager **MUST** generate an error response if a signature is invalid.
+
+When a Peer rejects a Contract, the Contract Manager **MUST** propagate the rejection to each of the Peers included in the contract.
+
+The Contract Manager **MUST** treat a Contract as rejected when the Contract has not been signed by the Peer owning the Contract Manager and the contract period has expired.
+
+#### Revoking Contracts
+
+The Contract Manager **MUST** validate the signature of the revocation.
+
+The Contract Manager **MUST** generate an error response if a signature is invalid.
+
+When a Peer revokes a Contract, the Contract Manager **MUST** propagate the revocation to each of the Peers included in the contract.
+
+#### Contract verification
+
+When receiving a contract the Peer **MUST** validate that the hash of the contract matches the hashes in the Peer signatures. 
 
 ### Interfaces
 
-#### AccessRequestService
-The Manager functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `AccessRequestService`. This service **MUST** offers three Remote Procedure Calls (rpc):
-- `RequestAccess`, used to request access
-- `GetAccessRequestState`, used to request information about an Access Request
-- `GetAccessGrant`, used to fetch an AccessGrant
+The Contract Manager functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ContractManagerService`. This service **MUST** offer four Remote Procedure Calls (rpc):
+- `CreateProposal`, used to offer a contract proposal to be signed by the receiver
+- `SignContract`, used to sign a contract
+- `RejectContract`, used to reject a contract
+- `RevokeContract`, used to revoke a contract
+- `ListContracts`, lists contracts for the Peer making the request 
 
-All rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
+Rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
 
-##### rpc RequestAccess
+#### Contract
 
-The Remote Procedure Call `RequestAccess` **MUST** be implemented with the following interface and messages:
+The interface Contract is used in rpc's of the gRPC service `ContractManagerService`
+
 ```
-rpc RequestAccess(RequestAccessRequest) returns (RequestAccessResponse);
-
-message RequestAccessRequest {
-  string service_name = 1;
-  string public_key_pem = 2;
+message Proposal {
+   string group_id = 1;
+   Period period = 2;
+   repeated Grant grants = 3; 
 }
 
-message RequestAccessResponse {
-  uint64 reference_id = 1;
-  AccessRequestState access_request_state = 2;
+message Contract {
+    Proposal proposal = 1;
+    repeated Signature signatures = 2;
 }
 
-enum AccessRequestState {
-  ACCESS_REQUEST_STATE_UNSPECIFIED = 0;
-  ACCESS_REQUEST_STATE_FAILED = 1;
-  reserved 2;
-  ACCESS_REQUEST_STATE_RECEIVED = 3;
-  ACCESS_REQUEST_STATE_APPROVED = 4;
-  ACCESS_REQUEST_STATE_REJECTED = 5;
-  ACCESS_REQUEST_STATE_REVOKED = 6;
+
+enum GrantType {
+  GRANT_TYPE_UNSPECIFIED = 0;
+  GRANT_TYPE_CONNECTION = 1;
+  GRANT_TYPE_DELEGATION = 2;
+}
+
+message Grant {
+    GrantType type = 1;
+    oneof data {
+        GrantConnection connection = 2;
+        GrantDelegation delegation = 3;
+    }
+}
+
+message GrantDelegation {
+    Peer delegator = 1;
+    Peer delegatee = 2;
+    Peer provider = 3;
+    Service service = 4;
+    repeated string public_key_fingerprints = 5;
+}
+
+message GrantConnection{
+    Peer client = 1;
+    Peer provider = 2;
+    Service service = 3;
+    repeated string public_key_fingerprints = 4;
+}
+
+--------------------------
+
+message GrantConnection{
+    Client client = 1;
+    Service service = 2;
+}
+
+message GrantDelegation {
+    Delegator delegator = 1;
+    Delegatee delegatee = 2;
+    Service provider = 3;
+}
+
+message Client {
+    Peer peer = 1;
+}
+
+message Peer {
+    string subject_serial_number = 1;
+}
+
+message Service {
+    string name = 1;
+    Peer peer = 2;
+}
+
+message Delegator {
+    Peer peer = 1;
+}
+
+message Delegatee {
+    Peer peer = 1;
+    repeated string public_key_fingerprints = 2;
+}
+
+message Period {
+    google.protobuf.Timestamp start = 1;
+    google.protobuf.Timestamp end = 2;
+} 
+```
+
+#### rpc CreateProposal
+
+The Remote Procedure Call `CreateProposal` **MUST** be implemented with the following interface and messages:
+
+```
+rpc CreateProposal(CreateProposalRequest) returns (CreateProposalResponse);
+
+message CreateProposalRequest {
+  Contract contract = 1;
+}
+
+message CreateProposalResponse {}
+```
+
+#### rpc SignContract
+
+The Remote Procedure Call `SignContract` **MUST** be implemented with the following interface and messages:
+
+```
+rpc SignContract(SignContractRequest) returns (SignContractResponse);
+
+message SignContractRequest {
+    Contract contract = 1;
+}
+
+message SingContractResponse{}
+```
+
+#### rpc RejectContract
+
+The Remote Procedure Call `RejectContract` **MUST** be implemented with the following interface and messages:
+
+```
+rpc RejectContract(RejectContractRequest) returns (RejectContractResponse);
+
+message RejectContractRequest {
+    Contract contract = 1;
+    string signature = 2;
+}
+
+message RejectContractResponse{}
+```
+
+#### rpc RevokeContract
+
+The Remote Procedure Call `RevokeContract` **MUST** be implemented with the following interface and messages:
+
+```
+rpc RevokeContract(RevokeContractRequest) returns (RevokeContractResponse);
+
+message RevokeContract {
+    Contract contract = 1;
+    string signature = 2;
+}
+
+message RevokeContractResponse{}
+```
+
+#### rpc ListContracts
+
+The Remote Procedure Call `ListContractsRequest` **MUST** be implemented with the following interface and messages:
+
+```
+rpc ListContracts(ListContractsRequest) returns (ListContractsResponse);
+
+message ListContractsRequest{}
+
+message ListContractsResponse {
+    repeated Contract contracts = 1;
 }
 ```
 
-##### rpc GetAccessRequestState
+#### Signatures
 
-The Remote Procedure Call `GetAccessRequestState` **MUST** be implemented with the following interface and messages:
-```
-rpc GetAccessRequestState(GetAccessRequestStateRequest) returns (GetAccessRequestStateResponse);
-
-message GetAccessRequestStateRequest {
-  string service_name = 1;
-  string public_key_fingerprint = 2;
-}
-
-message GetAccessRequestStateResponse {
-  AccessRequestState state = 1;
-}
-
-enum AccessRequestState {
-  ACCESS_REQUEST_STATE_UNSPECIFIED = 0;
-  ACCESS_REQUEST_STATE_FAILED = 1;
-  reserved 2; // Removed deprecated option 'CREATED'
-  ACCESS_REQUEST_STATE_RECEIVED = 3;
-  ACCESS_REQUEST_STATE_APPROVED = 4;
-  ACCESS_REQUEST_STATE_REJECTED = 5;
-  ACCESS_REQUEST_STATE_REVOKED = 6;
-}
-```
-
-##### rpc GetAccessGrant
-
-The Remote Procedure Call `GetAccessGrant` **MUST** be implemented with the following interface and messages:
-```
-rpc GetAccessGrant(GetAccessGrantRequest) returns (GetAccessGrantResponse);
-
-message GetAccessGrantRequest {
-  string service_name = 1;
-  string public_key_fingerprint = 2;
-}
-
-message GetAccessGrantResponse {
-  AccessGrant access_grant = 1;
-}
-
-message Organization {
-  string serial_number = 1;
-  string name = 2;
-}
-
-message AccessGrant {
-  uint64 id = 1;
-  Organization organization = 2;
-  string service_name = 3;
-  google.protobuf.Timestamp created_at = 4;
-  google.protobuf.Timestamp revoked_at = 5;
-  uint64 access_request_id = 6;
-  string public_key_fingerprint = 7;
-}
-```
 
 #### Error handling
-
-(This part will most likely change, with only the relevant errors in each part of the FSC standard)
 
 The gRPC service **MUST** implement error handling according to the interface described in
 
@@ -483,35 +602,16 @@ enum ErrorReason {
   // Do not use this default value.
   ERROR_REASON_UNSPECIFIED = 0;
 
-  // The order that is being used is revoked
-  ERROR_REASON_ORDER_REVOKED = 1;
+  // Provided contract is invalid
+  ERROR_REASON_CONTRACT_INVALID = 1;
+  
+  // Provided signature is invalid
+  ERROR_REASON_SIGNATURE_INVALID = 2;
 
-  // The order could not be found
-  ERROR_REASON_ORDER_NOT_FOUND = 2;
-
-  // The order does not exist for your organization
-  ERROR_REASON_ORDER_NOT_FOUND_FOR_ORG = 3;
-
-  // The service is not found in the order
-  ERROR_REASON_ORDER_DOES_NOT_CONTAIN_SERVICE = 4;
-
-  // The order is expired
-  ERROR_REASON_ORDER_EXPIRED = 5;
-
-  // Something went wrong while trying to retrieve the claim
-  ERROR_REASON_UNABLE_TO_RETRIEVE_CLAIM = 6;
-
-  // Something went wrong while trying to sign the claim
-  ERROR_REASON_UNABLE_TO_SIGN_CLAIM = 7;
+  // Peer initating the rpc is not present in the contract
+  ERROR_REASON_PEER_NOT_IN_CONTRACT = 3;
 }
 ```
-
-### Behavior
-
-The gRPC service **MUST** enforce the use of mTLS connections.
-The gRPC service **SHALL** accept only TLS certificates that are valid and issued under the Root Certificate that defines the scope of the FSC System. Which Root Certificate to accept is based on an agreement between the organizations that cooperate in the FSC System.
-
-
 
 ## Directory
 
