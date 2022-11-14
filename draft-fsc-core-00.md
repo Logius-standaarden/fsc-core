@@ -435,18 +435,19 @@ Rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to e
 
 The interface Contract is used in rpc's of the gRPC service `ContractManagerService`
 
+The signatures field of the Contract message **MUST** contain a map of Peer subject serial numbers and signatures
+
 ```
+message Contract {
+    Proposal proposal = 1;
+    map<string,string> signatures = 2;
+}
+
 message Proposal {
    string group_id = 1;
    Period period = 2;
    repeated Grant grants = 3; 
 }
-
-message Contract {
-    Proposal proposal = 1;
-    repeated Signature signatures = 2;
-}
-
 
 enum GrantType {
   GRANT_TYPE_UNSPECIFIED = 0;
@@ -592,6 +593,21 @@ message ListContractsResponse {
 
 #### Signatures
 
+A signature **MUST** follow the JSON Web Signature(JWS) format specified in [@!RFC7515](https://www.rfc-editor.org/rfc/rfc7515.html)
+
+The JWS Payload [@RFC7515, section 2](https://www.rfc-editor.org/rfc/rfc7515.html#section-2) **MUST** contain a hash of the `Proposal` gRPC message content and the algorithm used to generate the hash.
+
+JWS Payload example:
+```JSON
+{
+  "alg": "SHA512",
+  "proposalHash": "--------"
+}
+```
+
+The JWS **MUST** specify the x509 certificate containing the public key used to create the digital signature using the `x5t`[@!RFC7515, section 4.1.6](https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.6) field of the `JOSE Header`[@!RFC7515, section 4](https://www.rfc-editor.org/rfc/rfc7515.html#section-4).
+
+The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1](https://www.rfc-editor.org/rfc/rfc7515.html#section-7.1)
 
 #### Error handling
 
