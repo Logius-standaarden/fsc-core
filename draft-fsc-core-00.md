@@ -374,15 +374,15 @@ The code field of the error response **MUST** contain one of the following codes
 
 ## Contract Manager
 
-The Contract Manager  functionality in FSC Core is (XX list functionality)
+The Contract Manager functionality in FSC Core is (XX list functionality)
 
-It is RECOMMENDED to implement the Contract Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Manager.
+It is RECOMMENDED to implement the Contract Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Contract Manager.
 
 ### Behavior
 
 #### Authentication
 
-The Contract Manager **MUST** only accept mTLS connections from Other Contract Managers. The x509 certificate **MUST** be signed by the Thrust Anchor of the Group.
+The Contract Manager **MUST** accept only mTLS connections from other external Contract Managers. The x509 certificate **MUST** be signed by the Thrust Anchor of the Group.
 
 #### Creating Contract Proposals
 
@@ -423,11 +423,12 @@ When receiving a contract the Peer **MUST** validate that the hash of the contra
 ### Interfaces
 
 The Contract Manager functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ContractManagerService`. This service **MUST** offer four Remote Procedure Calls (rpc):
-- `CreateProposal`, used to offer a contract proposal to be signed by the receiver
+- `SubmitProposal`, used to offer a contract proposal to be signed by the receiver
 - `SignContract`, used to sign a contract
 - `RejectContract`, used to reject a contract
 - `RevokeContract`, used to revoke a contract
-- `ListContracts`, lists contracts for the Peer making the request 
+- `ListContracts`, lists contracts for the Peer making the request
+- `ListCertifcates`, lists certificates matching the public key fingerprints
 
 Rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
 
@@ -453,6 +454,7 @@ enum GrantType {
   GRANT_TYPE_UNSPECIFIED = 0;
   GRANT_TYPE_CONNECTION = 1;
   GRANT_TYPE_DELEGATION = 2;
+  GRANT_TYPE_SERVICE = 3;
 }
 
 message Grant {
@@ -460,25 +462,9 @@ message Grant {
     oneof data {
         GrantConnection connection = 2;
         GrantDelegation delegation = 3;
+        GrantService service = 4;
     }
 }
-
-message GrantDelegation {
-    Peer delegator = 1;
-    Peer delegatee = 2;
-    Peer provider = 3;
-    Service service = 4;
-    repeated string public_key_fingerprints = 5;
-}
-
-message GrantConnection{
-    Peer client = 1;
-    Peer provider = 2;
-    Service service = 3;
-    repeated string public_key_fingerprints = 4;
-}
-
---------------------------
 
 message GrantConnection{
     Client client = 1;
@@ -491,6 +477,17 @@ message GrantDelegation {
     Service provider = 3;
 }
 
+message GrantService {
+    message Service {
+        Peer provider = 1;
+        string name = 2;
+        repeated string inway_addresses = 3;
+    }
+    
+    Directory directory = 1;
+    Service service = 2;
+}
+
 message Client {
     Peer peer = 1;
 }
@@ -500,8 +497,8 @@ message Peer {
 }
 
 message Service {
-    string name = 1;
-    Peer peer = 2;
+    Peer peer = 1;
+    string name = 2;
 }
 
 message Delegator {
@@ -513,24 +510,28 @@ message Delegatee {
     repeated string public_key_fingerprints = 2;
 }
 
+message Directory {
+    Peer peer = 1;
+}
+
 message Period {
     google.protobuf.Timestamp start = 1;
     google.protobuf.Timestamp end = 2;
 } 
 ```
 
-#### rpc CreateProposal
+#### rpc SubmitProposal
 
-The Remote Procedure Call `CreateProposal` **MUST** be implemented with the following interface and messages:
+The Remote Procedure Call `SubmitProposal` **MUST** be implemented with the following interface and messages:
 
 ```
-rpc CreateProposal(CreateProposalRequest) returns (CreateProposalResponse);
+rpc SubmitProposal(SubmitProposalRequest) returns (SubmitProposalResponse);
 
-message CreateProposalRequest {
+message SubmitProposalRequest {
   Contract contract = 1;
 }
 
-message CreateProposalResponse {}
+message SubmitProposalResponse {}
 ```
 
 #### rpc SignContract
@@ -544,7 +545,7 @@ message SignContractRequest {
     Contract contract = 1;
 }
 
-message SingContractResponse{}
+message SignContractResponse{}
 ```
 
 #### rpc RejectContract
@@ -579,15 +580,35 @@ message RevokeContractResponse{}
 
 #### rpc ListContracts
 
-The Remote Procedure Call `ListContractsRequest` **MUST** be implemented with the following interface and messages:
+The Remote Procedure Call `ListContracts` **MUST** only return contracts involving the Peer calling the rpc when the GrantType is `GRANT_TYPE_CONNECTION`, `GRANT_TYPE_DELEGATION`.
+
+The Remote Procedure Call `ListContracts` **MUST** be implemented with the following interface and messages:
 
 ```
 rpc ListContracts(ListContractsRequest) returns (ListContractsResponse);
 
-message ListContractsRequest{}
+message ListContractsRequest{
+    GrantType grant_type = 1;
+}
 
 message ListContractsResponse {
     repeated Contract contracts = 1;
+}
+```
+
+#### rpc ListCertificates
+
+The Remote Procedure Call `ListCertificates` **MUST** be implemented with the following interface and messages:
+
+```
+rpc ListCertificates(ListCertificatesRequest) returns (ListCertificatesResponse);
+
+message ListCertificatesRequest{
+    repeated string public_key_fingerprints = 1;
+}
+
+message ListCertificatesResponse {
+    map<string,string> certificates = 1;
 }
 ```
 
@@ -605,7 +626,7 @@ JWS Payload example:
 }
 ```
 
-The JWS **MUST** specify the x509 certificate containing the public key used to create the digital signature using the `x5t`[@!RFC7515, section 4.1.6](https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.6) field of the `JOSE Header`[@!RFC7515, section 4](https://www.rfc-editor.org/rfc/rfc7515.html#section-4).
+The JWS **MUST** specify the x509 certificate containing the public key used to create the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.8) field of the `JOSE Header`[@!RFC7515, section 4](https://www.rfc-editor.org/rfc/rfc7515.html#section-4).
 
 The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1](https://www.rfc-editor.org/rfc/rfc7515.html#section-7.1)
 
