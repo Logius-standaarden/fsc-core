@@ -141,13 +141,16 @@ Contract
 : Document containing the Grants between Peers, defining which interactions between Peers are possible.
 
 Contract Manager
-: The Contract Manager manages Contracts and configures all Inways and Outways based on information from an Directory and Contracts.
+: The Contract Manager manages Contracts and configures Inways and Outways based on information from a Directory and Contracts.
 
 Grant
-: XX
+: Defines the interactions between Peers. In FSC Core only the Connection Grant is described which specifies the right of a Peer to connect to a Service provided by a Peer.
+
+Service
+: An HTTP API offered to the Group.
 
 Trust Anchor
-: The Trust Anchor is an XX.
+: The Trust Anchor is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
 # Architecture
 
@@ -232,7 +235,7 @@ FSC places specific requirements on the subject fields of the certificate. [@!RF
 
 #### Authentication
 
-The Outway **MUST** use mTLS when connecting to the Directory or Inways. The x509 certificate **MUST** be signed by the chosen Certificate Authority (CA) of the network.
+The Outway **MUST** use mTLS when connecting to the Directory or Inways. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) of the network.
 
 #### Routing
 
@@ -375,8 +378,8 @@ The code field of the error response **MUST** contain one of the following codes
 
 - `ACCESS_DENIED`: No access grant exists for the public key used by the client making the request.
 - `EMPTY_PATH`: the path of the HTTP request does not contain a service-name
-- `INVALID_CERTIFICATE`: The x509 certificates does not meet the requirements of FSC.
-- `MISSING_PEER_CERTIFICATE`: the Inway is unable to extract the x509 certificate from the connection.
+- `INVALID_CERTIFICATE`: The X.509 certificates does not meet the requirements of FSC.
+- `MISSING_PEER_CERTIFICATE`: the Inway is unable to extract the X.509 certificate from the connection.
 - `SERVER_ERROR`: General error code
 - `SERVICE_DOES_NOT_EXIST`: the service is unknown to the Inway
 - `SERVICE_UNREACHABLE`: the Inway knows the service but is unable to proxy the request to the service
@@ -407,7 +410,14 @@ paths:
 
 ## Contract Manager
 
-The Contract Manager functionality in FSC Core is (XX list functionality)
+The Contract Manager functionality in FSC Core is:
+
+- Receiving contract proposals
+- Receiving contract signatures (accept, reject, revoke)
+- Validating contract proposals
+- Validating contract signatures
+- Providing the X.509 certificates containing the public key of the keypair of which the private key was used by the Peer to create signatures
+- Providing contracts involving a specific Peer
 
 It is RECOMMENDED to implement the Contract Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Contract Manager.
 
@@ -415,7 +425,7 @@ It is RECOMMENDED to implement the Contract Manager functionality separate from 
 
 #### Authentication
 
-The Contract Manager **MUST** accept only mTLS connections from other external Contract Managers. The x509 certificate **MUST** be signed by the Thrust Anchor of the Group.
+The Contract Manager **MUST** accept only mTLS connections from other external Contract Managers. The X.509 certificate **MUST** be signed by the Thrust Anchor of the Group.
 
 #### Creating Contract Proposals
 
@@ -449,9 +459,26 @@ The Contract Manager **MUST** generate an error response if a signature is inval
 
 When a Peer revokes a Contract, the Contract Manager **MUST** propagate the revocation to each of the Peers included in the contract.
 
+#### Signature verification
+
+A signature **SHOULD** only be accepted if the Peer is present in the Contract Proposal as:
+
+- `GrantConnection.Client.Peer`
+- `GrantConnection.Service.Peer`
+
+The subject serial number of the Peer offering the signature **MUST** match the subject serial number of the X.509 certificate containing the public key used to create the signature.   
+
 #### Contract verification
 
-When receiving a contract the Peer **MUST** validate that the hash of the contract matches the hashes in the Peer signatures. 
+When receiving a contract the Peer **MUST** validate that the hash of the contract matches the hashes in the Peer signatures.
+
+#### Providing X.509 certificates
+
+The Contract Manager **MUST** be able to provide the X.509 certificates containing the public key of the keypair of which the private key was used by the Peer to create signatures.
+
+#### Providing contracts
+
+The Contract Manager **MUST** be able to provide contracts the Contract Manager has available for specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.   
 
 ### Interfaces
 
@@ -461,7 +488,7 @@ The Contract Manager functionality **MUST** implement an gRPC service, as specif
 - `RejectContract`, used to reject a contract
 - `RevokeContract`, used to revoke a contract
 - `ListContracts`, lists contracts for the Peer making the request
-- `ListCertifcates`, lists certificates matching the public key fingerprints
+- `ListCertificates`, lists certificates matching the public key fingerprints in the request
 
 Rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
 
@@ -472,9 +499,22 @@ The interface Contract is used in rpc's of the gRPC service `ContractManagerServ
 The signatures field of the Contract message **MUST** contain a map of Peer subject serial numbers and signatures
 
 ```
+message Hash {
+    string hash = 1;
+    HashAlgorithm algorithm = 2;
+}
+
+enum HashAlgorithm {
+    HASH_ALGORITHM_UNSPECIFIED = 0;
+    HASH_ALGORITHM_SHA3_512 = 1;
+}
+
 message Contract {
+    Hash hash = 1;
     Proposal proposal = 1;
-    map<string,string> signatures = 2;
+    map<string,string> signatures_approved = 2;
+    map<string, string> signatures_rejected = 3;
+    map<string, string> signatures_revoked = 4;
 }
 
 message Proposal {
@@ -590,7 +630,6 @@ rpc RejectContract(RejectContractRequest) returns (RejectContractResponse);
 
 message RejectContractRequest {
     Contract contract = 1;
-    string signature = 2;
 }
 
 message RejectContractResponse{}
@@ -605,7 +644,6 @@ rpc RevokeContract(RevokeContractRequest) returns (RevokeContractResponse);
 
 message RevokeContract {
     Contract contract = 1;
-    string signature = 2;
 }
 
 message RevokeContractResponse{}
@@ -649,19 +687,55 @@ message ListCertificatesResponse {
 
 A signature **MUST** follow the JSON Web Signature(JWS) format specified in [@!RFC7515](https://www.rfc-editor.org/rfc/rfc7515.html)
 
-The JWS Payload [@RFC7515, section 2](https://www.rfc-editor.org/rfc/rfc7515.html#section-2) **MUST** contain a hash of the `Proposal` gRPC message content and the algorithm used to generate the hash.
+The JWS **MUST** specify the X.509 certificate containing the public key used to create the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.8) field of the `JOSE Header`[@!RFC7515, section 4](https://www.rfc-editor.org/rfc/rfc7515.html#section-4).
+
+The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1](https://www.rfc-editor.org/rfc/rfc7515.html#section-7.1)
+
+The JWS Payload as defined in [@!RFC7515, section 2](https://www.rfc-editor.org/rfc/rfc7515.html#section-2), **MUST** contain a hash of the `Proposal` gRPC message, the algorithm used to generate the hash and the type signature.
+
+The JWS **MUST** be created using one of the digital signature algorithms described in [@!RFC7518, section 3,1](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1)
 
 JWS Payload example:
 ```JSON
 {
-  "alg": "SHA512",
-  "proposalHash": "--------"
+  "proposalHash": "--------",
+  "type": "accept"
 }
 ```
 
-The JWS **MUST** specify the x509 certificate containing the public key used to create the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.8) field of the `JOSE Header`[@!RFC7515, section 4](https://www.rfc-editor.org/rfc/rfc7515.html#section-4).
+#### The proposal hash
 
-The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1](https://www.rfc-editor.org/rfc/rfc7515.html#section-7.1)
+When a Contract proposal with a signature is received, the Peer should validate that the signature is intended for the received contract proposal. FSC does this by comparing a hash of the received proposal with the hash in the signature payload.
+
+A signature contains a hash of the values of the contract proposal. The hash is located in the field `Contract.Hash.Hash`. The hash can be generated by following the algorithm described below:
+
+1. Create an array of byte arrays.
+2. Convert the value of each field in the proposal to a byte array and append it to the array of byte arrays. Certain fields need to be represented in a standardized way, see (#data_types)
+3. Sort the array of byte arrays in an ascending order.
+4. Concatenate the sorted array of byte arrays into a single byte array.
+5. Hash the single byte array.
+6. Encode the bytes of the hash as base64.
+
+* The hashing algorithm is determined by the field `Contract.Hash.Algorithm`
+
+##### Data types {#data_types}
+
+- `int32`: use `Little-endian` as endianness when converting to a byte array
+- `int64`: use `Little-endian` as endianness when converting to a byte array
+- `string`: use `utf-8` encoding when converting to a byte array
+- `GrantType`: should be represented as an int32
+- `google.protobuf.Timestamp`: should be converted to int64 representing the seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z.
+
+##### Payload fields
+
+- `proposalHash`, hash of the contract proposal
+- `type`, type of signature. Types are defined in the `Signature type` section of this RFC
+
+###### Signature type
+
+- `accept`, peer has accepted the contract
+- `reject`, peer has rejected the contract
+- `revoked`, peer has revoked the contract
 
 #### Error handling
 
@@ -669,17 +743,25 @@ The gRPC service **MUST** implement error handling according to the interface de
 
 ```
 enum ErrorReason {
-  // Do not use this default value.
-  ERROR_REASON_UNSPECIFIED = 0;
+    ERROR_REASON_UNSPECIFIED = 0;
 
-  // Provided contract is invalid
-  ERROR_REASON_CONTRACT_INVALID = 1;
-  
-  // Provided signature is invalid
-  ERROR_REASON_SIGNATURE_INVALID = 2;
+    // Peer is not part of the contract
+    ERROR_REASON_PEER_NOT_PART_OF_CONTRACT = 1;
 
-  // Peer initating the rpc is not present in the contract
-  ERROR_REASON_PEER_NOT_IN_CONTRACT = 3;
+    // Signature proposal does not match the hash of the proposal
+    ERROR_REASON_SIGNATURE_PROPOSAL_HASH_MISMATCH = 2;
+
+    // Peer certificate could not be verified
+    ERROR_REASON_PEER_CERTIFICATE_VERIFICATION_FAILED = 3;
+
+    // Subject Serial Number of the signature does not match the Subject Serial Number of the certificate with the public key used to verify the signature
+    ERROR_REASON_CERTIFICATE_SUBJECT_SERIAL_NUMBER_SIGNATURE_MISMATCH = 4;
+
+    // Peer certificate could not be retrieved from the peer
+    ERROR_REASON_PEER_CERTIFICATE_UNAVAILABLE = 5;
+
+    // Signature could not be verified
+    ERROR_REASON_SIGNATURE_VERIFICATION_FAILED = 6;
 }
 ```
 
