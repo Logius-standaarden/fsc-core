@@ -757,7 +757,7 @@ The clients **MUST** use mTLS when connecting to the Directory. The X.509 certif
 
 #### Inway registration
 
-The Directory **MUST** offer a registration point for Inways. An Inway will register itself and the services it is offering to the FSC Group.
+The Directory **MUST** offer a registration point for Inways. An Inway will use this registration point to register itself and the services it is offering to the FSC Group.
 
 The Directory **MUST** be able to provide the Inway addresses of a peer.
 
@@ -771,14 +771,19 @@ The Directory **MUST** know which services each Inway is offering to the FSC Gro
 
 The Directory **MUST** validate if a mTLS connection can be setup to the URI of an Inway. If the Directory is able to set up a connection the Inway **MUST** be given the state `UP`, if not the state of the Inway **MUST** be `DOWN`
 
+#### Peer listing
+
+The Directory **MUST** be able to offer a list of the Peers available in the FSC Group. The listing should also include the Contract Managers of each Peer. This information is used to negotiate Contracts between Peers
+
 ### Interfaces
 
 #### Directory Service
 
 The Directory functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `Directory`. This service **MUST** offer twelve Remote Procedure Calls (rpc):
 - `RegisterInway`, registers an Inway and the services the Inway is offering to the FSC Group
+- `RegisterContractManager`, registers a Contract Manager
 - `ListServices`, lists the services available on the FSC Group
-- `ListPeerInways`, lists the Inways of a peer
+- `ListPeers`, lists the Peers of a Group
 - `GetGroupInfo`, return the version of the FSC standard used by the FSC Group
 
 All rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
@@ -795,9 +800,8 @@ message RegisterInwayRequest {
   }
 
   string inway_address = 1;
-  string contract_manager_address = 2;
-  repeated RegisterService services = 3;
-  string inway_name = 4;
+  repeated RegisterService services = 2;
+  string inway_name = 3;
 }
 
 message RegisterInwayResponse {
@@ -841,23 +845,27 @@ message Inway {
 }
 ```
 
-##### rpc ListPeerInways
+##### rpc ListPeers
 
-The Remote Procedure Call `ListPeerInways` **MUST** be implemented with the following interface and messages:
+The Remote Procedure Call `ListPeers` **MUST** be implemented with the following interface and messages:
 ```
-rpc ListPeerInways(ListPeerInwaysRequest) returns (ListPeerInwaysResponse);
+rpc ListPeers(ListPeersRequest) returns (ListPeersResponse);
 
-message ListPeerInwaysRequest {
-  string peer_serial_number = 1;
+message ListPeersRequest {
+  repeated string peer_serial_numbers = 1;
 }
 
-message ListPeerInwaysResponse {
-  repeated Inway inways = 1;
+message ListPeersResponse {
+  repeated Peer peers = 1;
 }
 
-message Inway {
+message Peer {
+  string serial_number = 1;
+  repeated ContractManager contract_managers = 2;
+}
+
+message ContractManager {
     string address
-    string contract_manager_address
 }
 ```
 
