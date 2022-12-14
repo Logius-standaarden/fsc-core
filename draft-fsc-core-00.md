@@ -99,9 +99,9 @@ The Directory lists routing information for all services in the Group.
 To connect to a service, the Peer needs a Grant that specifies the connection. The FSC Core specification describes how Grants are requested, granted and revoked. Once a right to connect is granted, a connection from HTTP Client to HTTP Service will be automatically created everytime an HTTP request to the HTTPS service is made.
 
 FSC Core specifies the basics for setting up and managing connections in a Group. It is RECOMMENDED to use FSC Core with the following extensions, each specified in a dedicated RFC:
+- [FSC Delegation](delegation/README.md), to delegate the right to connect to a service
 - [FSC Policies](policies/README.md), to use more advanced policies as conditions in Contracts
 - [FSC Logging](logging/README.md), to standardize and link transaction logs
-- [FSC Delegation](delegation/README.md), to delegate the right to connect to a service
 - [FSC Control](control/README.md), to get in control from a management, security and audit perspective
 
 
@@ -109,10 +109,7 @@ FSC Core specifies the basics for setting up and managing connections in a Group
 
 A typical use case is a cooperation of many organizations that use APIs to exchange data or provide business services to eachother.
 
-Organizations can participate in multiple FSC Groups at once. This likely happens when using different environments for production, test and more - each environment will require its own Group.
-
-An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a service in the Directory of each group using a different Inway for each Group.
-
+Organizations can participate in more than one FSC Groups at the same time, for example when using different environments for production and test deployments, or when participating in different ecosystems, for example health industry and government industry. An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a service in the Directory of each group using a different Inway for each Group.
 
 ## Requirements Language
 
@@ -129,7 +126,7 @@ Group
 : System of Peers using Inways, Outways and Contract Managers that confirm to the FSC specification to make use of each other's services.
 
 Directory
-: A Directory holds information about services in the FSC Group, so they can be discovered.
+: A Directory holds information about all services in the FSC Group to make them discoverable.
 
 Inway
 : Reverse proxy that handles incoming connections to one or more services and confirms to the FSC Core specification.
@@ -162,19 +159,19 @@ This chapter describes the basic architecture of FSC systems.
 ## Request flow
 
 !---
-![Request Flow](request-flow.svg "Request Flow")
-![Request Flow](request-flow.ascii-art "Request Flow")
+![Request Flow](diagrams/core/request-flow.svg "Request Flow")
+![Request Flow](diagrams/core/request-flow.ascii-art "Request Flow")
 !---
 
 ## Service discovery
 
-Every Group is defined by a Directory that contains routing information for all services in the Group.
+Every Group is defined by one Directory that contains routing information for all services in the Group.
 Inways register services in the Directory.
 Outways discover services by requesting a list from the Directory.
 
 !---
-![Service discovery](service-discovery.svg "Service discovery")
-![Service discovery](service-discovery.ascii-art "Service discovery")
+![Service discovery](diagrams/core/service-discovery.svg "Service discovery")
+![Service discovery](diagrams/core/service-discovery.ascii-art "Service discovery")
 !---
 
 ## mTLS connections and Trust Anchor {#trustanchor}
@@ -182,27 +179,31 @@ Outways discover services by requesting a list from the Directory.
 Connections between Inways and Outways and connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. Components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor. The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing `Subject.organization` and `Subject.serialnumber` [@!RFC5280, section 4.1.2.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.6) in each certificate.
 
 !---
-![mTLS Connections](mtls-connections.svg "mTLS Connections")
-![mTLS Connections](mtls-connections.ascii-art "mTLS Connections")
+![mTLS Connections](diagrams/core/mtls-connections.svg "mTLS Connections")
+![mTLS Connections](diagrams/core/mtls-connections.ascii-art "mTLS Connections")
 !---
 
 ## Contract Management
 
-Connections between Peers are based on Grants. A Grant is the right to make a connection from an Outway to a service offered in the Group. Grants are encapsulated in Contracts and agreed upon by the involved Peers. To create a new contract, the Contract Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Contract Management functionality, see [Administrating a Peer](#administrating)). For each desired connection, a Grant is formulated that contains identifying information about both the Outway from the requesting Peer and the service of the Providing Peer. One Contract may contain multiple Grants, typically those match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). A Contract becomes valid once all Peers mentioned in the Contract have agreed upon its content by cryptographically signing it. Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
-
-Contracts are immutable. To change a contract, a new Contract is made that replaces the old one. Contracts can be invalidated which revokes the Grants in the Contract.
+Connections between Peers are based on Grants. A Grant is the right to make a connection from an Outway to a service offered in the Group. Grants are encapsulated in Contracts and agreed upon by the involved Peers. To create a new contract, the Contract Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Contract Management functionality, see [Administrating a Peer](#administrating)). For each desired connection, a Grant is formulated that contains identifying information about both the Outway from the requesting Peer and the service of the Providing Peer. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
 
 !---
-![Contract Management](contract-management.svg "Contract Management")
-![Contract Management](contract-management.ascii-art "Contract Management")
+![Contract Management](diagrams/core/contract-management.svg "Contract Management")
+![Contract Management](diagrams/core/contract-management.ascii-art "Contract Management")
 !---
+### Contract states
 
-Inways and Outways of a Peer are in part configured by the Contract Manager. The Contract Manager stores Contracts involving the Peer and translates the content of the Contracts in configuration for the local Inway and Outway functionality.
+Any Peer can submit a Proposal to other Peers. This Proposal becomes a valid Contract when all Peers mentioned in the Contract accept its content. When 
 
-!---
-![Peer Configuration](peer-configuration.svg "Peer Configuration")
-![Peer Configuration](peer-configuration.ascii-art "Peer Configuration")
-!---
+
+A Contract becomes invalid when at least one Peer mentioned in de Contract revokes its content.
+
+Accepting, rejecting and revoking is done by adding a signed statement.
+
+
+Contracts are immutable. When the content of a Contract has to change, the contract is invalidated and replaced by a new one.
+
+
 
 ## Connecting to a service
 
@@ -274,7 +275,7 @@ If an error occurs within the scope of the FSC network, the Outway **MUST** retu
 ```
   responses:
     '540':
-      description: A FCS network error has occurred
+      description: A FSC network error has occurred
       content:
         application/json:
           schema:
@@ -394,21 +395,20 @@ The Inway **MUST** implement a health endpoint. This endpoint is called by the D
 ```
 openapi: 3.0.0
 paths:
-  /.fsc/health/{service_name}: 
-    get: 
+  /.fsc/health/{service_name}:
+    get:
       summary: Returns if the service is available and reachable,
-        responses: 
-          200:          
+        responses:
+          200:
             description: healh status object,
-            content: 
-              application/json: 
+            content:
+              application/json:
                 schema:
                   type: object
                   properties:
                     healthy:
                       type: bool
-                      description: true if the service is healthy 
-                      
+                      description: true if the service is healthy
 ```
 
 ## Contract Manager
@@ -440,7 +440,7 @@ The Contract Manager **MUST** validate the signature.
 
 The Contract Manager **MUST** generate an error response if a signature is invalid.
 
-When a Peer signs a Contract, the Contract Manager **MUST** propagate the signature to each of the Peers included in the contract.  
+When a Peer signs a Contract, the Contract Manager **MUST** propagate the signature to each of the Peers included in the contract.
 
 A Contract is deemed valid when each of the involved peers has digitally signed the contract.
 
@@ -471,7 +471,7 @@ A signature **SHOULD** only be accepted if the Peer is present in the Contract P
 - `GrantPublication.Directory.Peer`
 - `GrantPublication.Service.Peer`
 
-The subject serial number of the Peer offering the signature **MUST** match the subject serial number of the X.509 certificate containing the public key used to create the signature.   
+The subject serial number of the Peer offering the signature **MUST** match the subject serial number of the X.509 certificate containing the public key used to create the signature.
 
 #### Contract verification
 
@@ -483,7 +483,7 @@ The Contract Manager **MUST** be able to provide the X.509 certificates containi
 
 #### Providing contracts
 
-The Contract Manager **MUST** be able to provide contracts the Contract Manager has available for specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.   
+The Contract Manager **MUST** be able to provide contracts the Contract Manager has available for specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.
 
 ### Interfaces {#contract_manager_interface}
 
@@ -591,7 +591,7 @@ message Directory {
 message Period {
     google.protobuf.Timestamp start = 1;
     google.protobuf.Timestamp end = 2;
-} 
+}
 ```
 
 #### rpc SubmitProposal
