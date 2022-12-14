@@ -129,7 +129,7 @@ Group
 : System of Peers using Inways, Outways and Contract Managers that confirm to the FSC specification to make use of each other's services.
 
 Directory
-: A Directory holds information about all services in the FSC Group, so they can be discovered.
+: A Directory holds information about services in the FSC Group, so they can be discovered.
 
 Inway
 : Reverse proxy that handles incoming connections to one or more services and confirms to the FSC Core specification.
@@ -144,7 +144,10 @@ Contract Manager
 : The Contract Manager manages Contracts and configures Inways and Outways based on information from a Directory and Contracts.
 
 Grant
-: Defines the interactions between Peers. In FSC Core only the Connection Grant is described which specifies the right of a Peer to connect to a Service provided by a Peer.
+: Defines the interactions between Peers. In FSC Core two Grants are described. 
+
+1. The Connection Grant which specifies the right of a Peer to connect to a Service provided by a Peer.
+2. The Publication Grant which specifies the right of a Peer to publish a Service in the Group.
 
 Service
 : An HTTP API offered to the Group.
@@ -419,7 +422,7 @@ The Contract Manager functionality in FSC Core is:
 - Providing the X.509 certificates containing the public key of the keypair of which the private key was used by the Peer to create signatures
 - Providing contracts involving a specific Peer
 
-It is RECOMMENDED to implement the Contract Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Contract Manager.
+It is **RECOMMENDED** to implement the Contract Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Contract Manager.
 
 ### Behavior
 
@@ -465,12 +468,14 @@ A signature **SHOULD** only be accepted if the Peer is present in the Contract P
 
 - `GrantConnection.Client.Peer`
 - `GrantConnection.Service.Peer`
+- `GrantPublication.Directory.Peer`
+- `GrantPublication.Service.Peer`
 
 The subject serial number of the Peer offering the signature **MUST** match the subject serial number of the X.509 certificate containing the public key used to create the signature.   
 
 #### Contract verification
 
-When receiving a contract the Peer **MUST** validate that the hash of the contract matches the hashes in the Peer signatures.
+When receiving a Contract the Peer **MUST** validate that the hash of the contract proposal matches the contract proposal hash in each Peer signature.
 
 #### Providing X.509 certificates
 
@@ -480,14 +485,14 @@ The Contract Manager **MUST** be able to provide the X.509 certificates containi
 
 The Contract Manager **MUST** be able to provide contracts the Contract Manager has available for specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.   
 
-### Interfaces
+### Interfaces {#contract_manager_interface}
 
 The Contract Manager functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ContractManagerService`. This service **MUST** offer four Remote Procedure Calls (rpc):
 - `SubmitProposal`, used to offer a contract proposal to be signed by the receiver
 - `SignContract`, used to sign a contract
 - `RejectContract`, used to reject a contract
 - `RevokeContract`, used to revoke a contract
-- `ListContracts`, lists contracts for the Peer making the request
+- `ListContracts`, lists contracts of a specific grant type
 - `ListCertificates`, lists certificates matching the public key fingerprints in the request
 
 Rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
@@ -518,20 +523,22 @@ message Contract {
 
 message Proposal {
    Hash hash = 1;
-   string group_id = 1;
-   Period period = 2;
-   repeated Grant grants = 3; 
+   string group_id = 2;
+   Period period = 3;
+   repeated Grant grants = 4; 
 }
 
 enum GrantType {
   GRANT_TYPE_UNSPECIFIED = 0;
   GRANT_TYPE_CONNECTION = 1;
+  GRANT_TYPE_PUBLICATION = 2;
 }
 
 message Grant {
     GrantType type = 1;
     oneof data {
         GrantConnection connection = 2;
+        GrantPublication publication = 3;
     }
 }
 
@@ -540,8 +547,23 @@ message GrantConnection{
     Service service = 2;
 }
 
+message GrantPublication {
+    Directory directory = 1;
+    ServicePublication service = 2;
+}
+
 message Client {
     Peer peer = 1;
+}
+
+message Directory {
+    Peer peer = 1;
+}
+
+message ServicePublication {
+    Peer peer = 1;
+    string name = 2;
+    repeated string inway_addresses = 3;
 }
 
 message Peer {
@@ -719,7 +741,7 @@ The `proposalHash` of the signature payload contains the signature hash. The alg
 
 - `accept`, peer has accepted the contract
 - `reject`, peer has rejected the contract
-- `revoked`, peer has revoked the contract
+- `revoke`, peer has revoked the contract
 
 #### Error handling
 
@@ -755,59 +777,72 @@ enum ErrorReason {
 
 #### Authentication
 
-The clients **MUST** use mTLS when connecting to the Directory. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) that acts as Trust Anchor of the Group.
+The clients **MUST** use mTLS when connecting to the Directory. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) that acts as the Trust Anchor of the Group.
 
-#### Inway registration
+#### Service registration
 
-The Directory **MUST** offer a registration point for Inways. An Inway will use this registration point to register itself and the services it is offering to the FSC Group.
+Service registration is accomplished by offering a Contract proposal to the Directory which contains one or more `PublicationGrants` with each `PublicationGrant` containing a single Service. Once the Directory and the Peer offering the Service have both signed the Contract, the Service is published in the Directory.
 
-The Directory **MUST** be able to provide the Inway addresses of a peer.
+The Directory **MUST** be able to sign Contracts with Grants of the type `PublicationGrant`.
+
+The Directory **MUST** validate that a `PublicationGrant` is valid by applying the following rules:
+
+- The subject serial number of the X.509 certificate used by the Directory Peer must match the value of the field `PublicationGrant.Directory.SubjectSerialNumber`
+- A Service name is provided in the field  `PublicationGrant.ServicePublication.Name`
+- At least one Inway address is provided in the field   `PublicationGrant.ServicePublication.InwayAddresses`
+- A signature is present with the subject serial number of the Peer defined the field `PublicationGrant.Directory.SubjectSerialNumber`
+- A signature is present with the subject serial number of the Peer defined the field `PublicationGrant.ServicePublication.Peer.SubjectSerialNumber`
 
 #### Service listing
 
-The Directory **MUST** be able to offer a list of the services available in the FSC Group. This service list will be used by Outways in the FCS Group to route HTTP Requests to the correct service.
+The Directory **MUST** list a service when the Contract containing the `PublicationGrants` for the Service has been signed by the Peers involved with the Contract.
 
-The Directory **MUST** be able to provide the URI of each Inway
+The Directory **MUST** list the Services that are available in the Group. This Service list us used by Outways in the Group to route HTTP Requests to the correct Service.
 
-The Directory **MUST** know which services each Inway is offering to the FSC Group.
-
-The Directory **MUST** validate if a mTLS connection can be setup to the URI of an Inway. If the Directory is able to set up a connection the Inway **MUST** be given the state `UP`, if not the state of the Inway **MUST** be `DOWN`
+The Directory **MUST** provide the URI of the Inway that is offering a Service.
 
 #### Peer listing
 
-The Directory **MUST** be able to offer a list of the Peers available in the FSC Group. The listing should also include the Contract Managers of each Peer. This information is used to negotiate Contracts between Peers
+The Directory **MUST** offer a list of the Peers in the Group. The listing should also include the Contract Managers of each Peer. This information is used to negotiate Contracts between Peers
+
+#### Health checking
+
+The Directory **MUST** validate if a mTLS connection can be setup to the URI of an Inway. If the Directory is able to set up a connection, the Inway **MUST** be given the state `UP`, if not the state of the Inway **MUST** be `DOWN`. This state can be **SHOULD** be used by Outways to determine if a call can be routed to a Service.
+
+The Directory **MUST** validate if a mTLS connection can be setup to the URI of a Contact Manager. If the Directory is able to set up a connection, the Contract Manager **MUST** be given the state `UP`, if not the state of the Contact Manager **MUST** be `DOWN`.
+
+The Directory **MUST** remove Services when the state of all the Inways offering the Service has been `DOWN` for a certain period. The **RECOMMENDED** period is 48 hours.
+
+The Directory **MUST** remove Contract Managers when the state of the Contract Manager has been `DOWN` for a certain period. The **RECOMMENDED** period is 48 hours.
 
 ### Interfaces
 
 #### Directory Service
 
-The Directory functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `Directory`. This service **MUST** offer twelve Remote Procedure Calls (rpc):
-- `RegisterInway`, registers an Inway and the services the Inway is offering to the FSC Group
+The Directory functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ContractManagerService`. This service **MUST** implement the interface of the [Contract Manager](#contract_manager_interface).
+
+In addition to the Contract Manager interface the Directory functionality **MUST** implement an gRPC service with the name `Directory`. This service **MUST** offer four Remote Procedure Calls (rpc):
 - `RegisterContractManager`, registers a Contract Manager
-- `ListServices`, lists the services available on the FSC Group
 - `ListPeers`, lists the Peers of a Group
-- `GetGroupInfo`, return the version of the FSC standard used by the FSC Group
+- `ListServicePublications`, lists the services known by the Director
+- `GetGroupInfo`, returns the version of the FSC standard used by the Group
 
-All rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
+Rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
 
-##### rpc RegisterInway
+##### rpc RegisterContractManager
 
-The Remote Procedure Call `RegisterInway` **MUST** be implemented with the following interface and messages:
+The Remote Procedure Call `RegisterContractManager` **MUST** be implemented with the following interface and messages:
 ```
-rpc RegisterInway(RegisterInwayRequest) returns (RegisterInwayResponse);
+rpc RegisterContractManager(RegisterContractManagerRequest) returns (RegisterContractManagerResponse);
 
-message RegisterInwayRequest {
-  message RegisterService {
-    string name = 1;
-  }
-
-  string inway_address = 1;
-  repeated RegisterService services = 2;
-  string inway_name = 3;
+message RegisterContractManagerRequest {
+    ContractManager contract_manager = 1;
 }
 
-message RegisterInwayResponse {
-  string error = 1;
+message RegisterContractManagerResponse {}
+
+message ContractManager {
+    string address = 1;
 }
 ```
 
@@ -815,20 +850,19 @@ message RegisterInwayResponse {
 
 The Remote Procedure Call `ListServices` **MUST** be implemented with the following interface and messages:
 ```
-rpc ListServices(ListServicesRequest) returns (ListServicesResponse);
+rpc ListServicePublications(ListServicePublicationsRequest) returns (ListServicePublicationsResponse);
 
 
 message ListServicesRequest {}
 
-message ListServicesResponse {
-
-  message Service {
+message ListServicePublicationsResponse {
+  message ServicePublication {
     Organization organization = 1;
     string name = 2;
     repeated Inway inways = 3;
   }
 
-  repeated Service services = 1;
+  repeated ServicePublication services = 1;
 }
 
 message Organization {
@@ -867,7 +901,13 @@ message Peer {
 }
 
 message ContractManager {
-    string address
+  enum State {
+    STATE_UNSPECIFIED = 0;
+    STATE_UP = 1;
+    STATE_DOWN = 2;
+  }
+  string address = 1;
+  State state = 2;
 }
 ```
 
@@ -894,7 +934,6 @@ message Extension {
 According to gRPC specification a gRPC service will, in case of an error, return a response structured according to the `Status` interface. In case of an error that should generate a specific FSC error code the `status` message is enriched with an `ErrorInfo` message containing the FSC specific error code.
 The FSC specific error code **MUST** be set as the value of the `reason` field of the `ErrorInfo` interface.
 The `ErrorInfo` interface **MUST** be used as the value of the `details` field of the `Status` interface.
-
 
 The `Status` interface:  <https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto>
 The `ErrorInfo` interface: <https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto>
