@@ -76,51 +76,16 @@ This section gives an introduction to this RFC.
 Section 2 describes the architecture of a system that follows the FSC specification.
 Section 3 describes the interfaces and behavior of FSC components in detail.
 
-## Purpose
-
-The Federated Service Connectivity (FSC) specifications describe a way to implement technically interoperable API gateway functionality, covering federated authentication, secure connecting and transaction logging in a large-scale, dynamic API landscape. The standard includes the exchange of information and requests about the management of connections and authorizations, in order to make it possible to automate those activities.
-
-The Core part of the FSC specification achieves inter-organizational, technical interoperability:
-- to discover services
-- to route requests to services in other contexts (e.g. from within organization A to organization B)
-- to request and managing connection rights needed to connect to said services
-
-All functionality required to achieve technical interoperability is provided by APIs as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling upscaling of inter-organizational usage of services.
-
-
-## Overall Operation of FSC Core
-
-All Peers in a Group announce their HTTP services to the Group by registering them in the Directory. Every Group uses one Directory that defines the scope of the Group. All Peers use the list of services as provided by the Directory to discover which services are available in the Group. With this information, Peers can propose Peer to Peer Contracts. Contracts contain Grants that specify which Outways from Peers may connect to which services from Peers. Each Contract may contain multiple Grants, defining the rights to connect between Peers.
-
-Inways are reverse proxies that announce services to the Directory and route incoming connections to those services.
-Outways are forward proxies that discover all available services in the Group and route outgoing connections to services.
-The Directory lists routing information for all services in the Group.
-
-To connect to a service, the Peer needs a Grant that specifies the connection. The FSC Core specification describes how Grants are requested, granted and revoked. Once a right to connect is granted, a connection from HTTP Client to HTTP Service will be automatically created everytime an HTTP request to the HTTPS service is made.
-
-FSC Core specifies the basics for setting up and managing connections in a Group. It is RECOMMENDED to use FSC Core with the following extensions, each specified in a dedicated RFC:
-- [FSC Policies](policies/README.md), to use more advanced policies as conditions in Contracts
-- [FSC Logging](logging/README.md), to standardize and link transaction logs
-- [FSC Delegation](delegation/README.md), to delegate the right to connect to a service
-- [FSC Control](control/README.md), to get in control from a management, security and audit perspective
-
-
-### Use cases
-
-A typical use case is a cooperation of many organizations that use APIs to exchange data or provide business services to eachother.
-
-Organizations can participate in multiple FSC Groups at once. This likely happens when using different environments for production, test and more - each environment will require its own Group.
-
-An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a service in the Directory of each group using a different Inway for each Group.
-
-
 ## Requirements Language
 
-The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://www.rfc-editor.org/info/bcp14) [RFC2119](https://www.rfc-editor.org/rfc/rfc2119) [RFC8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
+The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",
+"NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described
+in [BCP 14](https://www.rfc-editor.org/info/bcp14) [RFC2119](https://www.rfc-editor.org/rfc/rfc2119)
+[RFC8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
 
 ## Terminology
 
-This specification lists terms and abbreviations as used in this document.
+The following terms are used in this document.
 
 Peer
 : Actor that both provides and requests services. This is an abstraction of e.g. an organization, a department or a security context.
@@ -151,6 +116,51 @@ Service
 
 Trust Anchor
 : The Trust Anchor is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
+
+## Purpose
+
+The Federated Service Connectivity (FSC) specifications describe a way to implement technically interoperable 
+API gateway functionality, covering federated authentication, secure connecting and transaction logging in a 
+large-scale, dynamic API landscape. The standard includes the exchange of information and requests about the management 
+of connections and authorizations, in order to make it possible to automate those activities.
+
+The Core part of the FSC specification achieves inter-organizational, technical interoperability:
+- to discover services
+- to route requests to services in other contexts (e.g. from within organization A to organization B)
+- to request and managing connection rights needed to connect to said services
+
+All functionality required to achieve technical interoperability is provided by APIs as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling upscaling of inter-organizational usage of services.
+
+## Overall Operation of FSC Core
+
+All Peers in a Group announce their HTTP services to the Group by registering them in the Directory. Every Group uses one Directory that defines the scope of the Group. All Peers use the list of services as provided by the Directory to discover which services are available in the Group. With this information, Peers can propose Peer to Peer Contracts. Contracts contain Grants that specify which Outways from Peers may connect to which services from Peers. Each Contract may contain multiple Grants, defining the rights to connect between Peers.
+
+Inways are reverse proxies that announce services to the Directory and route incoming connections to those services.
+Outways are forward proxies that discover all available services in the Group and route outgoing connections to services.
+The Directory lists routing information for all services in the Group.
+
+To connect to a service, the Peer needs a Grant that specifies the connection. The FSC Core specification describes how Grants are requested, granted and revoked. Once a right to connect is granted, a connection from HTTP Client to HTTP Service will be automatically created everytime an HTTP request to the HTTPS service is made.
+
+FSC Core specifies the basics for setting up and managing connections in a Group. It is RECOMMENDED to use FSC Core with the following extensions, each specified in a dedicated RFC:
+- [FSC Policies](policies/README.md), to use more advanced policies as conditions in Contracts
+- [FSC Logging](logging/README.md), to standardize and link transaction logs
+- [FSC Delegation](delegation/README.md), to delegate the right to connect to a service
+- [FSC Control](control/README.md), to get in control from a management, security and audit perspective
+
+## Use cases
+
+### Cooperation of multiple organizations
+
+A typical use case is a cooperation of many organizations that use APIs 
+to exchange data or provide business services to each-other.
+
+Organizations can participate in multiple FSC Groups at once. This likely happens when using different environments for production, test and more - each environment will require its own Group.
+
+An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a service in the Directory of each group using a different Inway for each Group.
+
+### Discover which services are available in a Group
+
+TODO: explain that you can discover by fetching all services from the directory.
 
 # Architecture
 
