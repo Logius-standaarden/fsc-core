@@ -201,6 +201,10 @@ Inways and Outways of a Peer are in part configured by the Contract Manager. The
 ![Peer Configuration](peer-configuration.ascii-art "Peer Configuration")
 !---
 
+### Connection Grant
+
+TODO: describe Connection Grants, so we can refer to this section from the FSC Delegation Extension.
+
 ## Connecting to a service
 
 ## Providing a service
