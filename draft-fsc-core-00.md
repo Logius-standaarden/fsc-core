@@ -90,6 +90,8 @@ All functionality required to achieve technical interoperability is provided by 
 
 ## Overall Operation of FSC Core
 
+-> what about moving this section below 'Requirements Language' and 'Terminology'?
+
 All Peers in a Group announce their HTTP services to the Group by registering them in the Directory. Every Group uses one Directory that defines the scope of the Group. All Peers use the list of services as provided by the Directory to discover which services are available in the Group. With this information, Peers can propose Peer to Peer Contracts. Contracts contain Grants that specify which Outways from Peers may connect to which services from Peers. Each Contract may contain multiple Grants, defining the rights to connect between Peers.
 
 Inways are reverse proxies that announce services to the Directory and route incoming connections to those services.
@@ -185,7 +187,18 @@ Connections between Inways and Outways and connections with the Directory use Mu
 
 ## Contract Management
 
-Connections between Peers are based on Grants. A Grant is the right to make a connection from an Outway to a service offered in the Group. Grants are encapsulated in Contracts and agreed upon by the involved Peers. To create a new contract, the Contract Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Contract Management functionality, see [Administrating a Peer](#administrating)). For each desired connection, a Grant is formulated that contains identifying information about both the Outway from the requesting Peer and the service of the Providing Peer. One Contract may contain multiple Grants, typically those match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). A Contract becomes valid once all Peers mentioned in the Contract have agreed upon its content by cryptographically signing it. Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
+Connections between Peers are based on Grants. A Grant is the right to make a connection from an Outway to a service offered in the Group. Grants are encapsulated in Contracts and agreed upon by the involved Peers. 
+
+-> the following sentence is difficult to grasp.
+what about describing what a contract is with subtitles for the type of grants. the actual creation will be done via a UI.
+
+To create a new contract, the Contract Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Contract Management functionality, see [Administrating a Peer](#administrating)). For each desired connection, a Grant is formulated that contains identifying information about both the Outway from the requesting Peer and the service of the Providing Peer. One Contract may contain multiple Grants, typically those match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA).
+
+-> the following sentence is difficult to grasp. what is a 'valid' contract? and what makes a contract 'invalid'?
+
+A Contract becomes valid once all Peers mentioned in the Contract have agreed upon its content by cryptographically signing it. Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
+
+-> following sentence: describe why contracts are immutable. what's the reasoning and what are the implications for our architecture? 
 
 Contracts are immutable. To change a contract, a new Contract is made that replaces the old one. Contracts can be invalidated which revokes the Grants in the Contract.
 
