@@ -83,18 +83,43 @@ The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SH
 in [BCP 14](https://www.rfc-editor.org/info/bcp14) [RFC2119](https://www.rfc-editor.org/rfc/rfc2119)
 [RFC8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals, as shown here.
 
+## Purpose
+
+The Federated Service Connectivity (FSC) specifications describe a way to implement technical interoperable
+API gateway functionality. Covering federated authentication, secure connecting and transaction logging in a
+large-scale, dynamic API landscape.
+
+> **Vraag:** onderstaande zin, wat bedoelen we daarmee? Willen we zeggen dat de standaard voorschrijft hoe je die informatie moet delen.
+> Of willen we zeggen dat je die acties geautomatiseerd kan uitvoeren? Indien dat laatste, welk onderdeel wil je dan precies automatisere?
+> Het automatisatie stukje is nl. ook al beschreven onder het lijstje 'technical interoperability'.
+
+The standard includes the exchange of information and requests about the management
+of connections and authorizations, in order to make it possible to automate those activities.
+
+The Core part of the FSC specification achieves inter-organizational, technical interoperability:
+
+- to discover services
+- to route requests to services in other contexts (e.g. from within **Organization A** to **Organization B**)
+- to request and manage connection rights needed to connect to these services
+
+All functionality required to achieve technical interoperability is provided by APIs as specified in this RFC.
+This allows for automation of most management tasks, greatly reducing the administrative load and enabling upscaling
+of inter-organizational usage of services.
+
 ## Terminology
 
-The following terms are used in this document.
+The following terms are used in this document. Some of these are explained more in depth along the document.
 
 Peer
-: Actor that both provides and requests services. This is an abstraction of e.g. an organization, a department or a security context.
+: Actor that both provide and consume services.  
+  This is an abstraction of e.g. an organization, a department or a security context.
 
 Group
-: System of Peers using Inways, Outways and Contract Managers that confirm to the FSC specification to make use of each other's services.
+: System of Peers using Inways, Outways and Contract Managers that confirm  
+  to the FSC specification to make use of each other's services.
 
 Directory
-: A Directory holds information about all services in the FSC Group, so they can be discovered.
+: Holds information about all services in the FSC Group.
 
 Inway
 : Reverse proxy that handles incoming connections to one or more services and confirms to the FSC Core specification.
@@ -106,52 +131,24 @@ Contract
 : Document containing the Grants between Peers, defining which interactions between Peers are possible.
 
 Contract Manager
-: The Contract Manager manages Contracts and configures Inways and Outways based on information from a Directory and Contracts.
+: Manages Contracts and configures Inways and Outways based on information from a Directory and Contracts.
 
 Grant
-: Defines the interactions between Peers. In FSC Core only the Connection Grant is described which specifies the right of a Peer to connect to a Service provided by a Peer.
+: Defines the interactions between Peers. In FSC Core only the Connection Grant is described which  
+  specifies the right of a Peer to connect to a Service provided by a Peer.
 
 Service
 : An HTTP API offered to the Group.
 
 Trust Anchor
-: The Trust Anchor is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
-
-## Purpose
-
-The Federated Service Connectivity (FSC) specifications describe a way to implement technically interoperable 
-API gateway functionality, covering federated authentication, secure connecting and transaction logging in a 
-large-scale, dynamic API landscape. The standard includes the exchange of information and requests about the management 
-of connections and authorizations, in order to make it possible to automate those activities.
-
-The Core part of the FSC specification achieves inter-organizational, technical interoperability:
-- to discover services
-- to route requests to services in other contexts (e.g. from within organization A to organization B)
-- to request and managing connection rights needed to connect to said services
-
-All functionality required to achieve technical interoperability is provided by APIs as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling upscaling of inter-organizational usage of services.
-
-## Overall Operation of FSC Core
-
-All Peers in a Group announce their HTTP services to the Group by registering them in the Directory. Every Group uses one Directory that defines the scope of the Group. All Peers use the list of services as provided by the Directory to discover which services are available in the Group. With this information, Peers can propose Peer to Peer Contracts. Contracts contain Grants that specify which Outways from Peers may connect to which services from Peers. Each Contract may contain multiple Grants, defining the rights to connect between Peers.
-
-Inways are reverse proxies that announce services to the Directory and route incoming connections to those services.
-Outways are forward proxies that discover all available services in the Group and route outgoing connections to services.
-The Directory lists routing information for all services in the Group.
-
-To connect to a service, the Peer needs a Grant that specifies the connection. The FSC Core specification describes how Grants are requested, granted and revoked. Once a right to connect is granted, a connection from HTTP Client to HTTP Service will be automatically created everytime an HTTP request to the HTTPS service is made.
-
-FSC Core specifies the basics for setting up and managing connections in a Group. It is RECOMMENDED to use FSC Core with the following extensions, each specified in a dedicated RFC:
-- [FSC Policies](policies/README.md), to use more advanced policies as conditions in Contracts
-- [FSC Logging](logging/README.md), to standardize and link transaction logs
-- [FSC Delegation](delegation/README.md), to delegate the right to connect to a service
-- [FSC Control](control/README.md), to get in control from a management, security and audit perspective
+: An authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses  
+  an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
 ## Use cases
 
 ### Cooperation of multiple organizations
 
-A typical use case is a cooperation of many organizations that use APIs 
+A typical use case is a cooperation of many organizations that use APIs
 to exchange data or provide business services to each-other.
 
 Organizations can participate in multiple FSC Groups at once. This likely happens when using different environments for production, test and more - each environment will require its own Group.
@@ -162,31 +159,160 @@ An organization can offer the same API in multiple Groups. When doing so, the or
 
 TODO: explain that you can discover by fetching all services from the directory.
 
-# Architecture
+## Overall Operation of FSC Core
 
-This chapter describes the basic architecture of FSC systems.
+This section gives provides a general description of each component and how it relates to other components.  
+Technical implementation details are outlined in the [Specifications](#Specifications) section.
 
-## Request flow
-
-!---
-![Request Flow](request-flow.svg "Request Flow")
-![Request Flow](request-flow.ascii-art "Request Flow")
-!---
-
-## Service discovery
+### Directory
 
 Every Group is defined by a Directory that contains routing information for all services in the Group.
-Inways register services in the Directory.
-Outways discover services by requesting a list from the Directory.
+Peers announce their HTTP services to the Group by registering them in the Directory.  
+
+The Peers of a group request the list of available services from the Directory to discover which Services are 
+available in the Group. Using this list, Peers can setup contracts with other peers in the same Group.
+This list contains routing information for all services in the Group.
+
+### Outways & Inways
+
+Outways are forward proxies that discover all available services in the Group and route outgoing connections to services.  
+Outways discover services by requesting a list from the Directory.  
+They should not be exposed to the outside world.
+
+Inways are reverse proxies that announce services to the Directory and route incoming connections to those services.  
+Inways register services in the Directory.  
+They are exposed to the outside world, so they can be reached by Outways of other Peers.
+
+### Contracts
+
+Contracts are agreements between Peers of the same Group. They contain one or more Grants defining the 
+rights to connect. These connection rights specify which Outways from a Peer may connect to which Services from 
+another Peer.
+
+A Contract contains the following information:
+
+- Hash algorithm: used to determine the hash of a Contract.  
+  Used as unique identifier and as a way of checking if two contracts are equal.  
+  Currently only *SHA3-512* is supported. We have a dedicated section on [how a Contract hash is composed](#how-a-contract-hash-is-composed).
+- Group ID: the name of the Group for which this Contract is intended.
+- Period: contains two dates describing the interval in which the Contract can be used.
+- Signatures: signatures of the Peers listed in the contract. Contracts have three types of signatures: approved, rejected and revoked.  
+  A signature is a JSON Web Token. We have a dedicated section on [how signatures are composed](#how-signatures-are-composed).
+- Grants: describes what is granted by a contract.  
+  See the [Grants section](###Grants) for more details.
+
+A Contract becomes valid once all Peers mentioned in the Contract have agreed
+upon its content by cryptographically signing it. Valid Contracts are used to configure Inways and Outways and enable
+the possibility to automatically create on demand connections between Peers, as defined in the Grants.
+
+The [technical details of a Contract are described below](###Contract).
+
+### Grants
+
+Grants are encapsulated in Contracts and agreed upon by the involved Peers.
+Typically, those match the connections mentioned in a legal agreement like a  
+Data Processing Agreement (DPA). They describe what is granted by a Contract. 
+
+There are multiple types of Grants:
+
+#### Connection Grants
+
+To connect to a service, the Peer needs a Connection Grant. That is a Grant that specifies the connection. 
+The FSC Core specification describes how these are requested, granted and revoked.
+
+> **Vraag:** onderstaande zin is onduidelijk. Wat bedoelen we daarmee? Een connection kan wel granted zijn, maar dan 
+> moet je toch nog steeds zelf een request gaan maken via Outway -> Inway -> Service? Het leest nu alsof er door een 
+> Grant automatisch verbinding ontstaat naar een API.
+
+Once a right to connect is granted, a connection from HTTP Client to HTTP Service will be automatically 
+created everytime an HTTP request to the HTTPS service is made.
+
+## How a Contract Signature is composed
+
+A signature **MUST** follow the JSON Web Signature (JWS) format specified in [@!RFC7515](https://www.rfc-editor.org/rfc/rfc7515.html)
+
+The JWS **MUST** specify the X.509 certificate containing the public key used to create the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.8) field of the `JOSE Header`[@!RFC7515, section 4](https://www.rfc-editor.org/rfc/rfc7515.html#section-4).
+
+The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1](https://www.rfc-editor.org/rfc/rfc7515.html#section-7.1)
+
+The JWS Payload as defined in [@!RFC7515, section 2](https://www.rfc-editor.org/rfc/rfc7515.html#section-2), **MUST** contain a hash of the `Proposal` gRPC message, the algorithm used to generate the hash and the type signature.
+
+The JWS **MUST** be created using one of the digital signature algorithms described in [@!RFC7518, section 3,1](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1)
+
+JWS Payload example:
+
+```JSON
+{
+  "proposalHash": "--------",
+  "type": "accept"
+}
+```
+
+## How a Contract hash is composed
+
+A Peer should ensure that a contract signature is intended for the contract proposal.
+Validation is done by comparing the hash of the received proposal with the hash in the signature.
+
+The `proposalHash` of the signature payload contains the signature hash. The algorithm to create a `proposalHash` is described below. The resulting hash can be used to verify if two proposals are equal.
+
+1. Create a byte array called `proposalBytes`.
+2. Convert `Proposal.Hash.Algorithm` to bytes and append the bytes to `proposalBytes`.
+3. Convert `Proposal.GroupId` to bytes and append the bytes to `proposalBytes`.
+4. Convert the values of the fields `Proposal.Period.start` and `Proposal.Period.End` to an int64 representing the seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. And append the bytes of the int64 values to `proposalBytes`.
+5. Create an array of bytes arrays called `grantByteArrays`
+6. For each Grant in `Proposal.Grants`
+    1. Create a byte array named `grantBytes`
+    2. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
+    3. Append `grantBytes` to `grantByteArrays`
+7. Sort the byte arrays in `grantByteArrays` in ascending order
+8. Append the bytes of `grantByteArrays` to `proposalBytes`.
+9. Hash the `proposalBytes` using the hash algorithm described in `Proposal.Hash.Algorithm`
+10. Encode the bytes of the hash as base64.
+
+# Extensions
+
+FSC Core specifies the basics for setting up and managing connections in a Group. It is RECOMMENDED to use FSC Core with the following extensions, each specified in a dedicated RFC:
+- [FSC Policies](policies/README.md), to use more advanced policies as conditions in Contracts
+- [FSC Logging](logging/README.md), to standardize and link transaction logs
+- [FSC Delegation](delegation/README.md), to delegate the right to connect to a service
+- [FSC Control](control/README.md), to get in control from a management, security and audit perspective
+
+
+# Architecture
+
+This chapter describes the architecture of FSC systems.
+
+> **Vraag:** moeten we dit niet in volgorde doen? Dus eerst providing a service, dan 
+> service discovery, dan administrating a peer (toegang aanvragen & geven?) en dan connecting 
+> to a service?
+
+## Connecting to a service
+
+## Providing a service
+
+## Administrating a Peer {#administrating}
+
+## Service discovery
 
 !---
 ![Service discovery](service-discovery.svg "Service discovery")
 ![Service discovery](service-discovery.ascii-art "Service discovery")
 !---
 
+## Request flow
+
+**Vraag:** is dit niet hetzelfde als 'connecting to a service'?
+
+!---
+![Request Flow](request-flow.svg "Request Flow")
+![Request Flow](request-flow.ascii-art "Request Flow")
+!---
+
 ## mTLS connections and Trust Anchor {#trustanchor}
 
-Connections between Inways and Outways and connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. Components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor. The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing `Subject.organization` and `Subject.serialnumber` [@!RFC5280, section 4.1.2.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.6) in each certificate.
+Connections between Inways and Outways and connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates.  
+Components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor.  
+The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing `Subject.organization` and `Subject.serialnumber` [@!RFC5280, section 4.1.2.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.6) in each certificate.
 
 !---
 ![mTLS Connections](mtls-connections.svg "mTLS Connections")
@@ -195,7 +321,14 @@ Connections between Inways and Outways and connections with the Directory use Mu
 
 ## Contract Management
 
-Connections between Peers are based on Grants. A Grant is the right to make a connection from an Outway to a service offered in the Group. Grants are encapsulated in Contracts and agreed upon by the involved Peers. To create a new contract, the Contract Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Contract Management functionality, see [Administrating a Peer](#administrating)). For each desired connection, a Grant is formulated that contains identifying information about both the Outway from the requesting Peer and the service of the Providing Peer. One Contract may contain multiple Grants, typically those match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). A Contract becomes valid once all Peers mentioned in the Contract have agreed upon its content by cryptographically signing it. Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
+> **Vraag:** is het interessant om het hier te hebben over het aanmaken van een contract?
+> Als eht al interessant is, moet dat dan niet gewoon in een sequence diagram worden uitgewerkt? 
+
+To create a new contract, the Contract Manager uses a selection of desired connections as input. 
+(Typically this input comes from a user interface interacting with the Contract Management functionality, 
+see [Administrating a Peer](#administrating)). For each desired connection, a Grant is formulated that contains 
+identifying information about both the Outway from the requesting Peer and the service of the Providing Peer. 
+One Contract may contain multiple Grants, 
 
 Contracts are immutable. To change a contract, a new Contract is made that replaces the old one. Contracts can be invalidated which revokes the Grants in the Contract.
 
@@ -204,22 +337,13 @@ Contracts are immutable. To change a contract, a new Contract is made that repla
 ![Contract Management](contract-management.ascii-art "Contract Management")
 !---
 
-Inways and Outways of a Peer are in part configured by the Contract Manager. The Contract Manager stores Contracts involving the Peer and translates the content of the Contracts in configuration for the local Inway and Outway functionality.
+Inways and Outways of a Peer are in part configured by the Contract Manager.  
+The Contract Manager stores Contracts involving the Peer and translates the content of the Contracts in configuration for the local Inway and Outway functionality.
 
 !---
 ![Peer Configuration](peer-configuration.svg "Peer Configuration")
 ![Peer Configuration](peer-configuration.ascii-art "Peer Configuration")
 !---
-
-## Connecting to a service
-
-## Providing a service
-
-
-## Administrating a Peer {#administrating}
-
-XX
-
 
 # Specifications
 
@@ -504,7 +628,7 @@ Rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to e
 
 #### Contract
 
-The interface Contract is used in rpc's of the gRPC service `ContractManagerService`
+The interface Contract is used in RPCs of the gRPC service `ContractManagerService`
 
 The signatures field of the Contract message **MUST** contain a map of Peer subject serial numbers and signatures
 
@@ -530,7 +654,7 @@ message Proposal {
    Hash hash = 1;
    string group_id = 1;
    Period period = 2;
-   repeated Grant grants = 3; 
+   repeated Grant grants = 3;
 }
 
 enum GrantType {
@@ -671,47 +795,6 @@ message ListCertificatesResponse {
     map<string,string> certificates = 1;
 }
 ```
-
-#### Signatures
-
-A signature **MUST** follow the JSON Web Signature(JWS) format specified in [@!RFC7515](https://www.rfc-editor.org/rfc/rfc7515.html)
-
-The JWS **MUST** specify the X.509 certificate containing the public key used to create the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.8) field of the `JOSE Header`[@!RFC7515, section 4](https://www.rfc-editor.org/rfc/rfc7515.html#section-4).
-
-The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1](https://www.rfc-editor.org/rfc/rfc7515.html#section-7.1)
-
-The JWS Payload as defined in [@!RFC7515, section 2](https://www.rfc-editor.org/rfc/rfc7515.html#section-2), **MUST** contain a hash of the `Proposal` gRPC message, the algorithm used to generate the hash and the type signature.
-
-The JWS **MUST** be created using one of the digital signature algorithms described in [@!RFC7518, section 3,1](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1)
-
-JWS Payload example:
-```JSON
-{
-  "proposalHash": "--------",
-  "type": "accept"
-}
-```
-
-#### The proposal hash
-
-A Peer should ensure that a contract signature is intended for the contract proposal.
-Validation is done by comparing the hash of the received proposal with the hash in the signature.
-
-The `proposalHash` of the signature payload contains the signature hash. The algorithm to create a `proposalHash` is described below. The resulting hash can be used to verify if two proposals are equal.
-
-1. Create a byte array called `proposalBytes`.
-2. Convert `Proposal.Hash.Algorithm` to bytes and append the bytes to `proposalBytes`.
-3. Convert `Proposal.GroupId` to bytes and append the bytes to `proposalBytes`.
-4. Convert the values of the fields `Proposal.Period.start` and `Proposal.Period.End` to an int64 representing the seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. And append the bytes of the int64 values to `proposalBytes`.
-5. Create an array of bytes arrays called `grantByteArrays` 
-6. For each Grant in `Proposal.Grants`
-   1. Create a byte array named `grantBytes`
-   2. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
-   3. Append `grantBytes` to `grantByteArrays`
-7. Sort the byte arrays in `grantByteArrays` in ascending order
-8. Append the bytes of `grantByteArrays` to `proposalBytes`.
-9. Hash the `proposalBytes` using the hash algorithm described in `Proposal.Hash.Algorithm`
-10. Encode the bytes of the hash as base64.
 
 ##### Data types {#data_types}
 
