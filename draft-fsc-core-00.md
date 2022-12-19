@@ -23,28 +23,12 @@ organization = "Hotting IT"
    email = "rfc@hotting.it"
 
 [[author]]
-initials = "E."
-surname = "van Gelderen"
-fullname = "Edward van Gelderen"
-organization = "VNG"
-  [author.address]
-   email = "edward.vangelderen@vng.nl"
-
-[[author]]
 initials = "R."
 surname = "Koster"
 fullname = "Ronald Koster"
 organization = "VNG"
   [author.address]
    email = "ronald.koster@vng.nl"
-
-[[author]]
-initials = "N."
-surname = "Dequeker"
-fullname = "Niels Dequeker"
-organization = "VNG"
-  [author.address]
-   email = "niels.dequeker@vng.nl"
 
 [[author]]
 initials = "H."
@@ -55,12 +39,12 @@ organization = "AceWorks"
    email = "henk.van.maanen@aceworks.nl"
 
 [[author]]
-initials = "G.J."
-surname = "Riemer"
-fullname = "Geert-Johan Riemer"
-organization = "Utlimate Spellchek Serveces Riemer"
+initials = "N."
+surname = "Dequeker"
+fullname = "Niels Dequeker"
+organization = "VNG"
   [author.address]
-   email = "fsc@geertjohan.net"
+   email = "niels.dequeker@vng.nl"
 
 %%%
 
