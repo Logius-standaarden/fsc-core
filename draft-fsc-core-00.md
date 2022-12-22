@@ -423,48 +423,45 @@ message Extension {
 
 ## Contract
 
-**Fields**
-
-- ID: a UUID that functions as the unique identifier for the Contract
-- Group ID: the name of the Group for which this Contract is intended
-- Hash algorithm: specifies the Hash algorithm that needs to be used to generate the hash of the Contract. This hash is used to validate if two contracts are equal and verify that a signature is intended for the Contract
+- ID(string): a UUID that functions as the unique identifier for the Contract
+- Group ID(string): the name of the Group for which this Contract is intended
+- Hash algorithm(string): specifies the Hash algorithm that needs to be used to generate the hash of the Contract. This hash is used to validate if two contracts are equal and verify that a signature is intended for the Contract
   Currently only *SHA3-512* is supported. The hash generation is described in the section [content hash](#content_hash).
 - Validity: contains two dates describing the interval in which the Contract can be used.
+  - NotBefore(timestamp): a contract is not valid before this date
+  - NotAfter(timestamp): a contract is not valid after this date 
 - Signatures: signatures of the Peers listed in the contract. Contracts have three types of signatures: accepted, rejected and revoked.  
+    - accept(map<string,string>): a map of accept signatures. The key is the subject serial number of the Peer, the value is the JWT.
+    - reject(map<string,string>): a map of reject signatures. The key is the subject serial number of the Peer, the value is the JWT.
+    - revoke(map<string,string>): a map of revoke signatures. The key is the subject serial number of the Peer, the value is the JWT.
   A signature is a JSON Web Token. We have a dedicated section on [signatures](#signatures).
-- Grants: describes what is granted by a contract.  
+- Grants(list of grants): describes what is granted by a contract.  
   See the [Grants section](#grants) for more details.
 
 ### Grants
 
 **Connection Grant**
 
-**Fields**
-
-// TODO: Outway the right word?
-
 - Outway: information about the Outway of the Peer that is allowed to connect
     - Peer: the Peer that is allowed to connect
-        - SubjectSerialNumber: the subject serial number of the Peer
+        - SubjectSerialNumber(string): the subject serial number of the Peer
     - PublicKeyFingerprints: a list of public key fingerprints that are allowed to connect
 - Service: the service to which a connection is allowed
     - Peer: the Peer that is offering the service
-        - SubjectSerialNumber: the subject serial number of the Peer
-    - Name: the name of the Service
-
-**Fields**
+        - SubjectSerialNumber(string): the subject serial number of the Peer
+    - Name(string): the name of the Service
 
 **Publication Grant**
 
 - Directory: the Directory to which the Service is published
     - Peer: the Peer hosting the Directory
-        - SubjectSerialNumber: the subject serial number of the Peer
-    - GroupID: the Group ID is the URI of the Directory
+        - SubjectSerialNumber(string): the subject serial number of the Peer
+    - GroupID(string): the Group ID is the URI of the Directory
 - ServicePublication: describes the details of the Service
     - Peer: the Peer offering the Service
-        - SubjectSerialNumber: the subject serial number of the Peer
-    - Name: name of the Service
-    - InwayAddresses: A list of addresses of Inways that are offering the Service.
+        - SubjectSerialNumber(string): the subject serial number of the Peer
+    - Name(string): name of the Service
+    - InwayAddresses(list of strings): A list of addresses of Inways that are offering the Service.
 
 ## Contract Manager
 
