@@ -415,9 +415,9 @@ paths:
 
 The Contract Manager functionality in FSC Core is:
 
-- Receiving contract proposals
+- Receiving contracts
 - Receiving contract signatures (accept, reject, revoke)
-- Validating contract proposals
+- Validating contracts
 - Validating contract signatures
 - Providing the X.509 certificates containing the public key of the keypair of which the private key was used by the Peer to create signatures
 - Providing contracts involving a specific Peer
@@ -430,9 +430,9 @@ It is **RECOMMENDED** to implement the Contract Manager functionality separate f
 
 The Contract Manager **MUST** accept only mTLS connections from other external Contract Managers. The X.509 certificate **MUST** be signed by the Thrust Anchor of the Group.
 
-#### Creating Contract Proposals
+#### Creating Contracts
 
-The Contract Manager is responsible for propagating the Contract Proposal to the Peers involved in the contract.
+The Contract Manager is responsible for propagating the Contract to the Peers involved in the contract.
 
 #### Signing Contracts
 
@@ -464,7 +464,7 @@ When a Peer revokes a Contract, the Contract Manager **MUST** propagate the revo
 
 #### Signature verification
 
-A signature **SHOULD** only be accepted if the Peer is present in the Contract Proposal as:
+A signature **SHOULD** only be accepted if the Peer is present in the Contract content as:
 
 - `GrantConnection.Client.Peer`
 - `GrantConnection.Service.Peer`
@@ -475,7 +475,7 @@ The subject serial number of the Peer offering the signature **MUST** match the 
 
 #### Contract verification
 
-When receiving a Contract the Peer **MUST** validate that the hash of the contract proposal matches the contract proposal hash in each Peer signature.
+When receiving a contract the Peer **MUST** validate that the hash of the contract matches the hashes in the Peer signatures.
 
 #### Providing X.509 certificates
 
@@ -488,8 +488,8 @@ The Contract Manager **MUST** be able to provide contracts the Contract Manager 
 ### Interfaces {#contract_manager_interface}
 
 The Contract Manager functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ContractManagerService`. This service **MUST** offer four Remote Procedure Calls (rpc):
-- `SubmitProposal`, used to offer a contract proposal to be signed by the receiver
-- `SignContract`, used to sign a contract
+- `SubmitContract`, used to offer a contract to be signed by the receiver
+- `AcceptContract`, used to accept a contract
 - `RejectContract`, used to reject a contract
 - `RevokeContract`, used to revoke a contract
 - `ListContracts`, lists contracts of a specific grant type
@@ -504,28 +504,28 @@ The interface Contract is used in rpc's of the gRPC service `ContractManagerServ
 The signatures field of the Contract message **MUST** contain a map of Peer subject serial numbers and signatures
 
 ```
-message Hash {
-    string hash = 1;
-    HashAlgorithm algorithm = 2;
-}
-
 enum HashAlgorithm {
     HASH_ALGORITHM_UNSPECIFIED = 0;
     HASH_ALGORITHM_SHA3_512 = 1;
 }
 
 message Contract {
-    Proposal proposal = 1;
-    map<string,string> signatures_approved = 2;
-    map<string, string> signatures_rejected = 3;
-    map<string, string> signatures_revoked = 4;
+    ContractContent content = 1;
+    Signatures signatures = 2;
 }
 
-message Proposal {
-   Hash hash = 1;
-   string group_id = 2;
-   Period period = 3;
-   repeated Grant grants = 4; 
+message ContractContent {
+  string id = 1;
+  string group_id = 2;
+  Period period = 3;
+  repeated Grant grants = 4;
+  string hash_algorithm = 5;
+}
+
+message Signatures {
+    map<string, string> accept = 1;
+    map<string, string> reject = 2;
+    map<string, string> revoke = 3;
 }
 
 enum GrantType {
@@ -594,32 +594,35 @@ message Period {
 } 
 ```
 
-#### rpc SubmitProposal
+#### rpc SubmitContract
 
-The Remote Procedure Call `SubmitProposal` **MUST** be implemented with the following interface and messages:
+The Remote Procedure Call `SubmitContract` **MUST** be implemented with the following interface and messages:
 
 ```
-rpc SubmitProposal(SubmitProposalRequest) returns (SubmitProposalResponse);
+rpc SubmitContract(SubmitContractRequest) returns (SubmitContractResponse);
 
-message SubmitProposalRequest {
-  Contract contract = 1;
+message SubmitContractRequest {
+  ContractContent contract_content = 1;
+  string signature = 2;
+  bytes certificate_chain = 3;
 }
 
-message SubmitProposalResponse {}
+message SubmitContractResponse {}
 ```
 
-#### rpc SignContract
+#### rpc AcceptContract
 
-The Remote Procedure Call `SignContract` **MUST** be implemented with the following interface and messages:
+The Remote Procedure Call `AcceptContract` **MUST** be implemented with the following interface and messages:
 
 ```
-rpc SignContract(SignContractRequest) returns (SignContractResponse);
+rpc AcceptContract(AcceptContractRequest) returns (AcceptContractResponse);
 
-message SignContractRequest {
-    Contract contract = 1;
+message AcceptContractRequest {
+    ContractContent contract_content = 1;
+    string signature = 2;
+    bytes certificate_chain = 3;
 }
-
-message SignContractResponse{}
+message AcceptContractResponse{}
 ```
 
 #### rpc RejectContract
@@ -630,8 +633,11 @@ The Remote Procedure Call `RejectContract` **MUST** be implemented with the foll
 rpc RejectContract(RejectContractRequest) returns (RejectContractResponse);
 
 message RejectContractRequest {
-    Contract contract = 1;
+    ContractContent contract_content = 1;
+    string signature = 2;
+    bytes certificate_chain = 3;
 }
+
 
 message RejectContractResponse{}
 ```
@@ -643,8 +649,10 @@ The Remote Procedure Call `RevokeContract` **MUST** be implemented with the foll
 ```
 rpc RevokeContract(RevokeContractRequest) returns (RevokeContractResponse);
 
-message RevokeContract {
-    Contract contract = 1;
+message RevokeContractRequest {
+    ContractContent contract_content = 1;
+    string signature = 2;
+    bytes certificate_chain = 3;
 }
 
 message RevokeContractResponse{}
@@ -680,7 +688,7 @@ message ListCertificatesRequest{
 }
 
 message ListCertificatesResponse {
-    map<string,string> certificates = 1;
+    map<string, bytes> certificates = 1;
 }
 ```
 
@@ -692,38 +700,39 @@ The JWS **MUST** specify the X.509 certificate containing the public key used to
 
 The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1](https://www.rfc-editor.org/rfc/rfc7515.html#section-7.1)
 
-The JWS Payload as defined in [@!RFC7515, section 2](https://www.rfc-editor.org/rfc/rfc7515.html#section-2), **MUST** contain a hash of the `Proposal` gRPC message, the algorithm used to generate the hash and the type signature.
+The JWS Payload as defined in [@!RFC7515, section 2](https://www.rfc-editor.org/rfc/rfc7515.html#section-2), **MUST** contain a hash of the `Contract.Content` as described in the section [Content Hash](#content_hash), the algorithm used to generate the hash and the type signature.
 
 The JWS **MUST** be created using one of the digital signature algorithms described in [@!RFC7518, section 3,1](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1)
 
 JWS Payload example:
 ```JSON
 {
-  "proposalHash": "--------",
+  "contentHash": "--------",
   "type": "accept"
 }
 ```
 
-#### The proposal hash
+#### The content hash {content_hash}
 
-A Peer should ensure that a contract signature is intended for the contract proposal.
-Validation is done by comparing the hash of the received proposal with the hash in the signature.
+A Peer should ensure that a contract signature is intended for the contract.
+Validation is done by comparing the hash of the received contract with the hash in the signature.
 
-The `proposalHash` of the signature payload contains the signature hash. The algorithm to create a `proposalHash` is described below. The resulting hash can be used to verify if two proposals are equal.
+The `contentHash` of the signature payload contains the signature hash. The algorithm to create a `contentHash` is described below. The resulting hash can be used to verify if two Contracts are equal.
 
-1. Create a byte array called `proposalBytes`.
-2. Convert `Proposal.Hash.Algorithm` to bytes and append the bytes to `proposalBytes`.
-3. Convert `Proposal.GroupId` to bytes and append the bytes to `proposalBytes`.
-4. Convert the values of the fields `Proposal.Period.start` and `Proposal.Period.End` to an int64 representing the seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. And append the bytes of the int64 values to `proposalBytes`.
-5. Create an array of bytes arrays called `grantByteArrays` 
-6. For each Grant in `Proposal.Grants`
+1. Create a byte array called `contentBytes`.
+2. Convert `Contract.Content.HashAlgorithm` to bytes and append the bytes to `contentBytes`.
+3. Convert `Contract.Content.Id` to bytes and append the bytes to `contentBytes`.
+4. Convert `Contract.Content.GroupId` to bytes and append the bytes to `contentBytes`.
+5. Convert the values of the fields `Contract.Content.Period.start` and `Contract.Content.Period.End` to an int64 representing the seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. And append the bytes of the int64 values to `contentBytes`.
+6. Create an array of bytes arrays called `grantByteArrays` 
+7. For each Grant in `Contract.Content.Grants`
    1. Create a byte array named `grantBytes`
    2. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
    3. Append `grantBytes` to `grantByteArrays`
-7. Sort the byte arrays in `grantByteArrays` in ascending order
-8. Append the bytes of `grantByteArrays` to `proposalBytes`.
-9. Hash the `proposalBytes` using the hash algorithm described in `Proposal.Hash.Algorithm`
-10. Encode the bytes of the hash as base64.
+8. Sort the byte arrays in `grantByteArrays` in ascending order
+9. Append the bytes of `grantByteArrays` to `contentBytes`.
+10. Hash the `contentBytes` using the hash algorithm described in `Contract.Content.Algorithm`
+11. Encode the bytes of the hash as base64.
 
 ##### Data types {#data_types}
 
@@ -734,7 +743,7 @@ The `proposalHash` of the signature payload contains the signature hash. The alg
 
 ##### Payload fields
 
-- `proposalHash`, hash of the contract proposal
+- `contractContentHash`, hash of the content of the contract
 - `type`, type of signature. Types are defined in the `Signature type` section of this RFC
 
 ###### Signature type
@@ -754,8 +763,8 @@ enum ErrorReason {
     // Peer is not part of the contract
     ERROR_REASON_PEER_NOT_PART_OF_CONTRACT = 1;
 
-    // Signature proposal does not match the hash of the proposal
-    ERROR_REASON_SIGNATURE_PROPOSAL_HASH_MISMATCH = 2;
+    // Signature contentHash does not match the hash of the contract content
+    ERROR_REASON_SIGNATURE_CONTRACT_CONTENT_HASH_MISMATCH = 2;
 
     // Peer certificate could not be verified
     ERROR_REASON_PEER_CERTIFICATE_VERIFICATION_FAILED = 3;
