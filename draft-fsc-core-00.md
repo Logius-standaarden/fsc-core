@@ -155,6 +155,68 @@ Service
 Trust Anchor
 : The Trust Anchor is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
+## Contracts
+
+Document containing the Grants between Peers, defining which interactions between Peers are possible.
+
+A Contract becomes valid once all Peers mentioned in the Contract have agreed
+upon it's content by cryptographically signing it.
+
+**Fields**
+
+- ID: a UUID that functions as the unique identifier for the Contract
+- Group ID: the name of the Group for which this Contract is intended
+- Hash algorithm: specifies the Hash algorithm that needs to be used to generate the hash of the Contract. This hash is used to validate if two contracts are equal and verify that a signature is intended for the Contract
+  Currently only *SHA3-512* is supported. The hash generation is described in the section [content hash](#content_hash).
+- Validity: contains two dates describing the interval in which the Contract can be used.
+- Signatures: signatures of the Peers listed in the contract. Contracts have three types of signatures: accepted, rejected and revoked.  
+  A signature is a JSON Web Token. We have a dedicated section on [signatures](#signatures).
+- Grants: describes what is granted by a contract.  
+  See the [Grants section](#grants) for more details.
+
+## Grants {grants}
+
+Grants are encapsulated in Contracts and agreed upon by the involved Peers.
+Typically, those match the connections mentioned in a legal agreement like a  
+Data Processing Agreement (DPA). They describe what is granted by a Contract.
+
+### Connection Grant
+
+To connect to a service, the Peer needs a Connection Grant.
+That is a Grant that specifies which public key of a Peer is allowed to connect to a Service of a Peer.
+
+Once a right to connect is granted, an Outway using the public key defined in the grant can connect to the Inway of the Peer that is offering the Service to the Group.
+
+**Fields**
+
+// TODO: Outway the right word?
+
+- Outway: information about the Outway of the Peer that is allowed to connect
+    - Peer: the Peer that is allowed to connect
+        - SubjectSerialNumber: the subject serial number of the Peer
+    - PublicKeyFingerprints: a list of public key fingerprints that are allowed to connect
+- Service: the service to which a connection is allowed
+    - Peer: the Peer that is offering the service
+        - SubjectSerialNumber: the subject serial number of the Peer
+    - Name: the name of the Service
+
+### Publication Grant
+
+To publish a Service in the Group, the Peer need a Publication Grant.
+This is a Grant describing the details of a Service that a Peer is publishing in the Directory of the Group.
+
+**Fields**
+
+- Directory: the Directory to which the Service is published
+    - Peer: the Peer hosting the Directory
+        - SubjectSerialNumber: the subject serial number of the Peer
+    - GroupID: the Group ID is the URI of the Directory
+- ServicePublication: describes the details of the Service
+    - Peer: the Peer offering the Service
+        - SubjectSerialNumber: the subject serial number of the Peer
+    - Name: name of the Service
+    - InwayAddresses: A list of addresses of Inways that are offering the Service.
+  
 # Architecture
 
 This chapter describes the basic architecture of FSC systems.
@@ -188,7 +250,7 @@ Connections between Inways and Outways and connections with the Directory use Mu
 
 ## Contract Management
 
-Connections between Peers are based on Grants. A Grant is the right to make a connection from an Outway to a service offered in the Group. Grants are encapsulated in Contracts and agreed upon by the involved Peers. To create a new contract, the Contract Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Contract Management functionality, see [Administrating a Peer](#administrating)). For each desired connection, a Grant is formulated that contains identifying information about both the Outway from the requesting Peer and the service of the Providing Peer. One Contract may contain multiple Grants, typically those match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). A Contract becomes valid once all Peers mentioned in the Contract have agreed upon its content by cryptographically signing it. Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
+To create a new contract, the Contract Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Contract Management functionality, see [Administrating a Peer](#administrating)). For each desired connection, a Grant is formulated that contains identifying information about both the Outway from the requesting Peer and the service of the Providing Peer. One Contract may contain multiple Grants, typically those match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). A Contract becomes valid once all Peers mentioned in the Contract have agreed upon its content by cryptographically signing it. Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
 
 Contracts are immutable. To change a contract, a new Contract is made that replaces the old one. Contracts can be invalidated which revokes the Grants in the Contract.
 
@@ -204,74 +266,11 @@ Inways and Outways of a Peer are in part configured by the Contract Manager. The
 ![Peer Configuration](peer-configuration.ascii-art "Peer Configuration")
 !---
 
-### Contracts 
-
-Document containing the Grants between Peers, defining which interactions between Peers are possible.
-
-A Contract becomes valid once all Peers mentioned in the Contract have agreed
-upon it's content by cryptographically signing it. 
-
-**Fields**
-
-- ID: a UUID that functions as the unique identifier for the Contract
-- Group ID: the name of the Group for which this Contract is intended
-- Hash algorithm: specifies the Hash algorithm that needs to be used to generate the hash of the Contract. This hash is used to validate if two contracts are equal and verify that a signature is intended for the Contract
-  Currently only *SHA3-512* is supported. The hash generation is described in the section [content hash](#content_hash).
-- Validity: contains two dates describing the interval in which the Contract can be used.
-- Signatures: signatures of the Peers listed in the contract. Contracts have three types of signatures: accepted, rejected and revoked.  
-  A signature is a JSON Web Token. We have a dedicated section on [signatures](#signatures).
-- Grants: describes what is granted by a contract.  
-  See the [Grants section](#grants) for more details.
-
-### Grants {grants}
-
-Grants are encapsulated in Contracts and agreed upon by the involved Peers.
-Typically, those match the connections mentioned in a legal agreement like a  
-Data Processing Agreement (DPA). They describe what is granted by a Contract.
-
-#### Connection Grant
-
-To connect to a service, the Peer needs a Connection Grant. 
-That is a Grant that specifies which public key of a Peer is allowed to connect to a Service of a Peer.
-
-Once a right to connect is granted, an Outway using the public key defined in the grant can connect to the Inway of the Peer that is offering the Service to the Group.
-
-**Fields**
-// TODO: Outway the right word?
-- Outway: information about the Outway of the Peer that is allowed to connect
-   - Peer: the Peer that is allowed to connect
-        - SubjectSerialNumber: the subject serial number of the Peer
-   - PublicKeyFingerprints: a list of public key fingerprints that are allowed to connect
-- Service: the service to which a connection is allowed
-  - Peer: the Peer that is offering the service
-      - SubjectSerialNumber: the subject serial number of the Peer
-  - Name: the name of the Service
-
-#### Publication Grant
-
-To publish a Service in the Group, the Peer need a Publication Grant.
-This is a Grant describing the details of a Service that a Peer is publishing in the Directory of the Group.
-
-**Fields**
-
-- Directory: the Directory to which the Service is published
-  - Peer: the Peer hosting the Directory
-    - SubjectSerialNumber: the subject serial number of the Peer
-  - GroupID: the Group ID is the URI of the Directory 
-- ServicePublication: describes the details of the Service
-  - Peer: the Peer offering the Service
-    - SubjectSerialNumber: the subject serial number of the Peer
-  - Name: name of the Service
-  - InwayAddresses: A list of addresses of Inways that are offering the Service.
-  
 ## Connecting to a service
 
 ## Providing a service
 
 ## Administrating a Peer {#administrating}
-
-XX
-
 
 # Specifications
 
@@ -290,6 +289,15 @@ FSC places specific requirements on the subject fields of the certificate. [@!RF
 - SerialNumber: A unique identifier which serves as the Peers identity in the FSC Group. This value is used in combination with a Service name to route request to the correct Service.
 - CommonName: This should correspond to the Fully Qualified Domain Name (FQDN) of an Inway or Outway.  For an Outway this FQDN does not have to be resolvable.
 - Subject Alternative Name[@!RFC5280, section 4.2.1.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.2.1.6): This should contain to the Fully Qualified Domain Names (FQDN) of an Inway or Outway. For an Outway this FQDN does not have to be resolvable.
+
+### gRPC error handling
+
+According to gRPC specification a gRPC service will, in case of an error, return a response structured according to the `Status` interface. In case of an error that should generate a specific FSC error code the `status` message is enriched with an `ErrorInfo` message containing the FSC specific error code.
+The FSC specific error code **MUST** be set as the value of the `reason` field of the `ErrorInfo` interface.
+The `ErrorInfo` interface **MUST** be used as the value of the `details` field of the `Status` interface.
+
+The `Status` interface:  <https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto>
+The `ErrorInfo` interface: <https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto>
 
 ## Outway
 
@@ -328,7 +336,6 @@ The HTTP endpoint `/{serial_number}/{service_name}` **MUST** be implemented.
 If the service called generates an error, the Outway **MUST** return the error response of the API to the client without altering the response.
 
 If an error occurs within the scope of the FSC network, the Outway **MUST** return the HTTP status code 540 with an error response defined in the section below.
-
 
 ```
   responses:
@@ -752,69 +759,9 @@ message ListCertificatesResponse {
 }
 ```
 
-#### Signatures {signatures}
+### Error codes
 
-A signature **MUST** follow the JSON Web Signature(JWS) format specified in [@!RFC7515](https://www.rfc-editor.org/rfc/rfc7515.html)
-
-The JWS **MUST** specify the X.509 certificate containing the public key used to create the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.8) field of the `JOSE Header`[@!RFC7515, section 4](https://www.rfc-editor.org/rfc/rfc7515.html#section-4).
-
-The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1](https://www.rfc-editor.org/rfc/rfc7515.html#section-7.1)
-
-The JWS Payload as defined in [@!RFC7515, section 2](https://www.rfc-editor.org/rfc/rfc7515.html#section-2), **MUST** contain a hash of the `Contract.Content` as described in the section [Content Hash](#content_hash), the algorithm used to generate the hash and the type signature.
-
-The JWS **MUST** be created using one of the digital signature algorithms described in [@!RFC7518, section 3,1](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1)
-
-JWS Payload example:
-```JSON
-{
-  "contentHash": "--------",
-  "type": "accept"
-}
-```
-
-##### Payload fields
-
-- `contractContentHash`, hash of the content of the contract
-- `type`, type of signature. Types are defined in the `Signature type` section of this RFC
-
-###### Signature type
-
-- `accept`, peer has accepted the contract
-- `reject`, peer has rejected the contract
-- `revoke`, peer has revoked the contract
-
-#### The content hash {content_hash}
-
-A Peer should ensure that a contract signature is intended for the contract.
-Validation is done by comparing the hash of the received contract with the hash in the signature.
-
-The `contentHash` of the signature payload contains the signature hash. The algorithm to create a `contentHash` is described below. The resulting hash can be used to verify if two Contracts are equal.
-
-1. Create a byte array called `contentBytes`.
-2. Convert `Contract.Content.HashAlgorithm` to bytes and append the bytes to `contentBytes`.
-3. Convert `Contract.Content.Id` to bytes and append the bytes to `contentBytes`.
-4. Convert `Contract.Content.GroupId` to bytes and append the bytes to `contentBytes`.
-5. Convert the values of the fields `Contract.Content.Period.start` and `Contract.Content.Period.End` to an int64 representing the seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. And append the bytes of the int64 values to `contentBytes`.
-6. Create an array of bytes arrays called `grantByteArrays` 
-7. For each Grant in `Contract.Content.Grants`
-   1. Create a byte array named `grantBytes`
-   2. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
-   3. Append `grantBytes` to `grantByteArrays`
-8. Sort the byte arrays in `grantByteArrays` in ascending order
-9. Append the bytes of `grantByteArrays` to `contentBytes`.
-10. Hash the `contentBytes` using the hash algorithm described in `Contract.Content.Algorithm`
-11. Encode the bytes of the hash as base64.
-
-##### Data types {#data_types}
-
-- `int32`: use `Little-endian` as endianness when converting to a byte array
-- `int64`: use `Little-endian` as endianness when converting to a byte array
-- `string`: use `utf-8` encoding when converting to a byte array
-- `GrantType`: should be represented as an int32
-
-#### Error handling
-
-The gRPC service **MUST** implement error handling according to the interface described in
+The gRPC service **MUST** implement the following error codes:
 
 ```
 enum ErrorReason {
@@ -839,6 +786,66 @@ enum ErrorReason {
     ERROR_REASON_SIGNATURE_VERIFICATION_FAILED = 6;
 }
 ```
+
+### Signatures {signatures}
+
+A signature **MUST** follow the JSON Web Signature(JWS) format specified in [@!RFC7515](https://www.rfc-editor.org/rfc/rfc7515.html)
+
+The JWS **MUST** specify the X.509 certificate containing the public key used to create the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.8) field of the `JOSE Header`[@!RFC7515, section 4](https://www.rfc-editor.org/rfc/rfc7515.html#section-4).
+
+The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1](https://www.rfc-editor.org/rfc/rfc7515.html#section-7.1)
+
+The JWS Payload as defined in [@!RFC7515, section 2](https://www.rfc-editor.org/rfc/rfc7515.html#section-2), **MUST** contain a hash of the `Contract.Content` as described in the section [Content Hash](#content_hash), the algorithm used to generate the hash and the type signature.
+
+The JWS **MUST** be created using one of the digital signature algorithms described in [@!RFC7518, section 3,1](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1)
+
+JWS Payload example:
+```JSON
+{
+  "contentHash": "--------",
+  "type": "accept"
+}
+```
+
+#### Payload fields
+
+- `contractContentHash`, hash of the content of the contract
+- `type`, type of signature. Types are defined in the `Signature type` section of this RFC
+
+#### Signature types
+
+- `accept`, peer has accepted the contract
+- `reject`, peer has rejected the contract
+- `revoke`, peer has revoked the contract
+
+### The content hash {content_hash}
+
+A Peer should ensure that a contract signature is intended for the contract.
+Validation is done by comparing the hash of the received contract with the hash in the signature.
+
+The `contentHash` of the signature payload contains the signature hash. The algorithm to create a `contentHash` is described below. The resulting hash can be used to verify if two Contracts are equal.
+
+1. Create a byte array called `contentBytes`.
+2. Convert `Contract.Content.HashAlgorithm` to bytes and append the bytes to `contentBytes`.
+3. Convert `Contract.Content.Id` to bytes and append the bytes to `contentBytes`.
+4. Convert `Contract.Content.GroupId` to bytes and append the bytes to `contentBytes`.
+5. Convert the values of the fields `Contract.Content.Period.start` and `Contract.Content.Period.End` to an int64 representing the seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. And append the bytes of the int64 values to `contentBytes`.
+6. Create an array of bytes arrays called `grantByteArrays` 
+7. For each Grant in `Contract.Content.Grants`
+   1. Create a byte array named `grantBytes`
+   2. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
+   3. Append `grantBytes` to `grantByteArrays`
+8. Sort the byte arrays in `grantByteArrays` in ascending order
+9. Append the bytes of `grantByteArrays` to `contentBytes`.
+10. Hash the `contentBytes` using the hash algorithm described in `Contract.Content.Algorithm`
+11. Encode the bytes of the hash as base64.
+
+#### Data types {#data_types}
+
+- `int32`: use `Little-endian` as endianness when converting to a byte array
+- `int64`: use `Little-endian` as endianness when converting to a byte array
+- `string`: use `utf-8` encoding when converting to a byte array
+- `GrantType`: should be represented as an int32
 
 ## Directory
 
@@ -998,14 +1005,6 @@ message Extension {
     string version = 2;
 }
 ```
-# gRPC error handling
-
-According to gRPC specification a gRPC service will, in case of an error, return a response structured according to the `Status` interface. In case of an error that should generate a specific FSC error code the `status` message is enriched with an `ErrorInfo` message containing the FSC specific error code.
-The FSC specific error code **MUST** be set as the value of the `reason` field of the `ErrorInfo` interface.
-The `ErrorInfo` interface **MUST** be used as the value of the `details` field of the `Status` interface.
-
-The `Status` interface:  <https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto>
-The `ErrorInfo` interface: <https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto>
 
 # References
 
