@@ -162,18 +162,6 @@ Document containing the Grants between Peers, defining which interactions betwee
 A Contract becomes valid once all Peers mentioned in the Contract have agreed
 upon it's content by cryptographically signing it.
 
-**Fields**
-
-- ID: a UUID that functions as the unique identifier for the Contract
-- Group ID: the name of the Group for which this Contract is intended
-- Hash algorithm: specifies the Hash algorithm that needs to be used to generate the hash of the Contract. This hash is used to validate if two contracts are equal and verify that a signature is intended for the Contract
-  Currently only *SHA3-512* is supported. The hash generation is described in the section [content hash](#content_hash).
-- Validity: contains two dates describing the interval in which the Contract can be used.
-- Signatures: signatures of the Peers listed in the contract. Contracts have three types of signatures: accepted, rejected and revoked.  
-  A signature is a JSON Web Token. We have a dedicated section on [signatures](#signatures).
-- Grants: describes what is granted by a contract.  
-  See the [Grants section](#grants) for more details.
-
 ## Grants {#grants}
 
 Grants are encapsulated in Contracts and agreed upon by the involved Peers.
@@ -187,36 +175,11 @@ That is a Grant that specifies which public key of a Peer is allowed to connect 
 
 Once a right to connect is granted, an Outway using the public key defined in the grant can connect to the Inway of the Peer that is offering the Service to the Group.
 
-**Fields**
-
-// TODO: Outway the right word?
-
-- Outway: information about the Outway of the Peer that is allowed to connect
-    - Peer: the Peer that is allowed to connect
-        - SubjectSerialNumber: the subject serial number of the Peer
-    - PublicKeyFingerprints: a list of public key fingerprints that are allowed to connect
-- Service: the service to which a connection is allowed
-    - Peer: the Peer that is offering the service
-        - SubjectSerialNumber: the subject serial number of the Peer
-    - Name: the name of the Service
-
 ### Publication Grant
 
 To publish a Service in the Group, the Peer need a Publication Grant.
 This is a Grant describing the details of a Service that a Peer is publishing in the Directory of the Group.
 
-**Fields**
-
-- Directory: the Directory to which the Service is published
-    - Peer: the Peer hosting the Directory
-        - SubjectSerialNumber: the subject serial number of the Peer
-    - GroupID: the Group ID is the URI of the Directory
-- ServicePublication: describes the details of the Service
-    - Peer: the Peer offering the Service
-        - SubjectSerialNumber: the subject serial number of the Peer
-    - Name: name of the Service
-    - InwayAddresses: A list of addresses of Inways that are offering the Service.
-  
 # Architecture
 
 This chapter describes the basic architecture of FSC systems.
@@ -299,183 +262,209 @@ The `ErrorInfo` interface **MUST** be used as the value of the `details` field o
 The `Status` interface:  <https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto>
 The `ErrorInfo` interface: <https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto>
 
-## Outway
+## Directory
 
 ### Behavior
 
 #### Authentication
 
-The Outway **MUST** use mTLS when connecting to the Directory or Inways. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) of the network.
+The clients **MUST** use mTLS when connecting to the Directory. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) that acts as the Trust Anchor of the Group.
 
-#### Routing
+#### Service registration
 
-The Outway **MUST** be able to route HTTP requests to the correct service on the FSC network. A service on the FSC network can be identified by the unique combination of a serial-number and a service-name. An Outway receives the serial-number and service-name through the path component as described in  [@!RFC3986, section 3.3](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) of an HTTP request.
-The first segment of the path **MUST** contain the serial-number, the second segment of the path **MUST** contain the service-name.
+Service registration is accomplished by offering a Contract proposal to the Directory which contains one or more `PublicationGrants` with each `PublicationGrant` containing a single Service. Once the Directory and the Peer offering the Service have both signed the Contract, the Service is published in the Directory.
 
-The Outway **MUST** retrieve the available services from the Directory.
+The Directory **MUST** be able to sign Contracts with Grants of the type `PublicationGrant`.
 
-The Outway **MUST** delete the serial-number from the path of the HTTP Request before forwarding the request to the corresponding Inway.
-e.g `/1234567890/service` -> `/service`
+The Directory **MUST** validate that a `PublicationGrant` is valid by applying the following rules:
 
-The Outway **MUST NOT** alter the path of the HTTP Request except for stripping the serial-number.
+- The subject serial number of the X.509 certificate used by the Directory Peer must match the value of the field `PublicationGrant.Directory.SubjectSerialNumber`
+- A Service name is provided in the field  `PublicationGrant.ServicePublication.Name`
+- At least one Inway address is provided in the field   `PublicationGrant.ServicePublication.InwayAddresses`
+- A signature is present with the subject serial number of the Peer defined the field `PublicationGrant.Directory.SubjectSerialNumber`
+- A signature is present with the subject serial number of the Peer defined the field `PublicationGrant.ServicePublication.Peer.SubjectSerialNumber`
 
-The Outway **SHALL** use the last available address of a service in case the Directory is unreachable.
+#### Service listing
 
-Clients **MAY** use TLS when communicating with the Outway.
+The Directory **MUST** list a service when the Contract containing the `PublicationGrants` for the Service has been signed by the Peers involved with the Contract.
 
-### Interfaces
+The Directory **MUST** list the Services that are available in the Group. This Service list us used by Outways in the Group to route HTTP Requests to the correct Service.
 
-#### HTTP endpoint
+The Directory **MUST** provide the URI of the Inway that is offering a Service.
 
-The Outway **MUST** implement a single HTTP endpoint which proxies the received request to the corresponding service on the FSC Network.
+#### Peer listing
 
-The HTTP endpoint `/{serial_number}/{service_name}` **MUST** be implemented.
+The Directory **MUST** offer a list of the Peers in the Group. The listing should also include the Contract Managers of each Peer. This information is used to negotiate Contracts between Peers
 
-##### Error response
+#### Health checking
 
-If the service called generates an error, the Outway **MUST** return the error response of the API to the client without altering the response.
+The Directory **MUST** validate if a mTLS connection can be setup to the URI of an Inway. If the Directory is able to set up a connection, the Inway **MUST** be given the state `UP`, if not the state of the Inway **MUST** be `DOWN`. This state can be **SHOULD** be used by Outways to determine if a call can be routed to a Service.
 
-If an error occurs within the scope of the FSC network, the Outway **MUST** return the HTTP status code 540 with an error response defined in the section below.
+The Directory **MUST** validate if a mTLS connection can be setup to the URI of a Contact Manager. If the Directory is able to set up a connection, the Contract Manager **MUST** be given the state `UP`, if not the state of the Contact Manager **MUST** be `DOWN`.
 
-```
-  responses:
-    '540':
-      description: A FCS network error has occurred
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                description: A message describing the error
-              source:
-                type: string
-                description: The component causing the error. In this case 'outway'
-              location:
-                type: string
-                description: The location of the error. In this case 'C1' which means it happened between the client and the Outway
-              code:
-                type: string
-                description: A unique code describing the error.
-```
+The Directory **MUST** remove Services when the state of all the Inways offering the Service has been `DOWN` for a certain period. The **RECOMMENDED** period is 48 hours.
 
-###### Error codes
-
-The code field of the error response **MUST** contain one of the following codes:
-
-- `INVALID_URL`: The URL is invalid. e.g. the path of the HTTP request contains a serial-number but the service-name is missing.
-- `UNSUPPORTED_METHOD`: Outway called with an unsupported method, the CONNECT method is not supported.
-- `SERVER_ERROR`: General error code
-
-## Inway
-
-### Behavior
-
-#### Authentication
-
-The Inway **MUST** use mTLS when connecting to the Directory. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) that acts as Trust Anchor of the network.
-
-The Inway **MUST** only accept connections using mTLS. The X.509 certificates **MUST** be signed by the chosen Certificate Authority (CA) that acts as Trust Anchor of the network.
-
-#### Authorization
-
-The Inway **MUST** validate that an active access grant exists for the public key of the mTLS connection making the request. If no access grant exists the Inway **MUST** deny the request.
-
-#### Health check
-
-The Inway **MUST** be able to receive health checks from the Directory. The Directory will make a periodic health checks to known Inways by sending an HTTP request for each service the Inway is offering to the FSC network.
-
-Upon receiving the health check the Inway **MUST** validate that it is offering the service to the FSC network.
-
-#### Registration
-
-The Inway **MUST** register itself and the services it is offering to the Directory.
-
-The Inway **MUST** register the services it is offering to the Directory with a regular time interval. It is **RECOMMENDED** to do this every 30 seconds, to have a balance between the risk of flooding the Director and timely insight in available services in the Group.
-
-#### Routing
-
-The Inway **MUST** be able to route HTTP requests to the correct service. A service on the FSC network can be identified by the unique combination of a serial-number and a service-name. An Inway receives the service-name through the path component [@RFC3986, section 3.3](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) of an HTTP request.
-The first segment of the path **MUST** contain the service-name.
-
-The Inway **MUST** delete the service-name from the path of the HTTP Request before forwarding the request to the service.
-e.g `/service-name/get/data` -> `/get/data`
+The Directory **MUST** remove Contract Managers when the state of the Contract Manager has been `DOWN` for a certain period. The **RECOMMENDED** period is 48 hours.
 
 ### Interfaces
 
-#### Proxy Endpoint
+#### Directory Service
 
-The Inway **MUST** implement an HTTP endpoint which proxies received requests to the correct Service.
+The Directory functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ContractManagerService`. This service **MUST** implement the interface of the [Contract Manager](#contract_manager_interface).
 
+In addition to the Contract Manager interface the Directory functionality **MUST** implement an gRPC service with the name `Directory`. This service **MUST** offer four Remote Procedure Calls (rpc):
+- `RegisterContractManager`, registers a Contract Manager
+- `ListPeers`, lists the Peers of a Group
+- `ListServicePublications`, lists the services known by the Director
+- `GetGroupInfo`, returns the version of the FSC standard used by the Group
+
+Rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
+
+##### rpc RegisterContractManager
+
+The Remote Procedure Call `RegisterContractManager` **MUST** be implemented with the following interface and messages:
 ```
-openapi: 3.0.0
-paths:
-  /{service_name}: 
-    description: receives requests of all HTTP Methods and proxies the received requests to the service specified in the path of the HTTP request.
-    responses:
-      default:
-        description: must return the HTTP Response of the service.
-      540:
-        description: An FSC network error has occured 
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  description: A message describing the error
-                source:
-                  type: string
-                  description: The component causing the error. In this case 'inway'
-                location:
-                  type: string
-                  description: The location of the error.
-                code:
-                  type: string
-                  description: A unique code describing the error.
+rpc RegisterContractManager(RegisterContractManagerRequest) returns (RegisterContractManagerResponse);
+
+message RegisterContractManagerRequest {
+    ContractManager contract_manager = 1;
+}
+
+message RegisterContractManagerResponse {}
+
+message ContractManager {
+    string address = 1;
+}
 ```
 
-##### Error response
+##### rpc ListServices
 
-If the service called generates an error, the Inway **MUST** return the error response of the API to the client without altering the response.
-
-If an error occurs within the scope of the FSC network, the Inway **MUST** return the HTTP status code 540 with an error response defined in the section Proxy Endpoint.
-
-The code field of the error response **MUST** contain one of the following codes:
-
-- `ACCESS_DENIED`: No access grant exists for the public key used by the client making the request.
-- `EMPTY_PATH`: the path of the HTTP request does not contain a service-name
-- `INVALID_CERTIFICATE`: The X.509 certificates does not meet the requirements of FSC.
-- `MISSING_PEER_CERTIFICATE`: the Inway is unable to extract the X.509 certificate from the connection.
-- `SERVER_ERROR`: General error code
-- `SERVICE_DOES_NOT_EXIST`: the service is unknown to the Inway
-- `SERVICE_UNREACHABLE`: the Inway knows the service but is unable to proxy the request to the service
-
-#### Health check
-
-The Inway **MUST** implement a health endpoint. This endpoint is called by the Directory to determine if a service is being offered by the Inway.
-
+The Remote Procedure Call `ListServices` **MUST** be implemented with the following interface and messages:
 ```
-openapi: 3.0.0
-paths:
-  /.fsc/health/{service_name}: 
-    get: 
-      summary: Returns if the service is available and reachable,
-        responses: 
-          200:          
-            description: healh status object,
-            content: 
-              application/json: 
-                schema:
-                  type: object
-                  properties:
-                    healthy:
-                      type: bool
-                      description: true if the service is healthy 
-                      
+rpc ListServicePublications(ListServicePublicationsRequest) returns (ListServicePublicationsResponse);
+
+
+message ListServicesRequest {}
+
+message ListServicePublicationsResponse {
+  message ServicePublication {
+    Organization organization = 1;
+    string name = 2;
+    repeated Inway inways = 3;
+  }
+
+  repeated ServicePublication services = 1;
+}
+
+message Organization {
+  string serial_number = 1;
+  string name = 2;
+}
+
+message Inway {
+  enum State {
+    STATE_UNSPECIFIED = 0;
+    STATE_UP = 1;
+    STATE_DOWN = 2;
+  }
+  string address = 1;
+  State state = 2;
+}
 ```
+
+##### rpc ListPeers
+
+The Remote Procedure Call `ListPeers` **MUST** be implemented with the following interface and messages:
+```
+rpc ListPeers(ListPeersRequest) returns (ListPeersResponse);
+
+message ListPeersRequest {
+  repeated string peer_serial_numbers = 1;
+}
+
+message ListPeersResponse {
+  repeated Peer peers = 1;
+}
+
+message Peer {
+  string serial_number = 1;
+  repeated ContractManager contract_managers = 2;
+}
+
+message ContractManager {
+  enum State {
+    STATE_UNSPECIFIED = 0;
+    STATE_UP = 1;
+    STATE_DOWN = 2;
+  }
+  string address = 1;
+  State state = 2;
+}
+```
+
+##### rpc GetGroupInfo
+
+The Remote Procedure Call `GetGroupInfo` **MUST** be implemented with the following interface and messages:
+```
+rpc GetGroupInfo(GetGroupInfoRequest) returns (GetGroupInfoResponse);
+
+message GetGroupInfoRequest {}
+
+message GetGroupInfoResponse {
+  string fsc_version = 1;
+  repeated Extension extenstions = 2;
+}
+
+message Extension {
+    string name = 1;
+    string version = 2;
+}
+```
+
+## Contract
+
+**Fields**
+
+- ID: a UUID that functions as the unique identifier for the Contract
+- Group ID: the name of the Group for which this Contract is intended
+- Hash algorithm: specifies the Hash algorithm that needs to be used to generate the hash of the Contract. This hash is used to validate if two contracts are equal and verify that a signature is intended for the Contract
+  Currently only *SHA3-512* is supported. The hash generation is described in the section [content hash](#content_hash).
+- Validity: contains two dates describing the interval in which the Contract can be used.
+- Signatures: signatures of the Peers listed in the contract. Contracts have three types of signatures: accepted, rejected and revoked.  
+  A signature is a JSON Web Token. We have a dedicated section on [signatures](#signatures).
+- Grants: describes what is granted by a contract.  
+  See the [Grants section](#grants) for more details.
+
+### Grants
+
+**Connection Grant**
+
+**Fields**
+
+// TODO: Outway the right word?
+
+- Outway: information about the Outway of the Peer that is allowed to connect
+    - Peer: the Peer that is allowed to connect
+        - SubjectSerialNumber: the subject serial number of the Peer
+    - PublicKeyFingerprints: a list of public key fingerprints that are allowed to connect
+- Service: the service to which a connection is allowed
+    - Peer: the Peer that is offering the service
+        - SubjectSerialNumber: the subject serial number of the Peer
+    - Name: the name of the Service
+
+**Fields**
+
+**Publication Grant**
+
+- Directory: the Directory to which the Service is published
+    - Peer: the Peer hosting the Directory
+        - SubjectSerialNumber: the subject serial number of the Peer
+    - GroupID: the Group ID is the URI of the Directory
+- ServicePublication: describes the details of the Service
+    - Peer: the Peer offering the Service
+        - SubjectSerialNumber: the subject serial number of the Peer
+    - Name: name of the Service
+    - InwayAddresses: A list of addresses of Inways that are offering the Service.
 
 ## Contract Manager
 
@@ -506,7 +495,7 @@ The Contract Manager **MUST** validate the signature.
 
 The Contract Manager **MUST** generate an error response if a signature is invalid.
 
-When a Peer signs a Contract, the Contract Manager **MUST** propagate the signature to each of the Peers included in the contract.  
+When a Peer signs a Contract, the Contract Manager **MUST** propagate the signature to each of the Peers included in the contract.
 
 A Contract is deemed valid when each of the involved peers has digitally signed the contract.
 
@@ -537,7 +526,7 @@ A signature **SHOULD** only be accepted if the Peer is present in the Contract c
 - `GrantPublication.Directory.Peer`
 - `GrantPublication.Service.Peer`
 
-The subject serial number of the Peer offering the signature **MUST** match the subject serial number of the X.509 certificate containing the public key used to create the signature.   
+The subject serial number of the Peer offering the signature **MUST** match the subject serial number of the X.509 certificate containing the public key used to create the signature.
 
 #### Contract verification
 
@@ -549,7 +538,7 @@ The Contract Manager **MUST** be able to provide the X.509 certificates containi
 
 #### Providing contracts
 
-The Contract Manager **MUST** be able to provide contracts the Contract Manager has available for specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.   
+The Contract Manager **MUST** be able to provide contracts the Contract Manager has available for specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.
 
 ### Interfaces {#contract_manager_interface}
 
@@ -830,11 +819,11 @@ The `contentHash` of the signature payload contains the signature hash. The algo
 3. Convert `Contract.Content.Id` to bytes and append the bytes to `contentBytes`.
 4. Convert `Contract.Content.GroupId` to bytes and append the bytes to `contentBytes`.
 5. Convert the values of the fields `Contract.Content.Period.start` and `Contract.Content.Period.End` to an int64 representing the seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. And append the bytes of the int64 values to `contentBytes`.
-6. Create an array of bytes arrays called `grantByteArrays` 
+6. Create an array of bytes arrays called `grantByteArrays`
 7. For each Grant in `Contract.Content.Grants`
-   1. Create a byte array named `grantBytes`
-   2. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
-   3. Append `grantBytes` to `grantByteArrays`
+    1. Create a byte array named `grantBytes`
+    2. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
+    3. Append `grantBytes` to `grantByteArrays`
 8. Sort the byte arrays in `grantByteArrays` in ascending order
 9. Append the bytes of `grantByteArrays` to `contentBytes`.
 10. Hash the `contentBytes` using the hash algorithm described in `Contract.Content.Algorithm`
@@ -847,164 +836,184 @@ The `contentHash` of the signature payload contains the signature hash. The algo
 - `string`: use `utf-8` encoding when converting to a byte array
 - `GrantType`: should be represented as an int32
 
-## Directory
+## Outway
 
 ### Behavior
 
 #### Authentication
 
-The clients **MUST** use mTLS when connecting to the Directory. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) that acts as the Trust Anchor of the Group.
+The Outway **MUST** use mTLS when connecting to the Directory or Inways. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) of the network.
 
-#### Service registration
+#### Routing
 
-Service registration is accomplished by offering a Contract proposal to the Directory which contains one or more `PublicationGrants` with each `PublicationGrant` containing a single Service. Once the Directory and the Peer offering the Service have both signed the Contract, the Service is published in the Directory.
+The Outway **MUST** be able to route HTTP requests to the correct service on the FSC network. A service on the FSC network can be identified by the unique combination of a serial-number and a service-name. An Outway receives the serial-number and service-name through the path component as described in  [@!RFC3986, section 3.3](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) of an HTTP request.
+The first segment of the path **MUST** contain the serial-number, the second segment of the path **MUST** contain the service-name.
 
-The Directory **MUST** be able to sign Contracts with Grants of the type `PublicationGrant`.
+The Outway **MUST** retrieve the available services from the Directory.
 
-The Directory **MUST** validate that a `PublicationGrant` is valid by applying the following rules:
+The Outway **MUST** delete the serial-number from the path of the HTTP Request before forwarding the request to the corresponding Inway.
+e.g `/1234567890/service` -> `/service`
 
-- The subject serial number of the X.509 certificate used by the Directory Peer must match the value of the field `PublicationGrant.Directory.SubjectSerialNumber`
-- A Service name is provided in the field  `PublicationGrant.ServicePublication.Name`
-- At least one Inway address is provided in the field   `PublicationGrant.ServicePublication.InwayAddresses`
-- A signature is present with the subject serial number of the Peer defined the field `PublicationGrant.Directory.SubjectSerialNumber`
-- A signature is present with the subject serial number of the Peer defined the field `PublicationGrant.ServicePublication.Peer.SubjectSerialNumber`
+The Outway **MUST NOT** alter the path of the HTTP Request except for stripping the serial-number.
 
-#### Service listing
+The Outway **SHALL** use the last available address of a service in case the Directory is unreachable.
 
-The Directory **MUST** list a service when the Contract containing the `PublicationGrants` for the Service has been signed by the Peers involved with the Contract.
-
-The Directory **MUST** list the Services that are available in the Group. This Service list us used by Outways in the Group to route HTTP Requests to the correct Service.
-
-The Directory **MUST** provide the URI of the Inway that is offering a Service.
-
-#### Peer listing
-
-The Directory **MUST** offer a list of the Peers in the Group. The listing should also include the Contract Managers of each Peer. This information is used to negotiate Contracts between Peers
-
-#### Health checking
-
-The Directory **MUST** validate if a mTLS connection can be setup to the URI of an Inway. If the Directory is able to set up a connection, the Inway **MUST** be given the state `UP`, if not the state of the Inway **MUST** be `DOWN`. This state can be **SHOULD** be used by Outways to determine if a call can be routed to a Service.
-
-The Directory **MUST** validate if a mTLS connection can be setup to the URI of a Contact Manager. If the Directory is able to set up a connection, the Contract Manager **MUST** be given the state `UP`, if not the state of the Contact Manager **MUST** be `DOWN`.
-
-The Directory **MUST** remove Services when the state of all the Inways offering the Service has been `DOWN` for a certain period. The **RECOMMENDED** period is 48 hours.
-
-The Directory **MUST** remove Contract Managers when the state of the Contract Manager has been `DOWN` for a certain period. The **RECOMMENDED** period is 48 hours.
+Clients **MAY** use TLS when communicating with the Outway.
 
 ### Interfaces
 
-#### Directory Service
+#### HTTP endpoint
 
-The Directory functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ContractManagerService`. This service **MUST** implement the interface of the [Contract Manager](#contract_manager_interface).
+The Outway **MUST** implement a single HTTP endpoint which proxies the received request to the corresponding service on the FSC Network.
 
-In addition to the Contract Manager interface the Directory functionality **MUST** implement an gRPC service with the name `Directory`. This service **MUST** offer four Remote Procedure Calls (rpc):
-- `RegisterContractManager`, registers a Contract Manager
-- `ListPeers`, lists the Peers of a Group
-- `ListServicePublications`, lists the services known by the Director
-- `GetGroupInfo`, returns the version of the FSC standard used by the Group
+The HTTP endpoint `/{serial_number}/{service_name}` **MUST** be implemented.
 
-Rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
+##### Error response
 
-##### rpc RegisterContractManager
+If the service called generates an error, the Outway **MUST** return the error response of the API to the client without altering the response.
 
-The Remote Procedure Call `RegisterContractManager` **MUST** be implemented with the following interface and messages:
+If an error occurs within the scope of the FSC network, the Outway **MUST** return the HTTP status code 540 with an error response defined in the section below.
+
 ```
-rpc RegisterContractManager(RegisterContractManagerRequest) returns (RegisterContractManagerResponse);
-
-message RegisterContractManagerRequest {
-    ContractManager contract_manager = 1;
-}
-
-message RegisterContractManagerResponse {}
-
-message ContractManager {
-    string address = 1;
-}
-```
-
-##### rpc ListServices
-
-The Remote Procedure Call `ListServices` **MUST** be implemented with the following interface and messages:
-```
-rpc ListServicePublications(ListServicePublicationsRequest) returns (ListServicePublicationsResponse);
-
-
-message ListServicesRequest {}
-
-message ListServicePublicationsResponse {
-  message ServicePublication {
-    Organization organization = 1;
-    string name = 2;
-    repeated Inway inways = 3;
-  }
-
-  repeated ServicePublication services = 1;
-}
-
-message Organization {
-  string serial_number = 1;
-  string name = 2;
-}
-
-message Inway {
-  enum State {
-    STATE_UNSPECIFIED = 0;
-    STATE_UP = 1;
-    STATE_DOWN = 2;
-  }
-  string address = 1;
-  State state = 2;
-}
+  responses:
+    '540':
+      description: A FCS network error has occurred
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: A message describing the error
+              source:
+                type: string
+                description: The component causing the error. In this case 'outway'
+              location:
+                type: string
+                description: The location of the error. In this case 'C1' which means it happened between the client and the Outway
+              code:
+                type: string
+                description: A unique code describing the error.
 ```
 
-##### rpc ListPeers
+###### Error codes
 
-The Remote Procedure Call `ListPeers` **MUST** be implemented with the following interface and messages:
+The code field of the error response **MUST** contain one of the following codes:
+
+- `INVALID_URL`: The URL is invalid. e.g. the path of the HTTP request contains a serial-number but the service-name is missing.
+- `UNSUPPORTED_METHOD`: Outway called with an unsupported method, the CONNECT method is not supported.
+- `SERVER_ERROR`: General error code
+
+## Inway
+
+### Behavior
+
+#### Authentication
+
+The Inway **MUST** use mTLS when connecting to the Directory. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) that acts as Trust Anchor of the network.
+
+The Inway **MUST** only accept connections using mTLS. The X.509 certificates **MUST** be signed by the chosen Certificate Authority (CA) that acts as Trust Anchor of the network.
+
+#### Authorization
+
+The Inway **MUST** validate that an active access grant exists for the public key of the mTLS connection making the request. If no access grant exists the Inway **MUST** deny the request.
+
+#### Health check
+
+The Inway **MUST** be able to receive health checks from the Directory. The Directory will make a periodic health checks to known Inways by sending an HTTP request for each service the Inway is offering to the FSC network.
+
+Upon receiving the health check the Inway **MUST** validate that it is offering the service to the FSC network.
+
+#### Registration
+
+The Inway **MUST** register itself and the services it is offering to the Directory.
+
+The Inway **MUST** register the services it is offering to the Directory with a regular time interval. It is **RECOMMENDED** to do this every 30 seconds, to have a balance between the risk of flooding the Director and timely insight in available services in the Group.
+
+#### Routing
+
+The Inway **MUST** be able to route HTTP requests to the correct service. A service on the FSC network can be identified by the unique combination of a serial-number and a service-name. An Inway receives the service-name through the path component [@RFC3986, section 3.3](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) of an HTTP request.
+The first segment of the path **MUST** contain the service-name.
+
+The Inway **MUST** delete the service-name from the path of the HTTP Request before forwarding the request to the service.
+e.g `/service-name/get/data` -> `/get/data`
+
+### Interfaces
+
+#### Proxy Endpoint
+
+The Inway **MUST** implement an HTTP endpoint which proxies received requests to the correct Service.
+
 ```
-rpc ListPeers(ListPeersRequest) returns (ListPeersResponse);
-
-message ListPeersRequest {
-  repeated string peer_serial_numbers = 1;
-}
-
-message ListPeersResponse {
-  repeated Peer peers = 1;
-}
-
-message Peer {
-  string serial_number = 1;
-  repeated ContractManager contract_managers = 2;
-}
-
-message ContractManager {
-  enum State {
-    STATE_UNSPECIFIED = 0;
-    STATE_UP = 1;
-    STATE_DOWN = 2;
-  }
-  string address = 1;
-  State state = 2;
-}
+openapi: 3.0.0
+paths:
+  /{service_name}: 
+    description: receives requests of all HTTP Methods and proxies the received requests to the service specified in the path of the HTTP request.
+    responses:
+      default:
+        description: must return the HTTP Response of the service.
+      540:
+        description: An FSC network error has occured 
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: A message describing the error
+                source:
+                  type: string
+                  description: The component causing the error. In this case 'inway'
+                location:
+                  type: string
+                  description: The location of the error.
+                code:
+                  type: string
+                  description: A unique code describing the error.
 ```
 
-##### rpc GetGroupInfo
+##### Error response
 
-The Remote Procedure Call `GetGroupInfo` **MUST** be implemented with the following interface and messages:
+If the service called generates an error, the Inway **MUST** return the error response of the API to the client without altering the response.
+
+If an error occurs within the scope of the FSC network, the Inway **MUST** return the HTTP status code 540 with an error response defined in the section Proxy Endpoint.
+
+The code field of the error response **MUST** contain one of the following codes:
+
+- `ACCESS_DENIED`: No access grant exists for the public key used by the client making the request.
+- `EMPTY_PATH`: the path of the HTTP request does not contain a service-name
+- `INVALID_CERTIFICATE`: The X.509 certificates does not meet the requirements of FSC.
+- `MISSING_PEER_CERTIFICATE`: the Inway is unable to extract the X.509 certificate from the connection.
+- `SERVER_ERROR`: General error code
+- `SERVICE_DOES_NOT_EXIST`: the service is unknown to the Inway
+- `SERVICE_UNREACHABLE`: the Inway knows the service but is unable to proxy the request to the service
+
+#### Health check
+
+The Inway **MUST** implement a health endpoint. This endpoint is called by the Directory to determine if a service is being offered by the Inway.
+
 ```
-rpc GetGroupInfo(GetGroupInfoRequest) returns (GetGroupInfoResponse);
-
-message GetGroupInfoRequest {}
-
-message GetGroupInfoResponse {
-  string fsc_version = 1;
-  repeated Extension extenstions = 2;
-}
-
-message Extension {
-    string name = 1;
-    string version = 2;
-}
+openapi: 3.0.0
+paths:
+  /.fsc/health/{service_name}: 
+    get: 
+      summary: Returns if the service is available and reachable,
+        responses: 
+          200:          
+            description: healh status object,
+            content: 
+              application/json: 
+                schema:
+                  type: object
+                  properties:
+                    healthy:
+                      type: bool
+                      description: true if the service is healthy 
+                      
 ```
+
 
 # References
 
