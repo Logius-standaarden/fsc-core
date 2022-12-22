@@ -143,8 +143,8 @@ This chapter describes the basic architecture of FSC systems.
 ## Request flow
 
 !---
-![Request Flow](diagrams/core/seq-request-flow.svg "Request Flow")
-![Request Flow](diagrams/core/seq-request-flow.ascii-art "Request Flow")
+![Request Flow](diagrams/seq-request-flow.svg "Request Flow")
+![Request Flow](diagrams/seq-request-flow.ascii-art "Request Flow")
 !---
 
 ## Service discovery
@@ -154,8 +154,8 @@ Inways register services in the Directory.
 Outways discover services by requesting a list from the Directory.
 
 !---
-![Service discovery](diagrams/core/seq-service-discovery.svg "Service discovery")
-![Service discovery](diagrams/core/seq-service-discovery.ascii-art "Service discovery")
+![Service discovery](diagrams/seq-service-discovery.svg "Service discovery")
+![Service discovery](diagrams/seq-service-discovery.ascii-art "Service discovery")
 !---
 
 ## mTLS connections and Trust Anchor {#trustanchor}
@@ -163,8 +163,8 @@ Outways discover services by requesting a list from the Directory.
 Connections between Inways and Outways and connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. Components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor. The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing `Subject.organization` and `Subject.serialnumber` [@!RFC5280, section 4.1.2.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.6) in each certificate.
 
 !---
-![mTLS Connections](diagrams/core/seq-mtls-connections.svg "mTLS Connections")
-![mTLS Connections](diagrams/core/seq-mtls-connections.ascii-art "mTLS Connections")
+![mTLS Connections](diagrams/seq-mtls-connections.svg "mTLS Connections")
+![mTLS Connections](diagrams/seq-mtls-connections.ascii-art "mTLS Connections")
 !---
 
 ## Contract Management
@@ -172,8 +172,8 @@ Connections between Inways and Outways and connections with the Directory use Mu
 Connections between Peers are based on Grants. A Grant is the right to make a connection from an Outway to a service offered in the Group. Grants are encapsulated in Contracts and agreed upon by the involved Peers. To create a new contract, the Contract Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Contract Management functionality, see [Administrating a Peer](#administrating)). For each desired connection, a Grant is formulated that contains identifying information about both the Outway from the requesting Peer and the service of the Providing Peer. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
 
 !---
-![Contract Management](diagrams/core/seq-contract-management.svg "Contract Management")
-![Contract Management](diagrams/core/seq-contract-management.ascii-art "Contract Management")
+![Contract Management](diagrams/seq-contract-management.svg "Contract Management")
+![Contract Management](diagrams/seq-contract-management.ascii-art "Contract Management")
 !---
 ### Contract states
 

@@ -1,0 +1,20 @@
+@startuml
+title mTLS connections with Trust Anchor X.509 certificates
+
+frame "Group" {
+  frame "Requesting Peer" {
+    [Outway]
+  }
+  frame "Providing Peer" {
+     [Inway]
+  }
+  [Directory]
+}
+[Outway] -[bold,#green]r-> [Inway]
+[Outway] -[bold,#green]d-> [Directory]
+[Inway] -[bold,#green]d-> [Directory]
+
+skinparam boxPadding 50
+skinparam linetype polyline
+skinparam linetype ortho
+@enduml

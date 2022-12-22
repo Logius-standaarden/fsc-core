@@ -1,0 +1,16 @@
+@startuml
+title: Contract Management
+
+box "Peer"
+  participant "Contract Manager" as cm1
+end box
+box "Peer"
+  participant "Contract Manager" as cm2
+end box
+cm1 -> cm2 ++ : Contract proposal (signed by initiating Peer)
+return Valid Contract (signed by all Peers)
+
+skinparam sequenceBoxBorderColor #transparent
+skinparam boxPadding 50
+hide footbox
+@enduml
