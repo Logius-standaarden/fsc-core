@@ -174,7 +174,7 @@ upon it's content by cryptographically signing it.
 - Grants: describes what is granted by a contract.  
   See the [Grants section](#grants) for more details.
 
-## Grants {grants}
+## Grants {#grants}
 
 Grants are encapsulated in Contracts and agreed upon by the involved Peers.
 Typically, those match the connections mentioned in a legal agreement like a  
@@ -787,7 +787,7 @@ enum ErrorReason {
 }
 ```
 
-### Signatures {signatures}
+### Signatures {#signatures}
 
 A signature **MUST** follow the JSON Web Signature(JWS) format specified in [@!RFC7515](https://www.rfc-editor.org/rfc/rfc7515.html)
 
@@ -818,7 +818,7 @@ JWS Payload example:
 - `reject`, peer has rejected the contract
 - `revoke`, peer has revoked the contract
 
-### The content hash {content_hash}
+### The content hash {#content_hash}
 
 A Peer should ensure that a contract signature is intended for the contract.
 Validation is done by comparing the hash of the received contract with the hash in the signature.
