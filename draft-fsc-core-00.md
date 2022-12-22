@@ -204,10 +204,69 @@ Inways and Outways of a Peer are in part configured by the Contract Manager. The
 ![Peer Configuration](peer-configuration.ascii-art "Peer Configuration")
 !---
 
+### Contracts 
+
+Document containing the Grants between Peers, defining which interactions between Peers are possible.
+
+A Contract becomes valid once all Peers mentioned in the Contract have agreed
+upon it's content by cryptographically signing it. 
+
+**Fields**
+
+- ID: a UUID that functions as the unique identifier for the Contract
+- Group ID: the name of the Group for which this Contract is intended
+- Hash algorithm: specifies the Hash algorithm that needs to be used to generate the hash of the Contract. This hash is used to validate if two contracts are equal and verify that a signature is intended for the Contract
+  Currently only *SHA3-512* is supported. The hash generation is described in the section [content hash](#content_hash).
+- Validity: contains two dates describing the interval in which the Contract can be used.
+- Signatures: signatures of the Peers listed in the contract. Contracts have three types of signatures: accepted, rejected and revoked.  
+  A signature is a JSON Web Token. We have a dedicated section on [signatures](#signatures).
+- Grants: describes what is granted by a contract.  
+  See the [Grants section](#grants) for more details.
+
+### Grants {grants}
+
+Grants are encapsulated in Contracts and agreed upon by the involved Peers.
+Typically, those match the connections mentioned in a legal agreement like a  
+Data Processing Agreement (DPA). They describe what is granted by a Contract.
+
+#### Connection Grant
+
+To connect to a service, the Peer needs a Connection Grant. 
+That is a Grant that specifies which public key of a Peer is allowed to connect to a Service of a Peer.
+
+Once a right to connect is granted, an Outway using the public key defined in the grant can connect to the Inway of the Peer that is offering the Service to the Group.
+
+**Fields**
+// TODO: Outway the right word?
+- Outway: information about the Outway of the Peer that is allowed to connect
+   - Peer: the Peer that is allowed to connect
+        - SubjectSerialNumber: the subject serial number of the Peer
+   - PublicKeyFingerprints: a list of public key fingerprints that are allowed to connect
+- Service: the service to which a connection is allowed
+  - Peer: the Peer that is offering the service
+      - SubjectSerialNumber: the subject serial number of the Peer
+  - Name: the name of the Service
+
+#### Publication Grant
+
+To publish a Service in the Group, the Peer need a Publication Grant.
+This is a Grant describing the details of a Service that a Peer is publishing in the Directory of the Group.
+
+**Fields**
+
+- Directory: the Directory to which the Service is published
+  - Peer: the Peer hosting the Directory
+    - SubjectSerialNumber: the subject serial number of the Peer
+  - GroupID: the Group ID is the URI of the Directory 
+- ServicePublication: describes the details of the Service
+  - Peer: the Peer offering the Service
+    - SubjectSerialNumber: the subject serial number of the Peer
+  - Name: name of the Service
+  - InwayAddresses: A list of addresses of Inways that are offering the Service.
+  
 ## Connecting to a service
 
 ## Providing a service
-
 
 ## Administrating a Peer {#administrating}
 
@@ -517,7 +576,7 @@ message Contract {
 message ContractContent {
   string id = 1;
   string group_id = 2;
-  Period period = 3;
+  Validity validity = 3;
   repeated Grant grants = 4;
   string hash_algorithm = 5;
 }
@@ -543,7 +602,7 @@ message Grant {
 }
 
 message GrantConnection{
-    Client client = 1;
+    Outway outway = 1;
     Service service = 2;
 }
 
@@ -552,8 +611,9 @@ message GrantPublication {
     ServicePublication service = 2;
 }
 
-message Client {
+message Outway {
     Peer peer = 1;
+    repeated string public_key_fingerprints = 2;
 }
 
 message Directory {
@@ -588,9 +648,9 @@ message Directory {
     Peer peer = 1;
 }
 
-message Period {
-    google.protobuf.Timestamp start = 1;
-    google.protobuf.Timestamp end = 2;
+message Validity {
+    google.protobuf.Timestamp not_before = 1;
+    google.protobuf.Timestamp not_after = 2;
 } 
 ```
 
@@ -692,7 +752,7 @@ message ListCertificatesResponse {
 }
 ```
 
-#### Signatures
+#### Signatures {signatures}
 
 A signature **MUST** follow the JSON Web Signature(JWS) format specified in [@!RFC7515](https://www.rfc-editor.org/rfc/rfc7515.html)
 
@@ -711,6 +771,17 @@ JWS Payload example:
   "type": "accept"
 }
 ```
+
+##### Payload fields
+
+- `contractContentHash`, hash of the content of the contract
+- `type`, type of signature. Types are defined in the `Signature type` section of this RFC
+
+###### Signature type
+
+- `accept`, peer has accepted the contract
+- `reject`, peer has rejected the contract
+- `revoke`, peer has revoked the contract
 
 #### The content hash {content_hash}
 
@@ -740,17 +811,6 @@ The `contentHash` of the signature payload contains the signature hash. The algo
 - `int64`: use `Little-endian` as endianness when converting to a byte array
 - `string`: use `utf-8` encoding when converting to a byte array
 - `GrantType`: should be represented as an int32
-
-##### Payload fields
-
-- `contractContentHash`, hash of the content of the contract
-- `type`, type of signature. Types are defined in the `Signature type` section of this RFC
-
-###### Signature type
-
-- `accept`, peer has accepted the contract
-- `reject`, peer has rejected the contract
-- `revoke`, peer has revoked the contract
 
 #### Error handling
 
