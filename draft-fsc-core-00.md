@@ -125,10 +125,11 @@ Contract Manager
 : The Contract Manager manages Contracts and configures Inways and Outways based on information from a Directory and Contracts.
 
 Grant
-: Defines the interactions between Peers. In FSC Core two Grants are described. 
+: Defines the interactions between Peers. In FSC Core three Grants are described.
 
-1. The Connection Grant which specifies the right of a Peer to connect to a Service provided by a Peer.
+1. The Peer Registration Grant which specifies the right of a Peer to participate as a Peer in the Group.
 2. The Publication Grant which specifies the right of a Peer to publish a Service in the Group.
+3. The Connection Grant which specifies the right of a Peer to connect to a Service provided by a Peer.
 
 Service
 : An HTTP API offered to the Group.
