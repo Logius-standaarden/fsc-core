@@ -301,12 +301,6 @@ The Inway **MUST** only accept connections using mTLS. The X.509 certificates **
 
 The Inway **MUST** validate that an active access grant exists for the public key of the mTLS connection making the request. If no access grant exists the Inway **MUST** deny the request.
 
-#### Health check
-
-The Inway **MUST** be able to receive health checks from the Directory. The Directory will make a periodic health checks to known Inways by sending an HTTP request for each service the Inway is offering to the FSC network.
-
-Upon receiving the health check the Inway **MUST** validate that it is offering the service to the FSC network.
-
 #### Registration
 
 The Inway **MUST** register itself and the services it is offering to the Directory.
@@ -371,29 +365,6 @@ The code field of the error response **MUST** contain one of the following codes
 - `SERVER_ERROR`: General error code
 - `SERVICE_DOES_NOT_EXIST`: the service is unknown to the Inway
 - `SERVICE_UNREACHABLE`: the Inway knows the service but is unable to proxy the request to the service
-
-#### Health check
-
-The Inway **MUST** implement a health endpoint. This endpoint is called by the Directory to determine if a service is being offered by the Inway.
-
-```
-openapi: 3.0.0
-paths:
-  /.fsc/health/{service_name}:
-    get:
-      summary: Returns if the service is available and reachable,
-        responses:
-          200:
-            description: healh status object,
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    healthy:
-                      type: bool
-                      description: true if the service is healthy
-```
 
 ## Contract Manager
 
@@ -506,6 +477,11 @@ message ContractContent {
   string hash_algorithm = 5;
 }
 
+message Period {
+    google.protobuf.Timestamp start = 1;
+    google.protobuf.Timestamp end = 2;
+}
+
 message Signatures {
     map<string, string> accept = 1;
     map<string, string> reject = 2;
@@ -514,67 +490,62 @@ message Signatures {
 
 enum GrantType {
   GRANT_TYPE_UNSPECIFIED = 0;
-  GRANT_TYPE_CONNECTION = 1;
+  GRANT_TYPE_PEER_REGISTRATION = 1;
   GRANT_TYPE_PUBLICATION = 2;
+  GRANT_TYPE_CONNECTION = 3;
 }
 
 message Grant {
     GrantType type = 1;
     oneof data {
-        GrantConnection connection = 2;
+        GrantPeerRegistration registration = 2;
         GrantPublication publication = 3;
+        GrantConnection connection = 4;
     }
 }
 
-message GrantConnection{
-    Client client = 1;
-    Service service = 2;
+message GrantPeerRegistration {
+    message Directory {
+        string peer_serial_number = 1;
+    }
+    
+    message Peer {
+        string serial_number = 1;
+        string name = 2;
+        string contract_manager_address = 3;
+    }
+    
+    Directory directory = 1;
+    Peer peer = 2;
 }
 
 message GrantPublication {
+    message Service {
+        string peer_serial_number = 1;
+        string name = 2;
+        string inway_addresses = 3;
+    }
+    
+    message Directory {
+        string peer_serial_number = 1;
+    }
+    
     Directory directory = 1;
-    ServicePublication service = 2;
+    Service service = 2;
 }
 
-message Client {
-    Peer peer = 1;
-}
-
-message Directory {
-    Peer peer = 1;
-}
-
-message ServicePublication {
-    Peer peer = 1;
-    string name = 2;
-    repeated string inway_addresses = 3;
-}
-
-message Peer {
-    string subject_serial_number = 1;
-}
-
-message Service {
-    Peer peer = 1;
-    string name = 2;
-}
-
-message Delegator {
-    Peer peer = 1;
-}
-
-message Delegatee {
-    Peer peer = 1;
-    repeated string public_key_fingerprints = 2;
-}
-
-message Directory {
-    Peer peer = 1;
-}
-
-message Period {
-    google.protobuf.Timestamp start = 1;
-    google.protobuf.Timestamp end = 2;
+message GrantConnection{
+    message Service {
+        string peer_serial_number = 1;
+        string name = 2;
+    }
+       
+    message Outway {
+        peer_serial_number = 1;
+    }
+    
+    Outway outway = 1;
+    Service service = 2;
 }
 ```
 
@@ -772,19 +743,35 @@ enum ErrorReason {
 
 The clients **MUST** use mTLS when connecting to the Directory. The X.509 certificate **MUST** be signed by the chosen Certificate Authority (CA) that acts as the Trust Anchor of the Group.
 
+#### Peer registration 
+
+Peer registration is accomplished by offering a Contract to the Directory which contains a `PeerRegistrationGrant`.
+
+The Directory **MUST** be able to sign Contracts with Grants of the type `PeerRegistrationGrant`.
+
+The Directory **MUST** validate that a `PeerRegistrationGrant` is valid by applying the following rules:
+
+- The subject serial number of the X.509 certificate used by the Directory Peer must match the value of the field `PeerRegistrationGrant.Directory.PeerSerialNumber`
+- The subject serial number of the X.509 certificate used by the Contract Manager offering the Contract to Directory must match the value of the field `PeerRegistrationGrant.Peer.SerialNumber`
+- A Contract Manager address is provided in the field `PeerRegistrationGrant.Peer.ContractManagerAddress`. The value should be a valid URL as specified in [@RFC1738](https://www.rfc-editor.org/rfc/rfc1738)
+- A signature is present with the serial number of the Peer defined the field `PeerRegistrationGrant.Directory.PeerSerialNumber`
+- A signature is present with the serial number of the Peer defined the field `PeerRegistrationGrant.Peer.SerialNumber`
+
 #### Service registration
 
 Service registration is accomplished by offering a Contract proposal to the Directory which contains one or more `PublicationGrants` with each `PublicationGrant` containing a single Service. Once the Directory and the Peer offering the Service have both signed the Contract, the Service is published in the Directory.
 
 The Directory **MUST** be able to sign Contracts with Grants of the type `PublicationGrant`.
 
+The Directory **MUST** only accept `PublicationGrants` of Peers which have a valid Contract with a `PeerRegistrationGrant` containing both the Peer and the Directory.
+
 The Directory **MUST** validate that a `PublicationGrant` is valid by applying the following rules:
 
-- The subject serial number of the X.509 certificate used by the Directory Peer must match the value of the field `PublicationGrant.Directory.SubjectSerialNumber`
+- The subject serial number of the X.509 certificate used by the Directory Peer must match the value of the field `PublicationGrant.Directory.PeerSerialNumber`
 - A Service name is provided in the field  `PublicationGrant.ServicePublication.Name`
-- At least one Inway address is provided in the field   `PublicationGrant.ServicePublication.InwayAddresses`
-- A signature is present with the subject serial number of the Peer defined the field `PublicationGrant.Directory.SubjectSerialNumber`
-- A signature is present with the subject serial number of the Peer defined the field `PublicationGrant.ServicePublication.Peer.SubjectSerialNumber`
+- An Inway address is provided in the field `PublicationGrant.ServicePublication.InwayAddress`. The value should be a valid URL as specified in [@RFC1738](https://www.rfc-editor.org/rfc/rfc1738)
+- A signature is present with the subject serial number of the Peer defined the field `PublicationGrant.Directory.PeerSerialNumber`
+- A signature is present with the subject serial number of the Peer defined the field `PublicationGrant.Service.PeerSerialNumber`
 
 #### Service listing
 
@@ -796,17 +783,9 @@ The Directory **MUST** provide the URI of the Inway that is offering a Service.
 
 #### Peer listing
 
-The Directory **MUST** offer a list of the Peers in the Group. The listing should also include the Contract Managers of each Peer. This information is used to negotiate Contracts between Peers
+The Directory **MUST** offer a list of the Peers in the Group. The listing should also include the Contract Managers of each Peer. This information is used to negotiate Contracts between Peers.
 
-#### Health checking
-
-The Directory **MUST** validate if a mTLS connection can be setup to the URI of an Inway. If the Directory is able to set up a connection, the Inway **MUST** be given the state `UP`, if not the state of the Inway **MUST** be `DOWN`. This state can be **SHOULD** be used by Outways to determine if a call can be routed to a Service.
-
-The Directory **MUST** validate if a mTLS connection can be setup to the URI of a Contact Manager. If the Directory is able to set up a connection, the Contract Manager **MUST** be given the state `UP`, if not the state of the Contact Manager **MUST** be `DOWN`.
-
-The Directory **MUST** remove Services when the state of all the Inways offering the Service has been `DOWN` for a certain period. The **RECOMMENDED** period is 48 hours.
-
-The Directory **MUST** remove Contract Managers when the state of the Contract Manager has been `DOWN` for a certain period. The **RECOMMENDED** period is 48 hours.
+The Directory **MUST** return Peers with a valid Contract containing a `PeerRegistrationGrant`
 
 ### Interfaces
 
@@ -814,48 +793,32 @@ The Directory **MUST** remove Contract Managers when the state of the Contract M
 
 The Directory functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ContractManagerService`. This service **MUST** implement the interface of the [Contract Manager](#contract_manager_interface).
 
-In addition to the Contract Manager interface the Directory functionality **MUST** implement an gRPC service with the name `Directory`. This service **MUST** offer four Remote Procedure Calls (rpc):
-- `RegisterContractManager`, registers a Contract Manager
-- `ListPeers`, lists the Peers of a Group
-- `ListServicePublications`, lists the services known by the Director
+In addition to the Contract Manager interface the Directory functionality **MUST** implement an gRPC service with the name `Directory`. This service **MUST** offer three Remote Procedure Calls (rpc):
+- `ListPeers`, lists the Peers known by the Directory
+- `ListServices`, lists the services known by the Directory
 - `GetGroupInfo`, returns the version of the FSC standard used by the Group
 
 Rpc's **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
 
-##### rpc RegisterContractManager
-
-The Remote Procedure Call `RegisterContractManager` **MUST** be implemented with the following interface and messages:
-```
-rpc RegisterContractManager(RegisterContractManagerRequest) returns (RegisterContractManagerResponse);
-
-message RegisterContractManagerRequest {
-    ContractManager contract_manager = 1;
-}
-
-message RegisterContractManagerResponse {}
-
-message ContractManager {
-    string address = 1;
-}
 ```
 
 ##### rpc ListServices
 
 The Remote Procedure Call `ListServices` **MUST** be implemented with the following interface and messages:
-```
-rpc ListServicePublications(ListServicePublicationsRequest) returns (ListServicePublicationsResponse);
 
+```
+rpc ListServices(ListServicesRequest) returns (ListServicesResponse);
 
 message ListServicesRequest {}
 
-message ListServicePublicationsResponse {
-  message ServicePublication {
+message ListServicesResponse {
+  message Service {
     Organization organization = 1;
     string name = 2;
-    repeated Inway inways = 3;
+    Inway inway = 3;
   }
 
-  repeated ServicePublication services = 1;
+  repeated Service services = 1;
 }
 
 message Organization {
@@ -864,19 +827,14 @@ message Organization {
 }
 
 message Inway {
-  enum State {
-    STATE_UNSPECIFIED = 0;
-    STATE_UP = 1;
-    STATE_DOWN = 2;
-  }
   string address = 1;
-  State state = 2;
 }
 ```
 
 ##### rpc ListPeers
 
 The Remote Procedure Call `ListPeers` **MUST** be implemented with the following interface and messages:
+
 ```
 rpc ListPeers(ListPeersRequest) returns (ListPeersResponse);
 
@@ -890,23 +848,18 @@ message ListPeersResponse {
 
 message Peer {
   string serial_number = 1;
-  repeated ContractManager contract_managers = 2;
+  string name = 2;
+  ContractManager contract_manager = 3;
 }
 
 message ContractManager {
-  enum State {
-    STATE_UNSPECIFIED = 0;
-    STATE_UP = 1;
-    STATE_DOWN = 2;
-  }
   string address = 1;
-  State state = 2;
 }
 ```
-
 ##### rpc GetGroupInfo
 
 The Remote Procedure Call `GetGroupInfo` **MUST** be implemented with the following interface and messages:
+
 ```
 rpc GetGroupInfo(GetGroupInfoRequest) returns (GetGroupInfoResponse);
 
@@ -914,7 +867,7 @@ message GetGroupInfoRequest {}
 
 message GetGroupInfoResponse {
   string fsc_version = 1;
-  repeated Extension extenstions = 2;
+  repeated Extension extensions = 2;
 }
 
 message Extension {
