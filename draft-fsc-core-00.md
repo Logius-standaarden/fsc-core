@@ -472,14 +472,14 @@ message Contract {
 message ContractContent {
   string id = 1;
   string group_id = 2;
-  Period period = 3;
+  Validity validity = 3;
   repeated Grant grants = 4;
   string hash_algorithm = 5;
 }
 
-message Period {
-    google.protobuf.Timestamp start = 1;
-    google.protobuf.Timestamp end = 2;
+message Validity {
+    uint64 not_before = 1;
+    uint64 not_after = 2;
 }
 
 message Signatures {
@@ -678,16 +678,17 @@ The `contentHash` of the signature payload contains the signature hash. The algo
 2. Convert `Contract.Content.HashAlgorithm` to bytes and append the bytes to `contentBytes`.
 3. Convert `Contract.Content.Id` to bytes and append the bytes to `contentBytes`.
 4. Convert `Contract.Content.GroupId` to bytes and append the bytes to `contentBytes`.
-5. Convert the values of the fields `Contract.Content.Period.start` and `Contract.Content.Period.End` to an int64 representing the seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z. And append the bytes of the int64 values to `contentBytes`.
-6. Create an array of bytes arrays called `grantByteArrays` 
-7. For each Grant in `Contract.Content.Grants`
+5. Convert `Contract.Content.Validity.NotBefore` to bytes and append the bytes to `contentBytes`.
+6. Convert `Contract.Content.Validity.NotAfter` to bytes and append the bytes to `contentBytes`.
+7. Create an array of bytes arrays called `grantByteArrays` 
+8. For each Grant in `Contract.Content.Grants`
    1. Create a byte array named `grantBytes`
    2. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
    3. Append `grantBytes` to `grantByteArrays`
-8. Sort the byte arrays in `grantByteArrays` in ascending order
-9. Append the bytes of `grantByteArrays` to `contentBytes`.
-10. Hash the `contentBytes` using the hash algorithm described in `Contract.Content.Algorithm`
-11. Encode the bytes of the hash as base64.
+9. Sort the byte arrays in `grantByteArrays` in ascending order
+10. Append the bytes of `grantByteArrays` to `contentBytes`.
+11. Hash the `contentBytes` using the hash algorithm described in `Contract.Content.Algorithm`
+12. Encode the bytes of the hash as base64.
 
 ##### Data types {#data_types}
 
