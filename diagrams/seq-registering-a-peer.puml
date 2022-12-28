@@ -1,0 +1,19 @@
+@startuml
+title: Peer registration flow
+
+box "Peer"
+  participant "Contract Manager" as contractManagerPeer
+end box
+box "Directory"
+  participant "Contract Manager" as contractManagerDirectory
+end box
+
+contractManagerPeer -> contractManagerPeer: Create Contract with a Peer Registration Grant
+contractManagerPeer -> contractManagerPeer: Sign Contract
+contractManagerPeer -> contractManagerDirectory: Submit Contract
+contractManagerDirectory -> contractManagerPeer: Accept Contract
+
+skinparam sequenceBoxBorderColor #transparent
+skinparam boxPadding 50
+hide footbox
+@enduml

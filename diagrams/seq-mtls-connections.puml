@@ -2,7 +2,7 @@
 title mTLS connections with Trust Anchor X.509 certificates
 
 frame "Group" {
-  frame "Requesting Peer" {
+  frame "Consuming Peer" {
     [Outway]
   }
   frame "Providing Peer" {

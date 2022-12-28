@@ -7,7 +7,7 @@ end box
 box "Group"
   participant "Directory" as directory
 end box
-box "Requesting Peer"
+box "Consuming Peer"
   participant "Outway" as outway
 end box
 inway -> directory ++ : register service
