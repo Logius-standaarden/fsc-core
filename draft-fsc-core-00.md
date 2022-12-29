@@ -87,6 +87,7 @@ The Directory provides information about the Peers in a Group.
 To connect to a Service, the Peer needs a Contract with a Connection Grant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once a right to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the HTTPS service is made.
 
 FSC Core specifies the basics for setting up and managing connections in a Group. It is **RECOMMENDED** to use FSC Core with the following extensions, each specified in a dedicated RFC:
+
 - [FSC Delegation](delegation/README.md), to delegate the right to connect to a service
 - [FSC Policies](policies/README.md), to use more advanced policies as conditions in Contracts
 - [FSC Logging](logging/README.md), to standardize and link transaction logs
