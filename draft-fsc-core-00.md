@@ -65,6 +65,7 @@ Section 3 describes the interfaces and behavior of FSC components in detail.
 The Federated Service Connectivity (FSC) specifications describe a way to implement technically interoperable API gateway functionality, covering federated authentication, secure connecting and transaction logging in a large-scale, dynamic API landscape. The standard includes the exchange of information and requests about the management of connections and authorizations, in order to make it possible to automate those activities.
 
 The Core part of the FSC specification achieves inter-organizational, technical interoperability:
+
 - to discover Services
 - to route requests to Services in other contexts (e.g. from within organization A to organization B)
 - to request and managing connection rights needed to connect to said Services
