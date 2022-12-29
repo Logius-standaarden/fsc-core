@@ -177,7 +177,7 @@ Outways discover Services by requesting a list from the Directory.
 
 ## mTLS connections and Trust Anchor {#trustanchor}
 
-Connections between Contract Managers, Inways, Outways and connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. Components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor. The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing `Subject.organization` and `Subject.serialnumber` [@!RFC5280, section 4.1.2.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.6) in each certificate.
+Connections between Contract Managers, Inways, Outways and connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. Components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor. The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing `Subject.organization` and `Subject.serialnumber` [@!RFC5280, section 4.1.2.6] in each certificate.
 
 !---
 ![mTLS Connections](diagrams/seq-mtls-connections.svg "mTLS Connections")
@@ -247,7 +247,7 @@ Once the Contract between providing Peer and consuming Peer is signed by both pa
 
 ### TLS configuration
 
-Connections between components of an FSC Group are mTLS connections based on X.509 certificates as defined in [@RFC5280](https://www.rfc-editor.org/rfc/rfc5280).  
+Connections between components of an FSC Group are mTLS connections based on X.509 certificates as defined in [@RFC5280].
 
 The certificates must be provided by a Trust Anchor which **SHOULD** validate a Peers identity. 
 
@@ -257,11 +257,11 @@ Every Peer in a Group **MUST** accept the same Trust Anchor.
 
 The certificate guarantees the identity of a Peer.
 
-FSC places specific requirements on the subject fields of a certificate. [@!RFC5280, section 4.2.1.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.2.1.6) which are listed below
+FSC places specific requirements on the subject fields of a certificate. [@!RFC5280, section 4.2.1.6] which are listed below
 
 - SerialNumber: A unique identifier which serves as the Peers identity in the FSC Group. This value is used in combination with a Service name to route request to the correct Service.
 - CommonName: This should correspond to the Fully Qualified Domain Name (FQDN) of an Contract Manager, Inway or Outway.  For an Outway this FQDN does not have to be resolvable.
-- Subject Alternative Name[@!RFC5280, section 4.2.1.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.2.1.6): This should contain to the Fully Qualified Domain Names (FQDN) of an Contract Manager, Inway or Outway. For an Outway this FQDN does not have to be resolvable.
+- Subject Alternative Name [@!RFC5280, section 4.2.1.6]: This should contain to the Fully Qualified Domain Names (FQDN) of an Contract Manager, Inway or Outway. For an Outway this FQDN does not have to be resolvable.
 
 ### gRPC error handling
 
@@ -347,7 +347,7 @@ A `PeerRegistrationGrant` is valid when:
 
 - The subject serial number of the X.509 certificate used by the Directory matches the value of the field `PeerRegistrationGrant.Directory.PeerSerialNumber`
 - The subject serial number of the X.509 certificate used by the Contract Manager offering the Contract to Directory matches the value of the field `PeerRegistrationGrant.Peer.SerialNumber`
-- A Contract Manager address is provided in the field `PeerRegistrationGrant.Peer.ContractManagerAddress`. The value should be a valid URL as specified in [@RFC1738](https://www.rfc-editor.org/rfc/rfc1738)
+- A Contract Manager address is provided in the field `PeerRegistrationGrant.Peer.ContractManagerAddress`. The value should be a valid URL as specified in [@RFC1738]
 
 The Contract containing the `PeerRegistrationGrant` is valid when:
 
@@ -368,7 +368,7 @@ A `PublicationGrant` is valid when:
 
 - The subject serial number of the X.509 certificate used by the Directory Peer matches the value of the field `PublicationGrant.Directory.PeerSerialNumber`
 - A Service name is provided in the field  `PublicationGrant.ServicePublication.Name`
-- An Inway address is provided in the field `PublicationGrant.ServicePublication.InwayAddress`. The value should be a valid URL as specified in [@RFC1738](https://www.rfc-editor.org/rfc/rfc1738)
+- An Inway address is provided in the field `PublicationGrant.ServicePublication.InwayAddress`. The value should be a valid URL as specified in [@RFC1738]
 
 The Contract containing the `PublicationGrant` is valid when:
 
@@ -786,15 +786,15 @@ enum ErrorReason {
 
 ### Signatures  {#signatures}
 
-A signature **MUST** follow the JSON Web Signature(JWS) format specified in [@!RFC7515](https://www.rfc-editor.org/rfc/rfc7515.html)
+A signature **MUST** follow the JSON Web Signature(JWS) format specified in [@!RFC7515]
 
-The JWS **MUST** specify the X.509 certificate containing the public key used to create the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.8) field of the `JOSE Header`[@!RFC7515, section 4](https://www.rfc-editor.org/rfc/rfc7515.html#section-4).
+The JWS **MUST** specify the X.509 certificate containing the public key used to create the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8] field of the `JOSE Header`[@!RFC7515, section 4].
 
-The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1](https://www.rfc-editor.org/rfc/rfc7515.html#section-7.1)
+The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1]
 
-The JWS Payload as defined in [@!RFC7515, section 2](https://www.rfc-editor.org/rfc/rfc7515.html#section-2), **MUST** contain a hash of the `Contract.Content` as described in the section [Content Hash](#content_hash) and the signature type.
+The JWS Payload as defined in [@!RFC7515, section 2], **MUST** contain a hash of the `Contract.Content` as described in the section [Content Hash](#content_hash) and the signature type.
 
-The JWS **MUST** be created using one of the digital signature algorithms described in [@!RFC7518, section 3,1](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1)
+The JWS **MUST** be created using one of the digital signature algorithms described in [@!RFC7518, section 3,1]
 
 JWS Payload example:
 ```JSON
@@ -855,7 +855,7 @@ The Outway **MUST** use mTLS when connecting to the Directory or Inways with an 
 
 #### Routing
 
-The Outway **MUST** be able to route HTTP requests to the correct service on the FSC network. A service on the FSC network can be identified by the unique combination of a serial-number and a service-name. An Outway receives the serial-number and service-name through the path component as described in  [@!RFC3986, section 3.3](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) of an HTTP request.
+The Outway **MUST** be able to route HTTP requests to the correct service on the FSC network. A service on the FSC network can be identified by the unique combination of a serial-number and a service-name. An Outway receives the serial-number and service-name through the path component as described in  [@!RFC3986, section 3.3] of an HTTP request.
 The first segment of the path **MUST** contain the serial-number, the second segment of the path **MUST** contain the service-name.
 
 The Outway **MUST** retrieve the available services from the Directory.
@@ -928,7 +928,7 @@ The Inway **MUST** validate that an active access grant exists for the public ke
 
 #### Routing
 
-The Inway **MUST** be able to route HTTP requests to the correct service. A Service on the FSC network can be identified by the unique combination of a serial-number and a service-name. An Inway receives the service-name through the path component [@RFC3986, section 3.3](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) of an HTTP request.
+The Inway **MUST** be able to route HTTP requests to the correct service. A Service on the FSC network can be identified by the unique combination of a serial-number and a service-name. An Inway receives the service-name through the path component [@RFC3986, section 3.3] of an HTTP request.
 The first segment of the path **MUST** contain the service-name.
 
 The Inway **MUST** delete the service-name from the path of the HTTP Request before forwarding the request to the service.
