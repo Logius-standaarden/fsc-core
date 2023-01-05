@@ -2,17 +2,18 @@
 title: Connecting to a Service
 
 box "Consuming Peer"
-  participant "Contract Manager" as contractManagerPeer
+  participant "Contract Manager" as contractManagerConsumingPeer
 end box
 
 box "Providing Peer"
-  participant "Contract Manager" as contractManagerDirectory
+  participant "Contract Manager" as contractManagerProvidingPeer
 end box
 
-contractManagerPeer -> contractManagerPeer: Create Contract with a Connection Grant
-contractManagerPeer -> contractManagerPeer: Sign Contract
-contractManagerPeer -> contractManagerDirectory: Submit Contract
-contractManagerDirectory -> contractManagerPeer: Accept Contract
+contractManagerConsumingPeer -> contractManagerConsumingPeer: Create Contract with a Connection Grant
+contractManagerConsumingPeer -> contractManagerConsumingPeer: Sign Contract
+contractManagerConsumingPeer -> contractManagerProvidingPeer: Submit Contract
+contractManagerProvidingPeer -> contractManagerProvidingPeer: Sign Contract
+contractManagerProvidingPeer -> contractManagerConsumingPeer: Accept Contract
 
 skinparam sequenceBoxBorderColor #transparent
 skinparam boxPadding 50

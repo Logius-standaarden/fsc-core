@@ -3,16 +3,23 @@ title mTLS connections with Trust Anchor X.509 certificates
 
 frame "Group" {
   frame "Consuming Peer" {
-    [Outway]
+    component Outway as outway
+    component "Contract Manager" as contractManagerConsumingPeer
   }
   frame "Providing Peer" {
-     [Inway]
+     Component Inway as inway
+     component "Contract Manager" as contractManagerProvidingPeer
   }
-  [Directory]
+  component Directory as directory
 }
-[Outway] -[bold,#green]r-> [Inway]
-[Outway] -[bold,#green]d-> [Directory]
-[Inway] -[bold,#green]d-> [Directory]
+
+contractManagerConsumingPeer <-[bold,#green]l-> contractManagerProvidingPeer
+contractManagerProvidingPeer -[bold,#green]d-> directory
+contractManagerConsumingPeer -[bold,#green]d-> directory
+outway -[bold,#green]d-> directory
+outway -[bold,#green]l-> inway
+outway -[hidden]u-> contractManagerConsumingPeer
+inway -[hidden]u-> contractManagerProvidingPeer
 
 skinparam boxPadding 50
 skinparam linetype polyline

@@ -11,6 +11,7 @@ end box
 contractManagerPeer -> contractManagerPeer: Create Contract with a Publication Grant
 contractManagerPeer -> contractManagerPeer: Sign Contract
 contractManagerPeer -> contractManagerDirectory: Submit Contract
+contractManagerDirectory -> contractManagerDirectory: Sign Contract
 contractManagerDirectory -> contractManagerPeer: Accept Contract
 
 skinparam sequenceBoxBorderColor #transparent
