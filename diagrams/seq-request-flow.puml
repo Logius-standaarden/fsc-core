@@ -1,7 +1,7 @@
 @startuml
 title: Basic request flow
 
-box "Requesting Peer"
+box "Consuming Peer"
   participant "Client" as client
   participant "Outway" as outway
 end box

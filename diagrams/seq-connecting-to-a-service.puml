@@ -1,0 +1,21 @@
+@startuml
+title: Connecting to a Service
+
+box "Consuming Peer"
+  participant "Contract Manager" as contractManagerConsumingPeer
+end box
+
+box "Providing Peer"
+  participant "Contract Manager" as contractManagerProvidingPeer
+end box
+
+contractManagerConsumingPeer -> contractManagerConsumingPeer: Create Contract with a Connection Grant
+contractManagerConsumingPeer -> contractManagerConsumingPeer: Sign Contract
+contractManagerConsumingPeer -> contractManagerProvidingPeer: Submit Contract
+contractManagerProvidingPeer -> contractManagerProvidingPeer: Sign Contract
+contractManagerProvidingPeer -> contractManagerConsumingPeer: Accept Contract
+
+skinparam sequenceBoxBorderColor #transparent
+skinparam boxPadding 50
+hide footbox
+@enduml

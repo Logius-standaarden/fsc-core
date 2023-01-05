@@ -1,0 +1,20 @@
+@startuml
+title: Service registration flow
+
+box "Peer"
+  participant "Contract Manager" as contractManagerPeer
+end box
+box "Directory"
+  participant "Contract Manager" as contractManagerDirectory
+end box
+
+contractManagerPeer -> contractManagerPeer: Create Contract with a Publication Grant
+contractManagerPeer -> contractManagerPeer: Sign Contract
+contractManagerPeer -> contractManagerDirectory: Submit Contract
+contractManagerDirectory -> contractManagerDirectory: Sign Contract
+contractManagerDirectory -> contractManagerPeer: Accept Contract
+
+skinparam sequenceBoxBorderColor #transparent
+skinparam boxPadding 50
+hide footbox
+@enduml
