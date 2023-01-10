@@ -274,7 +274,23 @@ The public key fingerprint used in the ServiceConnection Grant can be created by
 2. Creating an SHA-256 hash of the public key PEM.
 3. Encoding the hash as Base64.
 
-### gRPC error handling
+###  Error Handling 
+
+#### HTTP {#error_handling_http}
+
+The Inway and Outway both have a single endpoint which proxies HTTP requests. In case of an error in the scope of FSC these components **MUST** return the HTTP status code 540 and the response body must contain an error object as described below:  
+
+```json
+{
+  "message": "A message describing the error",
+  "source": "The component that generated the error",
+  "code": "A unique code describing the error"
+}
+```
+
+#### gRPC
+
+The Contract Manager and Directory are both gRPC services.
 
 gRPC services defined in this RFC must return structured error responses using the [Status interface](https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto). 
 In case of an FSC specific error the `Status.Details` field should contain a [ErrorInfo](https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto) message. 
@@ -408,7 +424,7 @@ Signature requirements:
 - A signature is present with the subject serial number of the Peer defined the field `ServiceConnectionGrant.Outway.PeerSerialNumber`
 - A signature is present with the subject serial number of the Peer defined the field `ServiceConnectionGrant.Service.PeerSerialNumber`
 
-## Signatures {#signatures}
+### Signatures {#signatures}
 
 A signature **MUST** follow the JSON Web Signature(JWS) format specified in [@!RFC7515]
 
@@ -441,12 +457,12 @@ JWS Payload example:
 }
 ```
 
-### Payload fields
+#### Payload fields
 
 - `contractContentHash`, hash of the content of the contract.
 - `type`, type of signature.
 
-#### Signature types {#signature_types}
+##### Signature types {#signature_types}
 
 - `accept`, peer has accepted the contract
 - `reject`, peer has rejected the contract
@@ -481,6 +497,16 @@ The `contractContentHash` of the signature payload contains the signature hash. 
 - `int64`: use `Little-endian` as endianness when converting to a byte array
 - `string`: use `utf-8` encoding when converting to a byte array
 - `GrantType`: should be represented as an int32
+
+### Grant hash {#grant_hash}
+
+The Grant hash can be created by executing the following steps:
+
+1. Create a byte array named `grantBytes`
+2. Convert `Contract.Content.Id` to bytes and append the bytes to `grantBytes`.
+3. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
+4. Hash the `grantBytes` using the hash algorithm described in `Contract.Content.Algorithm`
+5. Encode the bytes of the hash as base64.
 
 ## Contract Manager {#contract_manager}
 
@@ -966,7 +992,7 @@ rpc GetGroupInfo(GetGroupInfoRequest) returns (GetGroupInfoResponse);
 message GetGroupInfoRequest {}
 
 message GetGroupInfoResponse {
-  string fsc_version = 1;
+  FSCVersion fsc_version = 1;
   repeated Extension extensions = 2;
 }
 
@@ -977,7 +1003,7 @@ enum FSCVersion {
 
 message Extension {
   string name = 1;
-  FSCVersion version = 2;
+  string version = 2;
 }
 ```
 
@@ -991,15 +1017,15 @@ The Outway **MUST** use mTLS when connecting to the Directory or Inways with an 
 
 #### Routing
 
-The Outway **MUST** route HTTP requests to the correct service on the Group. A Service on the Group can be identified by the unique combination of a serial-number and a service-name. An Outway receives the serial-number and service-name through the path component as described in  [@!RFC3986, section 3.3] of an HTTP request.
-The first segment of the path **MUST** contain the serial-number, the second segment of the path **MUST** contain the service-name.
+The Outway **MUST** proxy HTTP requests to the correct Service.
 
-The Outway **MUST** use routing information to Services provided by the Directory.
+The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which specifies the hash of the ServiceConnectionGrant to be used to route the request. Since this Grant contains the serial number of the Peer offering the service and the name of the service, this information can be used to retrieve the Inway address from the Directory.
 
-The Outway **MUST** delete the serial-number from the path of the HTTP Request before forwarding the request to the corresponding Inway.
-e.g `/1234567890/service` -> `/service`
+The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant matches the hash  in the `Fsc-Grant-Hash` header.
 
-The Outway **MUST NOT** alter the path of the HTTP Request except for stripping the serial-number.
+The Outway **MUST** use Service routing information provided by the Directory.
+
+The Outway **MUST NOT** alter the path of the HTTP Request.
 
 The Outway **SHALL** use the last available address of a Service in case the Directory is unreachable.
 
@@ -1007,47 +1033,21 @@ Clients **MAY** use TLS when communicating with the Outway.
 
 ### Interfaces
 
-#### HTTP endpoint
+#### Proxy endpoint
 
-The Outway **MUST** implement a single HTTP endpoint which proxies the received request to the corresponding Service on the Group.
+The HTTP endpoint `/` **MUST** be implemented.
 
-The HTTP endpoint `/{serial_number}/{service_name}` **MUST** be implemented.
+#### Error response
 
-##### Error response
+The Outway **MUST** return an error response of a Service to the client without altering the response.
 
-If the Service generates an error, the Outway **MUST** return the error response of the Service to the client without altering the response.
-
-If an error occurs within the scope of FSC, the Outway **MUST** return the HTTP status code 540 with an error response defined in the section below.
-
-```
-  responses:
-    '540':
-      description: A FSC network error has occurred
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                description: A message describing the error
-              source:
-                type: string
-                description: The component causing the error. In this case 'outway'
-              location:
-                type: string
-                description: The location of the error. In this case 'C1' which means it happened between the client and the Outway
-              code:
-                type: string
-                description: A unique code describing the error.
-```
-
-###### Error codes
+The Outway **MUST** return the HTTP status code 540 with an error response defined in the [section Error Handling ]({#error_handling_http}) when an error occurs within the scope of FSC.
 
 The code field of the error response **MUST** contain one of the following codes:
 
-- `INVALID_URL`: The URL is invalid. e.g. the path of the HTTP request contains a serial-number but the Service name is missing.
+- `FSC_GRANT_HASH_HEADER_MISSING`: The FSC Grant Hash header is missing.
 - `UNSUPPORTED_METHOD`: Outway called with an unsupported method, the CONNECT method is not supported.
+- `GRANT_UNKOWN`: The Grant provided in the `Fsc-Grant-Hash` header is not present at the Peer.
 - `SERVER_ERROR`: General error code.
 
 ## Inway
@@ -1060,66 +1060,44 @@ The Inway **MUST** only accept connections from Outways using mTLS with an X.509
 
 #### Authorization
 
-The Inway **MUST** validate that an active Contract with a ServiceConnectionGrant exists for the public key of the mTLS connection making the request. If an active Contract with a ServiceConnectionGrant does not exist, the Inway **MUST** deny the request.
+The Inway **MUST** deny the request when the Peer does not have a Contract containing a ServiceConnectionGrant with the same hash as specified in the HTTP header `Fsc-Grant-Hash`.
+
+The request **MUST** be authorized if the ServiceConnectionGrant meets the following conditions:  
+
+- The subject serial number of the X.509 certificate used by the Outway matches the value of the field `ServiceConnectionGrant.Outway.PeerSerialNumber`
+- The public key fingerprint of the public key used by the Outway matches a value of the field `ServiceConnectionGrant.Outway.publicKeyFingerprints`
 
 #### Routing
 
-The Inway **MUST** route HTTP requests to the correct Service. A Service on the Group can be identified by the unique combination of a serial-number and a service-name. An Inway receives the service-name through the path component [@RFC3986, section 3.3] of an HTTP request.
-The first segment of the path **MUST** contain the service-name.
+The Inway **MUST** proxy HTTP requests to the correct Service.
 
-The Inway **MUST** delete the service-name from the path of the HTTP Request before forwarding the request to the service.
-e.g `/service-name/get/data` -> `/get/data`
+The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which specifies the hash of the ServiceConnectionGrant that specifies the connection.
+
+The Inway **MUST** route the request based on the Service name specified in the ServiceConnectionGrant.
+
+The Inway **MUST** delete the HTTP Header `Fsc-Grant-Hash` from the HTTP Request before forwarding the request to the Service.
 
 ### Interfaces
 
 #### Proxy Endpoint
 
-The Inway **MUST** implement an HTTP endpoint which proxies received requests to the correct Service.
-
-```
-openapi: 3.0.0
-paths:
-  /{service_name}: 
-    description: receives requests of all HTTP Methods and proxies the received requests to the service specified in the path of the HTTP request.
-    responses:
-      default:
-        description: must return the HTTP Response of the service.
-      540:
-        description: An FSC network error has occured 
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  description: A message describing the error
-                source:
-                  type: string
-                  description: The component causing the error. In this case 'inway'
-                location:
-                  type: string
-                  description: The location of the error.
-                code:
-                  type: string
-                  description: A unique code describing the error.
-```
+The HTTP endpoint `/` **MUST** be implemented.
 
 #### Error response
 
-If the Service generates an error, the Inway **MUST** return the error response of the Service to the client without altering the response.
+The Inway **MUST** return the error response of a Service to the Outway without altering the response.
 
-If an error occurs within the scope of FSC, the Inway **MUST** return the HTTP status code 540 with an error response defined in the section Proxy Endpoint.
+The Inway **MUST** return the HTTP status code 540 with an error response defined in the [section Error Handling](#error_handling_http) when an error occurs within the scope of FSC.
 
 The code field of the error response **MUST** contain one of the following codes:
 
-- `ACCESS_DENIED`: No Contract with a ServiceConnectionGrant exists for the public key used by the client making the request.
-- `EMPTY_PATH`: the path of the HTTP request does not contain a Service name.
 - `INVALID_CERTIFICATE`: The X.509 certificates does not meet the requirements of FSC.
 - `MISSING_PEER_CERTIFICATE`: the Inway is unable to extract the X.509 certificate from the connection.
+- `FSC_GRANT_HASH_HEADER_MISSING`: The FSC Grant Hash header is missing.
+- `ACCESS_DENIED`: No Contract with a ServiceConnectionGrant exists for the public key used by the client making the request.
+- `SERVICE_NOT_FOUND`: the Service is unknown to the Inway.
+- `SERVICE_UNREACHABLE`: the Inway knows the Service but is unable to proxy the request to the Service.
 - `SERVER_ERROR`: General error code.
-- `SERVICE_DOES_NOT_EXIST`: the Service is unknown to the Inway.
-- `SERVICE_UNREACHABLE`: the Inway knows the Service but is unable to proxy the request to the service.
 
 # References
 
