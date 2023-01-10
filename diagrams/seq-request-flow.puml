@@ -1,4 +1,6 @@
 @startuml
+
+header: Core
 title: Basic request flow
 
 box "Consuming Peer"

@@ -1,5 +1,8 @@
 @startuml
-title: Service registration flow
+
+autonumber
+header: Core
+title: Providing a Service
 
 box "Peer"
   participant "Contract Manager" as contractManagerPeer
@@ -8,10 +11,10 @@ box "Directory"
   participant "Contract Manager" as contractManagerDirectory
 end box
 
-contractManagerPeer -> contractManagerPeer: Create Contract with a Publication Grant
-contractManagerPeer -> contractManagerPeer: Sign Contract
+contractManagerPeer -> contractManagerPeer: Create Contract with a __ServicePublicationGrant__
+contractManagerPeer -> contractManagerPeer: Add accept signature
 contractManagerPeer -> contractManagerDirectory: Submit Contract
-contractManagerDirectory -> contractManagerDirectory: Sign Contract
+contractManagerDirectory -> contractManagerDirectory: Add accept signature
 contractManagerDirectory -> contractManagerPeer: Accept Contract
 
 skinparam sequenceBoxBorderColor #transparent

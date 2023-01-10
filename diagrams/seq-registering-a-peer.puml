@@ -1,4 +1,7 @@
 @startuml
+
+autonumber
+header: Core
 title: Peer registration flow
 
 box "Peer"
@@ -8,10 +11,10 @@ box "Directory"
   participant "Contract Manager" as contractManagerDirectory
 end box
 
-contractManagerPeer -> contractManagerPeer: Create Contract with a Peer Registration Grant
-contractManagerPeer -> contractManagerPeer: Sign Contract
+contractManagerPeer -> contractManagerPeer: Create Contract with a __PeerRegistrationGrant__
+contractManagerPeer -> contractManagerPeer: Add accept signature
 contractManagerPeer -> contractManagerDirectory: Submit Contract
-contractManagerDirectory -> contractManagerDirectory: Sign Contract
+contractManagerDirectory -> contractManagerDirectory: Add accept signature
 contractManagerDirectory -> contractManagerPeer: Accept Contract
 
 skinparam sequenceBoxBorderColor #transparent

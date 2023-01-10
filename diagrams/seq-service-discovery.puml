@@ -1,5 +1,7 @@
 @startuml
-title: Register and discover a service
+
+header: Core
+title: Register and discover a Service
 
 box "Providing Peer"
   participant "Inway" as inway
@@ -10,9 +12,9 @@ end box
 box "Consuming Peer"
   participant "Outway" as outway
 end box
-inway -> directory ++ : register service
+inway -> directory ++ : register Service
 return
-outway -> directory ++ : discover service
+outway -> directory ++ : discover Service
 return
 
 skinparam sequenceBoxBorderColor #transparent

@@ -283,8 +283,8 @@ The Inway and Outway both have a single endpoint which proxies HTTP requests. In
 ```json
 {
   "message": "A message describing the error",
-  "source": "The component that generated the error",
-  "code": "A unique code describing the error"
+  "domain": "The component that generated the error",
+  "reason": "A unique code describing the error"
 }
 ```
 
@@ -295,7 +295,7 @@ The Contract Manager and Directory are both gRPC services.
 gRPC services defined in this RFC must return structured error responses using the [Status interface](https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto). 
 In case of an FSC specific error the `Status.Details` field should contain a [ErrorInfo](https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto) message. 
 
-The fields of the`ErrorInfo` interface are described below.
+The fields of the `ErrorInfo` interface are described below.
 
 * *Reason(string):*  
 The FSC specific error code
@@ -400,8 +400,8 @@ Signature requirements:
 
 Validation rules:
 
-- The subject serial number of the X.509 certificate used by the Contract Manager of the Directory Peer matches the value of the field `PublicationGrant.Directory.PeerSerialNumber`
-- The subject serial number of the X.509 certificate used by the Contract Manager offering the Contract to the Directory matches the value of the field `PublicationGrant.Service.PeerSerialNumber`
+- The subject serial number of the X.509 certificate used by the Contract Manager of the Directory Peer matches the value of the field `ServicePublicationGrant.Directory.PeerSerialNumber`
+- The subject serial number of the X.509 certificate used by the Contract Manager offering the Contract to the Directory matches the value of the field `ServicePublicationGrant.Service.PeerSerialNumber`
 - A Service name which matches the regular expression `^[a-zA-Z0-9-.]{1,100}$` is provided in the field  `ServicePublicationGrant.ServicePublication.Name` 
 - An Inway address is provided in the field `ServicePublicationGrant.ServicePublication.InwayAddress`. The value should be a valid URL as specified in [@!RFC1738]
 
