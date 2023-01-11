@@ -646,6 +646,7 @@ message GrantServiceConnection{
        
     message Outway {
         peer_serial_number = 1;
+        repeated string public_key_fingerprints = 2;
     }
     
     Outway outway = 1;
