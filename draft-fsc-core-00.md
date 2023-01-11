@@ -424,6 +424,27 @@ Signature requirements:
 - A signature is present with the subject serial number of the Peer defined the field `ServiceConnectionGrant.Outway.PeerSerialNumber`
 - A signature is present with the subject serial number of the Peer defined the field `ServiceConnectionGrant.Service.PeerSerialNumber`
 
+##### ServiceConnectionGrant Fsc-Grant header value {#serviceConnectionGrant_header_value}
+
+The Fsc-Grant header value must contain a Base64 string of the ServiceConnectionGrant encoded as JSON.
+
+An example of the ServiceConnectionGrant as JSON:
+
+```JSON
+{
+    "outway": {
+        "peer_serial_number":"12345678901234567890",
+        "public_key_fingerprints": ["g+jpuLAMFzM09tOZpb0Ehslhje4S/IsIxSWsS4E16Yc="]
+    },
+    "service": {
+        "peer_serial_number":"12345678911234567891",
+        "name": "my-service"
+    }
+}
+```
+
+The ServiceConnectionGrant described above results in the following Base64 encoded string: `ewogICAgIm91dHdheSI6IHsKICAgICAgICAicGVlcl9zZXJpYWxfbnVtYmVyIjoiMTIzNDU2Nzg5MDEyMzQ1Njc4OTAiLAogICAgICAgICJwdWJsaWNfa2V5X2ZpbmdlcnByaW50cyI6IFsiZytqcHVMQU1Gek0wOXRPWnBiMEVoc2xoamU0Uy9Jc0l4U1dzUzRFMTZZYz0iXQogICAgfSwKICAgICJzZXJ2aWNlIjogewogICAgICAgICJwZWVyX3NlcmlhbF9udW1iZXIiOiIxMjM0NTY3ODkxMTIzNDU2Nzg5MSIsCiAgICAgICAgIm5hbWUiOiAibXktc2VydmljZSIKICAgIH0KfQ==`
+
 ### Signatures {#signatures}
 
 A signature **MUST** follow the JSON Web Signature(JWS) format specified in [@!RFC7515]
@@ -1020,9 +1041,9 @@ The Outway **MUST** use mTLS when connecting to the Directory or Inways with an 
 
 The Outway **MUST** proxy HTTP requests to the correct Service.
 
-The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which specifies the hash of the ServiceConnectionGrant to be used to route the request. Since this Grant contains the serial number of the Peer offering the service and the name of the service, this information can be used to retrieve the Inway address from the Directory.
+The HTTP request **MUST** contain the HTTP Header `Fsc-Grant` which contains the ServiceConnectionGrant to be used to route the request. Since this Grant contains the serial number of the Peer offering the Service and the name of the Service, this information can be used to retrieve the Inway address from the Directory. The content of the header is described in the [ServiceConnectionGrant Fsc-Grant header value section](#serviceConnectionGrant_header_value).
 
-The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant matches the hash  in the `Fsc-Grant-Hash` header.
+The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant that matches the ServiceConnectionGrant in the `Fsc-Grant` header.
 
 The Outway **MUST** use Service routing information provided by the Directory.
 
@@ -1072,11 +1093,13 @@ The request **MUST** be authorized if the ServiceConnectionGrant meets the follo
 
 The Inway **MUST** proxy HTTP requests to the correct Service.
 
-The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which specifies the hash of the ServiceConnectionGrant that specifies the connection.
+The HTTP request **MUST** contain the HTTP Header `Fsc-Grant` which contains the ServiceConnectionGrant. The content of the header is described in the [ServiceConnectionGrant Fsc-Grant header value section](#serviceConnectionGrant_header_value).
 
 The Inway **MUST** route the request based on the Service name specified in the ServiceConnectionGrant.
 
-The Inway **MUST** delete the HTTP Header `Fsc-Grant-Hash` from the HTTP Request before forwarding the request to the Service.
+The Inway **MUST** delete the HTTP Header `Fsc-Grant` from the HTTP Request before forwarding the request to the Service.
+
+The Inway **MUST** add the HTTP Header `Fsc-Peer-Serial-Number` which contains the subject serial number of the X.509 certificate of the Outway making the request.
 
 ### Interfaces
 
