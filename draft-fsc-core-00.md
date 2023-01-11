@@ -754,7 +754,7 @@ The Remote Procedure Call `ListContracts` **MUST** only return contracts involvi
 The Remote Procedure Call `ListContracts` **MUST** be implemented with the following interface and messages:
 
 ```
-type SortOrder enum {
+enum SortOrder {
   SORT_ORDER_UNSPECIFIED = 0;
   SORT_ORDER_ASCENDING = 1;
   SORT_ORDER_DESCENDING = 2;
