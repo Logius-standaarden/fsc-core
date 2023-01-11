@@ -1,4 +1,7 @@
 @startuml
+
+autonumber
+header: Core
 title: Contract Management
 
 box "Peer"

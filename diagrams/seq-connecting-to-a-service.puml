@@ -1,4 +1,7 @@
 @startuml
+
+autonumber
+header: Core
 title: Connecting to a Service
 
 box "Consuming Peer"
@@ -9,10 +12,10 @@ box "Providing Peer"
   participant "Contract Manager" as contractManagerProvidingPeer
 end box
 
-contractManagerConsumingPeer -> contractManagerConsumingPeer: Create Contract with a Connection Grant
-contractManagerConsumingPeer -> contractManagerConsumingPeer: Sign Contract
+contractManagerConsumingPeer -> contractManagerConsumingPeer: Create Contract with a __ServiceConnectionGrant__
+contractManagerConsumingPeer -> contractManagerConsumingPeer: Add accept signature
 contractManagerConsumingPeer -> contractManagerProvidingPeer: Submit Contract
-contractManagerProvidingPeer -> contractManagerProvidingPeer: Sign Contract
+contractManagerProvidingPeer -> contractManagerProvidingPeer: Add accept signature
 contractManagerProvidingPeer -> contractManagerConsumingPeer: Accept Contract
 
 skinparam sequenceBoxBorderColor #transparent

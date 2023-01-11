@@ -1,4 +1,6 @@
 @startuml
+
+header: Core
 title mTLS connections with Trust Anchor X.509 certificates
 
 frame "Group" {
