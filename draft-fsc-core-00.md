@@ -42,9 +42,9 @@ organization = "AceWorks"
 initials = "N."
 surname = "Dequeker"
 fullname = "Niels Dequeker"
-organization = "VNG"
+organization = "ND Software"
   [author.address]
-   email = "niels.dequeker@vng.nl"
+   email = "niels@nd-software.be"
 
 %%%
 
