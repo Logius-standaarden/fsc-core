@@ -1041,7 +1041,7 @@ The Outway **MUST** use mTLS when connecting to the Directory or Inways with an 
 
 The Outway **MUST** proxy HTTP requests to the correct Service.
 
-The HTTP request **MUST** contain the HTTP Header `Fsc-Grant` which contains the ServiceConnectionGrant to be used to route the request. Since this Grant contains the serial number of the Peer offering the Service and the name of the Service, this information can be used to retrieve the Inway address from the Directory. The content of the header is described in the [ServiceConnectionGrant Fsc-Grant header value section](#serviceConnectionGrant_header_value)
+The HTTP request **MUST** contain the HTTP Header `Fsc-Grant` which contains the ServiceConnectionGrant to be used to route the request. Since this Grant contains the serial number of the Peer offering the Service and the name of the Service, this information can be used to retrieve the Inway address from the Directory. The content of the header is described in the [ServiceConnectionGrant Fsc-Grant header value section](#serviceConnectionGrant_header_value).
 
 The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant that matches the ServiceConnectionGrant in the `Fsc-Grant` header.
 
@@ -1093,11 +1093,13 @@ The request **MUST** be authorized if the ServiceConnectionGrant meets the follo
 
 The Inway **MUST** proxy HTTP requests to the correct Service.
 
-The HTTP request **MUST** contain the HTTP Header `Fsc-Grant` which contains the ServiceConnectionGrant. The content of the header is described in the [ServiceConnectionGrant Fsc-Grant header value section](#serviceConnectionGrant_header_value)
+The HTTP request **MUST** contain the HTTP Header `Fsc-Grant` which contains the ServiceConnectionGrant. The content of the header is described in the [ServiceConnectionGrant Fsc-Grant header value section](#serviceConnectionGrant_header_value).
 
 The Inway **MUST** route the request based on the Service name specified in the ServiceConnectionGrant.
 
 The Inway **MUST** delete the HTTP Header `Fsc-Grant` from the HTTP Request before forwarding the request to the Service.
+
+The Inway **MUST** add the HTTP Header `Fsc-Peer-Serial-Number` which contains the subject serial number of the X.509 certificate of the Outway making the request.
 
 ### Interfaces
 
