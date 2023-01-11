@@ -12,9 +12,9 @@ end box
 box "Consuming Peer"
   participant "Outway" as outway
 end box
-inway -> directory ++ : register Service
+inway -> directory ++ : Register Service
 return
-outway -> directory ++ : discover Service
+outway -> directory ++ : Discover Service
 return
 
 skinparam sequenceBoxBorderColor #transparent
