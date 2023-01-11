@@ -607,7 +607,7 @@ message ContractContent {
   string group_id = 2;
   Validity validity = 3;
   repeated Grant grants = 4;
-  string hash_algorithm = 5;
+  HashAlgorithm hash_algorithm = 5;
 }
 
 message Validity {
