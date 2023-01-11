@@ -310,7 +310,7 @@ The FSC component which generated the error. The following components are allowe
 
 The Contract fields are described below. The gRPC interface used by the Contract Manager is defined in the [Contract Interface section](#contract_interface). 
 
-* *ID(string):*  
+* *ID(bytes):*  
 UUID of the Contract.   
 * *GroupID(string):*  
 The URI of the Directory  
@@ -505,7 +505,7 @@ The `contractContentHash` of the signature payload contains the signature hash. 
 
 1. Create a byte array called `contentBytes`.
 2. Convert `Contract.Content.HashAlgorithm` to bytes and append the bytes to `contentBytes`.
-3. Convert `Contract.Content.Id` to bytes and append the bytes to `contentBytes`.
+3. Append `Contract.Content.Id` to `contentBytes`.
 4. Convert `Contract.Content.GroupId` to bytes and append the bytes to `contentBytes`.
 5. Convert `Contract.Content.Validity.NotBefore` to bytes and append the bytes to `contentBytes`.
 6. Convert `Contract.Content.Validity.NotAfter` to bytes and append the bytes to `contentBytes`.
@@ -603,7 +603,7 @@ message Contract {
 }
 
 message ContractContent {
-  string id = 1;
+  bytes id = 1;
   string group_id = 2;
   Validity validity = 3;
   repeated Grant grants = 4;
