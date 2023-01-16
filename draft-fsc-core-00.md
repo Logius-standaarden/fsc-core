@@ -337,7 +337,7 @@ There are multiple types of Grants. The type of a Grant is stored in its `Type` 
 Every type of Grant contains a specific set of information. That is contained in the `Data` field of the Grant.
 The gRPC interfaces of the Grants are defined in the [Contract Interface section](#contract_interface).
 
-**PeerRegistrationGrant** {#peer_registration_grant}
+#### PeerRegistrationGrant {#peer_registration_grant}
 
 * *Directory:*
   * *PeerSerialNumber(string):*  
@@ -350,7 +350,7 @@ The gRPC interfaces of the Grants are defined in the [Contract Interface section
   * *ContractManagerAddress(string):*  
     Address of the Contract Manager  
 
-**ServicePublicationGrant**
+#### ServicePublicationGrant
 
 * *Directory:*
   * *PeerSerialNumber(string):*  
@@ -363,7 +363,7 @@ The gRPC interfaces of the Grants are defined in the [Contract Interface section
   * *InwayAddress(string):*  
     Address of the Inway that is offering the Service.  
 
-**ServiceConnectionGrant**
+#### ServiceConnectionGrant
 
 * *Outway:*  
   * *PeerSerialNumber(string):*  
