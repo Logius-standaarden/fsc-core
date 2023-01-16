@@ -749,7 +749,7 @@ message RevokeContractResponse{}
 
 #### RPC ListContracts
 
-The Remote Procedure Call `ListContracts` **MUST** only return contracts involving the Peer calling the RPC when the GrantType is `GRANT_TYPE_SERVICE_CONNECTION`, `GRANT_TYPE_DELEGATION`.
+The Remote Procedure Call `ListContracts` **MUST** only return contracts involving the Peer calling the RPC when the GrantType is `GRANT_TYPE_SERVICE_CONNECTION`.
 
 The Remote Procedure Call `ListContracts` **MUST** be implemented with the following interface and messages:
 
