@@ -243,7 +243,7 @@ Clients make requests to Outways, the Outway proxies the request to the Inway an
 ### Port configuration
 
 In order to provide a predictable network configuration FSC limits the selection of network ports to be used by components. 
-The ports used by FSC are `443` and `8443`. 
+The ports used by FSC components **MUST** be `443` or `8443`. 
 
 Port `443` is **RECOMMENDED** for data traffic i.e. HTTP requests to a Service.  
 Port `8443` is **RECOMMENDED** for management traffic i.e. submitting/signing Contracts.  
@@ -430,27 +430,6 @@ Signature requirements:
 - A signature is present with the subject serial number of the Peer defined the field `ServiceConnectionGrant.Outway.PeerSerialNumber`
 - A signature is present with the subject serial number of the Peer defined the field `ServiceConnectionGrant.Service.PeerSerialNumber`
 
-##### ServiceConnectionGrant Fsc-Grant header value {#serviceConnectionGrant_header_value}
-
-The Fsc-Grant header value must contain a Base64 string of the ServiceConnectionGrant encoded as JSON.
-
-An example of the ServiceConnectionGrant as JSON:
-
-```JSON
-{
-    "outway": {
-        "peer_serial_number":"12345678901234567890",
-        "public_key_fingerprints": ["g+jpuLAMFzM09tOZpb0Ehslhje4S/IsIxSWsS4E16Yc="]
-    },
-    "service": {
-        "peer_serial_number":"12345678911234567891",
-        "name": "my-service"
-    }
-}
-```
-
-The ServiceConnectionGrant described above results in the following Base64 encoded string: `ewogICAgIm91dHdheSI6IHsKICAgICAgICAicGVlcl9zZXJpYWxfbnVtYmVyIjoiMTIzNDU2Nzg5MDEyMzQ1Njc4OTAiLAogICAgICAgICJwdWJsaWNfa2V5X2ZpbmdlcnByaW50cyI6IFsiZytqcHVMQU1Gek0wOXRPWnBiMEVoc2xoamU0Uy9Jc0l4U1dzUzRFMTZZYz0iXQogICAgfSwKICAgICJzZXJ2aWNlIjogewogICAgICAgICJwZWVyX3NlcmlhbF9udW1iZXIiOiIxMjM0NTY3ODkxMTIzNDU2Nzg5MSIsCiAgICAgICAgIm5hbWUiOiAibXktc2VydmljZSIKICAgIH0KfQ==`
-
 ### Signatures {#signatures}
 
 A signature **MUST** follow the JSON Web Signature (JWS) format specified in [@!RFC7515]
@@ -532,9 +511,11 @@ The Grant hash can be created by executing the following steps:
 
 1. Create a byte array named `grantBytes`
 2. Convert `Contract.Content.Id` to bytes and append the bytes to `grantBytes`.
-3. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
+3. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the proto definition](#contract_interface). If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
 4. Hash the `grantBytes` using the hash algorithm described in `Contract.Content.Algorithm`
 5. Encode the bytes of the hash as Base64.
+6. Convert the value of `Contract.Content.Algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value defined in [the proto definition](#contract_interface). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
+7. Prefix the Bas64 string with the string containing the hash algorithm.
 
 ## Contract Manager {#contract_manager}
 
@@ -583,6 +564,7 @@ This service **MUST** offer the following Remote Procedure Calls (RPC):
 - `RejectContract`, used to reject a Contract
 - `RevokeContract`, used to revoke a Contract
 - `ListContracts`, lists Contracts of a specific Grant Type
+- `GetContractByGrantHash`, gets Contract containing a Grant
 - `ListCertificates`, lists certificates matching the Public Key Fingerprints in the request
 
 RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
@@ -775,6 +757,24 @@ message ListContractsRequest{
 
 message ListContractsResponse {
     repeated Contract contracts = 1;
+}
+```
+
+#### RPC GetContractByGrantHash
+
+The Remote Procedure Call `GetContractByGrantHash` **MUST** only return contracts that involve the Peer calling the RPC and contain a grant which hash matches the hash specified in the field `GetContractByGrantHashRequest.GrantHash`.
+
+The Remote Procedure Call `GetContractByGrantHash` **MUST** be implemented with the following interface and messages:
+
+```
+rpc GetContractByGrantHash(GetContractByGrantHashRequest) returns (GetContractByGrantHashResponse);
+
+message GetContractByGrantHashHashRequest{
+   string grant_hash = 1;
+}
+
+message GetContractByGrantHashResponse {
+    Contract contract = 1;
 }
 ```
 
@@ -1050,10 +1050,10 @@ The Outway **MUST** use mTLS when connecting to the Directory or Inways with an 
 
 The Outway **MUST** proxy HTTP requests to the correct Service.
 
-The HTTP request **MUST** contain the HTTP Header `Fsc-Grant` which contains the ServiceConnectionGrant to be used to route the request. 
-Since this Grant contains the serial number of the Peer offering the Service and the name of the Service, this information can be used to retrieve the Inway address from the Directory. The content of the header is described in the [ServiceConnectionGrant Fsc-Grant header value section](#serviceConnectionGrant_header_value).
+The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which contains the hash of ServiceConnectionGrant to be used to route the request. For more information about the Grant hash read the [Grant hash section](#grant_hash)
+The ServiceConnectionGrant contains the serial number of the Peer offering the Service and the name of the Service, this information can be used to retrieve the Inway address from the Directory.
 
-The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant that matches the ServiceConnectionGrant in the `Fsc-Grant` header.
+The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant with a hash that matches the hash provided in the `Fsc-Grant_hash` header.
 
 The Outway **MUST** use Service routing information provided by the Directory.
 
@@ -1103,11 +1103,11 @@ The request **MUST** be authorized if the ServiceConnectionGrant meets the follo
 
 The Inway **MUST** proxy HTTP requests to the correct Service.
 
-The HTTP request **MUST** contain the HTTP Header `Fsc-Grant` which contains the ServiceConnectionGrant. The content of the header is described in the [ServiceConnectionGrant Fsc-Grant header value section](#serviceConnectionGrant_header_value).
+The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which contains the hash of the ServiceConnectionGrant.
 
-The Inway **MUST** route the request based on the Service name specified in the ServiceConnectionGrant.
+The Inway **MUST** route the request based on the Service specified in the ServiceConnectionGrant.
 
-The Inway **MUST** delete the HTTP Header `Fsc-Grant` from the HTTP Request before forwarding the request to the Service.
+The Inway **MUST** delete the HTTP Header `Fsc-Grant-Hash` from the HTTP Request before forwarding the request to the Service.
 
 The Inway **MUST** add the HTTP Header `Fsc-Peer-Serial-Number` which contains the subject serial number of the X.509 certificate of the Outway making the request.
 
