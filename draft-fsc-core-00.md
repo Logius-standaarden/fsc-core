@@ -408,8 +408,8 @@ Validation rules:
 
 - The subject serial number of the X.509 certificate used by the Contract Manager of the Directory Peer matches the value of the field `ServicePublicationGrant.Directory.PeerSerialNumber`
 - The subject serial number of the X.509 certificate used by the Contract Manager offering the Contract to the Directory matches the value of the field `ServicePublicationGrant.Service.PeerSerialNumber`
-- A Service name which matches the regular expression `^[a-zA-Z0-9-.]{1,100}$` is provided in the field  `ServicePublicationGrant.ServicePublication.Name` 
-- An Inway address is provided in the field `ServicePublicationGrant.ServicePublication.InwayAddress`. The value should be a valid URL as specified in [@!RFC1738]
+- A Service name which matches the regular expression `^[a-zA-Z0-9-.]{1,100}$` is provided in the field  `ServicePublicationGrant.Service.Name` 
+- An Inway address is provided in the field `ServicePublicationGrant.Service.InwayAddress`. The value should be a valid URL as specified in [@!RFC1738]
 
 Signature requirements:  
 
