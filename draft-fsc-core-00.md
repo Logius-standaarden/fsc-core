@@ -731,7 +731,14 @@ message RevokeContractResponse{}
 
 #### RPC ListContracts
 
-The Remote Procedure Call `ListContracts` **MUST** only return contracts involving the Peer calling the RPC when the GrantType is `GRANT_TYPE_SERVICE_CONNECTION`.
+The Remote Procedure Call `ListContracts` **MUST** returns a list of Grants of a specific type.
+
+When filtering by `GRANT_TYPE_SERVICE_CONNECTION`, the Remote Procedure Call `ListContracts` **MUST** 
+only return contracts where the Serial Number of the Peer calling the RPC is present in the 
+field `GrantServiceConnection.Service.PeerSerialNumber` or `GrantServiceConnection.Outway.PeerSerialNumber`.
+
+When filtering by `GRANT_TYPE_PEER_REGISTRATION` or `GRANT_TYPE_SERVICE_REGISTRATION` the Remote Procedure 
+Call `ListContracts` **MUST** return all contracts containing that Grant type.
 
 The Remote Procedure Call `ListContracts` **MUST** be implemented with the following interface and messages:
 
