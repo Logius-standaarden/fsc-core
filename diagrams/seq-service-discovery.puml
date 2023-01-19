@@ -4,7 +4,7 @@ header: Core
 title: Register and discover a Service
 
 box "Providing Peer"
-  participant "Contract Manager" as contractManager
+  participant "Manager" as Manager
 end box
 box "Group"
   participant "Directory" as directory
@@ -12,7 +12,7 @@ end box
 box "Consuming Peer"
   participant "Outway" as outway
 end box
-contractManager -> directory ++ : Register Service
+Manager -> directory ++ : Register Service
 return
 outway -> directory ++ : Discover Service
 return

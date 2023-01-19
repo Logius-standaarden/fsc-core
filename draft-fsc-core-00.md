@@ -81,9 +81,10 @@ Contracts define the registration of a Peer to the Group, Service publication to
 
 Inways are reverse proxies that route incoming connections from Outways to Services.
 Outways are forward proxies that discover all available Services in the Group and route outgoing connections to Inways.
-Contract Managers negotiate Contracts between Peers.
+Managers negotiate Contracts between Peers.
 Routing information for the Services in the Group can be requested from the Directory.
-Tha address of Contracts Managers of Peers can be requested from the Directory.
+The address of Managers of Peers can be requested from the Directory.
+The address of an Inway offering a Service can be request from the Manager of the Peer offering the Service.
 
 To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once a right to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the HTTPS service is made.
 
@@ -114,7 +115,7 @@ Actor that provides and/or consumes Services. This is an abstraction of e.g. an 
 
 *Group:*   
   
-System of Peers using Inways, Outways and Contract Managers that confirm to the FSC specification to make use of each other's Services.
+System of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services.
 
 *Directory:*      
   
@@ -132,9 +133,9 @@ Forward proxy that handles outgoing connections to Inways.
   
 Document between Peers defining which interactions between Peers are possible.
 
-*Contract Manager:*  
+*Manager:*  
   
-The Contract Manager manages Contracts and configures Inways and Outways based on information from a Directory and Contracts.
+The Manager manages Contracts and configures Inways and Outways based on information from a Directory and Contracts.
 
 *Grant:*  
   
@@ -158,7 +159,7 @@ This chapter describes the basic architecture of an FSC system.
 
 ## Identity and Trust  {#trustanchor}
 
-Connections between Contract Managers, Inways, Outways and connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. Components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor. The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing `Subject.organization` and `Subject.serialnumber` [@!RFC5280, section 4.1.2.6] in each certificate.
+Connections between Managers, Inways, Outways and connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. Components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor. The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing `Subject.organization` and `Subject.serialnumber` [@!RFC5280, section 4.1.2.6] in each certificate.
 
 !---
 ![mTLS Connections](diagrams/seq-mtls-connections.svg "mTLS Connections")
@@ -167,8 +168,8 @@ Connections between Contract Managers, Inways, Outways and connections with the 
 
 ## Contract Management
 
-Contracts are negotiated between Contract Managers of Peers. The Directory contains the Contract Manager address of each Peer.
-Connections between Peers are based on Contracts with ServiceConnectionGrants. To create a new contract, the Contract Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Contract Management functionality, see [Registering a Peer](#registering)). For each desired connection, a ServiceConnectionGrant is formulated that contains identifying information about both the Outway from the requesting Peer and the Service of the Providing Peer. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
+Contracts are negotiated between Managers of Peers. The Directory contains the Manager address of each Peer.
+Connections between Peers are based on Contracts with ServiceConnectionGrants. To create a new contract, the Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Management functionality, see [Registering a Peer](#registering)). For each desired connection, a ServiceConnectionGrant is formulated that contains identifying information about both the Outway from the requesting Peer and the Service of the Providing Peer. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
 
 !---
 ![Contract Management](diagrams/seq-contract-management.svg "Contract Management")
@@ -177,7 +178,7 @@ Connections between Peers are based on Contracts with ServiceConnectionGrants. T
 
 ### Contract states
 
-Any Peer can submit a Contract to other Peers. This Contract becomes valid when all Peers mentioned in the Contract accept its content by placing an accept signature. 
+Any Peer can submit a Contract to other Peers. This Contract becomes valid when all Peers mentioned in the Contract accept the Contract by placing an accept signature. 
 
 A Contract becomes invalid when at least one Peer mentioned in de Contract revokes its content.
 
@@ -190,7 +191,7 @@ Contracts are immutable. When the content of a Contract has to change, the contr
 A Peer needs to register with the Directory of the Group before a Peer is allowed to provide or consume Services available in the Group. 
 The Peer registration is required to validate that the Peer meets the requirements set by the Group. In case of FSC Core only an x.509 Certificate signed by the Trust Anchor is required but extensions on Core might, for example, require the Peer to sign a "Terms of Service" document before allowing a Peer to participate in a Group.
 
-To register, the Peer needs to create a Contract with a [PeerRegistrationGrant](#peer-registration). The PeerRegistrationGrant contains information about the Peer, the address of the Contract Manager of the Peer and the Directory that should accept the registration.
+To register, the Peer needs to create a Contract with a [PeerRegistrationGrant](#peer-registration). The PeerRegistrationGrant contains information about the Peer, the address of the Manager of the Peer and the Directory that should accept the registration.
 
 Once the Contract between Peer and Directory is signed by both parties, the Peer is considered a Peer of the Group.
 
@@ -202,7 +203,7 @@ Once the Contract between Peer and Directory is signed by both parties, the Peer
 ## Service discovery
 
 Every Group is defined by one Directory that contains routing information for the Services in the Group.
-Contract Managers register Services by offering Contracts with a ServicePublicationGrant to the Directory. This Grant contains information about the Service, the address of the Inway offering the Service and the Directory that should list the Service.
+Managers register Services by offering Contracts with a ServicePublicationGrant to the Directory. This Grant contains information about the Service and the Directory that should list the Service.
 Outways discover Services by requesting a list from the Directory.
 
 !---
@@ -249,11 +250,11 @@ Port `443` is **RECOMMENDED** for data traffic i.e. HTTP requests to a Service.
 Port `8443` is **RECOMMENDED** for management traffic i.e. submitting/signing Contracts.  
 
 Data traffic: Inway, Outway  
-Management Traffic: Directory, Contract Manager
+Management Traffic: Directory, Manager
 
 ### TLS configuration
 
-Connections between Inways, Outways, Contract Managers and the Directory of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
+Connections between Inways, Outways, Managers and the Directory of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
 
 The certificates must be provided by a Trust Anchor (CA) who **SHOULD** validate a Peers identity. 
 
@@ -266,8 +267,8 @@ Every Peer in a Group **MUST** accept the same Trust Anchor.
 FSC places specific requirements on the subject fields of a certificate. [@!RFC5280, section 4.2.1.6] which are listed below
 
 - SerialNumber: A unique identifier which serves as the Peers identity in the FSC Group.
-- CommonName: This should correspond to the Fully Qualified Domain Name (FQDN) of a Contract Manager, Inway or Outway. For an Outway this FQDN does not have to resolve.
-- Subject Alternative Name [@!RFC5280, section 4.2.1.6]: This should contain to the Fully Qualified Domain Names (FQDN) of a Contract Manager, Inway or Outway. For an Outway this FQDN does not have to resolve.
+- CommonName: This should correspond to the Fully Qualified Domain Name (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve.
+- Subject Alternative Name [@!RFC5280, section 4.2.1.6]: This should contain to the Fully Qualified Domain Names (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve.
 
 #### Public Key Fingerprints {#public_key_fingerprint}
 
@@ -294,7 +295,7 @@ In case of an error in the scope of FSC these components **MUST** return the HTT
 
 #### gRPC
 
-The Contract Manager and Directory are both gRPC services.
+The Manager and Directory are both gRPC services.
 
 gRPC services defined in this RFC must return structured error responses using the [Status interface](https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto). 
 In case of an FSC specific error the `Status.Details` field should contain a [ErrorInfo](https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto) message. 
@@ -304,11 +305,11 @@ The fields of the `ErrorInfo` interface are described below.
 * *Reason(string):*  
 The FSC specific error code
 * *Domain(string):*  
-The FSC component which generated the error. The following components are allowed `directory`,`contract_manager`, `inway`, `outway`
+The FSC component which generated the error. The following components are allowed `directory`,`manager`, `inway`, `outway`
 
 ## Contract
 
-The Contract fields are described below. The gRPC interface used by the Contract Manager is defined in the [Contract Interface section](#contract_interface). 
+The Contract fields are described below. The gRPC interface used by the Manager is defined in the [Contract Interface section](#contract_interface). 
 
 * *ID(bytes):*  
 UUID of the Contract.   
@@ -347,8 +348,8 @@ The gRPC interfaces of the Grants are defined in the [Contract Interface section
     Serial number of the Peer
   * *Name(string):*  
     Name of the Peer
-  * *ContractManagerAddress(string):*  
-    Address of the Contract Manager  
+  * *ManagerAddress(string):*  
+    Address of the Manager  
 
 #### ServicePublicationGrant
 
@@ -392,10 +393,10 @@ Per Grant type different validation rules apply.
 
 Validation rules:  
 
-- The subject serial number of the X.509 certificate used by the Contract Manager of the Directory matches the value of the field `PeerRegistrationGrant.Directory.PeerSerialNumber`
-- The subject serial number of the X.509 certificate used by the Contract Manager offering the Contract to the Directory matches the value of the field `PeerRegistrationGrant.Peer.SerialNumber`
-- The subject organization of the X.509 certificate used by the Contract Manager offering the Contract to the Directory matches the value of the field `PeerRegistrationGrant.Peer.Name`
-- A Contract Manager address is provided in the field `PeerRegistrationGrant.Peer.ContractManagerAddress`. The value should be a valid URL as specified in [@!RFC1738]
+- The subject serial number of the X.509 certificate used by the Manager of the Directory matches the value of the field `PeerRegistrationGrant.Directory.PeerSerialNumber`
+- The subject serial number of the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `PeerRegistrationGrant.Peer.SerialNumber`
+- The subject organization of the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `PeerRegistrationGrant.Peer.Name`
+- A Manager address is provided in the field `PeerRegistrationGrant.Peer.ContractManagerAddress`. The value should be a valid URL as specified in [@!RFC1738]
 
 Signature requirements:  
 
@@ -406,8 +407,8 @@ Signature requirements:
 
 Validation rules:
 
-- The subject serial number of the X.509 certificate used by the Contract Manager of the Directory Peer matches the value of the field `ServicePublicationGrant.Directory.PeerSerialNumber`
-- The subject serial number of the X.509 certificate used by the Contract Manager offering the Contract to the Directory matches the value of the field `ServicePublicationGrant.Service.PeerSerialNumber`
+- The subject serial number of the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `ServicePublicationGrant.Directory.PeerSerialNumber`
+- The subject serial number of the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `ServicePublicationGrant.Service.PeerSerialNumber`
 - A Service name which matches the regular expression `^[a-zA-Z0-9-.]{1,100}$` is provided in the field  `ServicePublicationGrant.Service.Name` 
 - An Inway address is provided in the field `ServicePublicationGrant.Service.InwayAddress`. The value should be a valid URL as specified in [@!RFC1738]
 
@@ -420,8 +421,8 @@ Signature requirements:
 
 Validation rules:
 
-- The subject serial number of the X.509 certificate used by the Contract Manager of the Peer providing the Service matches the value of the field `ServiceConnectionGrant.Service.PeerSerialNumber`
-- The subject serial number of the X.509 certificate used by the Contract Manager offering the Contract to the Service providing Peer matches the value of the field `ServiceConnectionGrant.Outway.PeerSerialNumber`
+- The subject serial number of the X.509 certificate used by the Manager of the Peer providing the Service matches the value of the field `ServiceConnectionGrant.Service.PeerSerialNumber`
+- The subject serial number of the X.509 certificate used by the Manager offering the Contract to the Service providing Peer matches the value of the field `ServiceConnectionGrant.Outway.PeerSerialNumber`
 - The Service provided in the field `ServiceConnectionGrant.Service.Name` is offered by the Peer provided in the field `ServiceConnectionGrant.Service.PeerSerialNumber`
 - At least one Public Key Fingerprint is provided in the field `ServiceConnectionGrant.Outway.PublicKeyFingerprints`
 
@@ -517,9 +518,9 @@ The Grant hash can be created by executing the following steps:
 6. Convert the value of `Contract.Content.Algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value defined in [the proto definition](#contract_interface). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
 7. Prefix the Bas64 string with the string containing the hash algorithm.
 
-## Contract Manager {#contract_manager}
+## Manager {#manager}
 
-The Contract Manager is responsible for:
+The Manager is responsible for:
 
 - Receiving Contracts
 - Validating Contracts
@@ -527,36 +528,39 @@ The Contract Manager is responsible for:
 - Validating Contract signatures
 - Providing the X.509 certificates containing the Public Key of the keypair of which the private key was used by the Peer to create signatures
 - Providing Contracts involving a specific Peer
+- Providing Inway addresses of Services offered by the Peer
 
-It is **RECOMMENDED** to implement the Contract Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Contract Manager.
+It is **RECOMMENDED** to implement the Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Manager.
 
 ### Behavior
 
 #### Authentication
 
-The Contract Manager **MUST** accept only mTLS connections from other external Contract Managers with an X.509 certificate that is signed by the Thrust Anchor of the Group.
+The Manager **MUST** accept only mTLS connections from other external Managers with an X.509 certificate that is signed by the Thrust Anchor of the Group.
 
 #### Receiving Signatures
 
-The Contract Manager **MUST** validate the signature according to the rules described in the [signature section](#signature).
+The Manager **MUST** validate the signature according to the rules described in the [signature section](#signature).
 
-The Contract Manager **MUST** generate an error response if a signature is invalid.
+The Manager **MUST** generate an error response if a signature is invalid.
 
-The Contract Manager **MUST** propagate the signature to each of the Peers in the Contract when the Peer signs the Contract.
+The Manager **MUST** propagate the signature to each of the Peers in the Contract when the Peer signs the Contract.
 
 It is **RECOMMENDED** to implement a retry mechanism in case the signature propagation fails.
 
 #### Providing X.509 certificates
 
-The Contract Manager **MUST** provide the X.509 certificates containing the Public Key of the keypair of which the Private Key was used by the Peer to create signatures.
+The Manager **MUST** provide the X.509 certificates containing the Public Key of the keypair of which the Private Key was used by the Peer to create signatures.
+
+The Manager **MUST** provide the complete certificate chain excluding the root CA certificate used by the Group as Thrust Anchor.
 
 #### Providing contracts
 
-The Contract Manager **MUST** provide existing Contracts for a specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.
+The Manager **MUST** provide existing Contracts for a specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.
 
-### Interfaces {#contract_manager_interface}
+### Interfaces {#manager_interface}
 
-The Contract Manager functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ContractManagerService`. 
+The Manager functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ManagerService`. 
 This service **MUST** offer the following Remote Procedure Calls (RPC):
 
 - `SubmitContract`, used to offer a Contract to be signed by the receiver
@@ -566,6 +570,7 @@ This service **MUST** offer the following Remote Procedure Calls (RPC):
 - `ListContracts`, lists Contracts of a specific Grant Type
 - `GetContractByGrantHash`, gets Contract containing a Grant
 - `ListCertificates`, lists certificates matching the Public Key Fingerprints in the request
+- `GetInwayAddressForServices`, gets Inway addresses of specific Services
 
 RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
 
@@ -627,7 +632,7 @@ message GrantPeerRegistration {
     message Peer {
         string serial_number = 1;
         string name = 2;
-        string contract_manager_address = 3;
+        string manager_address = 3;
     }
     
     Directory directory = 1;
@@ -751,8 +756,12 @@ message Pagination {
 rpc ListContracts(ListContractsRequest) returns (ListContractsResponse);
 
 message ListContractsRequest{
-    GrantType grant_type = 1;
-    Pagination pagination = 2;
+    message Filter {
+      GrantType grant_type = 1;
+    }
+   
+    Pagination pagination = 1;
+    repeated Filter filters = 2;
 }
 
 message ListContractsResponse {
@@ -794,6 +803,31 @@ message ListCertificatesResponse {
 }
 ```
 
+##### RPC GetInwayAddressForServices
+
+The Remote Procedure Call `GetInwayAddressForServices` **MUST** be implemented with the following interface and messages:
+
+```
+rpc GetInwayAddressForServices(GetInwayAddressForServicesRequest) returns (GetInwayAddressForServicesResponse);
+
+message GetInwayAddressForServicesRequest {
+  message Service {
+    string name = 2;
+  }
+  
+  repeated Service services = 1;
+}
+
+message GetInwayAddressForServicesResponse {
+  message Service {
+    string name = 1;
+    string inway_address = 2;
+  }
+
+  repeated Service services = 1;
+}
+```
+
 #### Error codes
 
 The gRPC service **MUST** implement the following error codes:
@@ -819,6 +853,9 @@ enum ErrorReason {
 
     // Signature could not be verified
     ERROR_REASON_SIGNATURE_VERIFICATION_FAILED = 6;
+    
+    // Inway address could not be provided because the Service is unknown
+    ERROR_REASON_SERVICE_UNKNOWN = 7;
 }
 ```
 
@@ -860,7 +897,7 @@ The Directory **MUST** list a Service when a valid Contract containing a `Servic
 
 #### Peer listing
 
-The Directory **MUST** offer a list of the Peers in the Group. The listing includes the Contract Manager of each Peer. This information is used to negotiate Contracts between Peers.
+The Directory **MUST** offer a list of the Peers in the Group. The listing includes the Manager of each Peer. This information is used to negotiate Contracts between Peers.
 
 The Directory **MUST** only return a Peer for which the Directory has a Contract with a `PeerRegistrationGrant`.
 
@@ -869,14 +906,12 @@ The Directory **MUST** only return a Peer for which the Directory has a Contract
 #### Directory Service
 
 The Directory functionality **MUST** implement a gRPC service with the name `ContractManagerService`. 
-This service **MUST** implement the interface of the [Contract Manager](#contract_manager).  
+This service **MUST** implement the interface of the [Manager](#manager).  
 
-In addition to the Contract Manager interface the Directory functionality **MUST** implement a gRPC service with the name `DirectoryService`. This service **MUST** offer five Remote Procedure Calls:  
+In addition to the Manager interface the Directory functionality **MUST** implement a gRPC service with the name `DirectoryService`. This service **MUST** offer three Remote Procedure Calls:  
 
 * `ListPeers`, lists the Peers known by the Directory
 * `ListServices`, lists the Services known by the Directory
-* `GetContractManagerAddressForPeers`, gets the Contract Manager address of specific Peers known by the Directory
-* `GetInwayAddressForServices`, gets Inway address of specific Services known by the Directory
 * `GetGroupInfo`, returns the version of the FSC standard used by the Group
 
 RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). 
@@ -903,7 +938,13 @@ message Pagination {
 rpc ListServices(ListServicesRequest) returns (ListServicesResponse);
 
 message ListServicesRequest {
+  message Filter {
+    string peer_serial_number = 1;
+    string service name = 2;
+  }
+
   Pagination pagination = 1;
+  repeated Filter filters = 2;
 }
 
 message ListServicesResponse {
@@ -923,33 +964,6 @@ message Organization {
 
 message Inway {
   string address = 1;
-}
-```
-
-##### RPC GetInwayAddressForServices
-
-The Remote Procedure Call `GetInwayAddressForServices` **MUST** be implemented with the following interface and messages:
-
-```
-rpc GetInwayAddressForServices(GetInwayAddressForServicesRequest) returns (GetInwayAddressForServicesResponse);
-
-message GetInwayAddressForServicesRequest {
-  message Service {
-    string peer_serial_number = 1;
-    string name = 2;
-  }
-  
-  repeated Service services = 1;
-}
-
-message GetInwayAddressForServicesResponse {
-  message ServiceInway {
-    string peer_serial_number = 1;
-    string service_name = 2;
-    string inway_address = 3;
-  }
-
-  repeated ServiceInway serviceInways = 1;
 }
 ```
 
@@ -973,8 +987,12 @@ message Pagination {
 rpc ListPeers(ListPeersRequest) returns (ListPeersResponse);
 
 message ListPeersRequest {
+  message Filter {
+    string peer_serial_number = 1;
+  }
+
   Pagination pagination = 1;
-  repeated string peer_serial_numbers = 1;
+  repeated Filter filters = 2;
 }
 
 message ListPeersResponse {
@@ -984,32 +1002,11 @@ message ListPeersResponse {
 message Peer {
   string serial_number = 1;
   string name = 2;
-  ContractManager contract_manager = 3;
+  Manager manager = 3;
 }
 
-message ContractManager {
+message Manager {
   string address = 1;
-}
-```
-
-##### RPC GetContractManagerAddressForPeers
-
-The Remote Procedure Call `GetContractManagerAddressForPeers` **MUST** be implemented with the following interface and messages:
-
-```
-rpc GetContractManagerAddressForPeers(GetContractManagerAddressForPeersRequest) returns (GetContractManagerAddressForPeersResponse);
-
-message GetContractManagerAddressForPeersRequest {
-  repeated string peer_serial_numbers = 1;
-}
-
-message GetContractManagerAddressForPeersResponse {
-  message ContractManager {
-    string peer_serial_number = 1;
-    string address = 3;
-  }
-
-  repeated ContractManager contract_managers = 1;
 }
 ```
 
@@ -1055,7 +1052,7 @@ The ServiceConnectionGrant contains the serial number of the Peer offering the S
 
 The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant with a hash that matches the hash provided in the `Fsc-Grant_hash` header.
 
-The Outway **MUST** use Service routing information provided by the Directory.
+The Outway **MUST** use Service routing information provided by the Peer offering the Service.
 
 The Outway **MUST NOT** alter the path of the HTTP Request.
 

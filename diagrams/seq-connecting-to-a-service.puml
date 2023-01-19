@@ -5,18 +5,18 @@ header: Core
 title: Connecting to a Service
 
 box "Consuming Peer"
-  participant "Contract Manager" as contractManagerConsumingPeer
+  participant "Manager" as managerConsumingPeer
 end box
 
 box "Providing Peer"
-  participant "Contract Manager" as contractManagerProvidingPeer
+  participant "Manager" as managerProvidingPeer
 end box
 
-contractManagerConsumingPeer -> contractManagerConsumingPeer: Create Contract with a __ServiceConnectionGrant__
-contractManagerConsumingPeer -> contractManagerConsumingPeer: Add accept signature
-contractManagerConsumingPeer -> contractManagerProvidingPeer: Submit Contract
-contractManagerProvidingPeer -> contractManagerProvidingPeer: Add accept signature
-contractManagerProvidingPeer -> contractManagerConsumingPeer: Accept Contract
+managerConsumingPeer -> managerConsumingPeer: Create Contract with a __ServiceConnectionGrant__
+managerConsumingPeer -> managerConsumingPeer: Add accept signature
+managerConsumingPeer -> managerProvidingPeer: Submit Contract
+managerProvidingPeer -> managerProvidingPeer: Add accept signature
+managerProvidingPeer -> managerConsumingPeer: Accept Contract
 
 skinparam sequenceBoxBorderColor #transparent
 skinparam boxPadding 50

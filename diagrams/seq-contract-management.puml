@@ -5,18 +5,18 @@ header: Core
 title: Contract Management
 
 box "Peer A"
-  participant "Contract Manager" as cm1
+  participant "Manager" as m1
 end box
 box "Directory"
   participant "Directory" as directory
 end box
 box "Peer B"
-  participant "Contract Manager" as cm2
+  participant "Manager" as m2
 end box
 
-cm1 -> directory: Get Contract Manager address of Peer B
-return Contract Manager address of Peer B
-cm1 -> cm2 ++ : Contract proposal (signed by initiating Peer)
+m1 -> directory: Get Manager address of Peer B
+return Manager address of Peer B
+m1 -> m2 ++ : Contract proposal (signed by initiating Peer)
 
 return Valid Contract (signed by all Peers)
 

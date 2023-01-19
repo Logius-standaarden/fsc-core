@@ -5,17 +5,17 @@ header: Core
 title: Providing a Service
 
 box "Peer"
-  participant "Contract Manager" as contractManagerPeer
+  participant "Manager" as managerPeer
 end box
 box "Directory"
-  participant "Contract Manager" as contractManagerDirectory
+  participant "Manager" as managerDirectory
 end box
 
-contractManagerPeer -> contractManagerPeer: Create Contract with a __ServicePublicationGrant__
-contractManagerPeer -> contractManagerPeer: Add accept signature
-contractManagerPeer -> contractManagerDirectory: Submit Contract
-contractManagerDirectory -> contractManagerDirectory: Add accept signature
-contractManagerDirectory -> contractManagerPeer: Accept Contract
+managerPeer -> managerPeer: Create Contract with a __ServicePublicationGrant__
+managerPeer -> managerPeer: Add accept signature
+managerPeer -> managerDirectory: Submit Contract
+managerDirectory -> managerDirectory: Add accept signature
+managerDirectory -> managerPeer: Accept Contract
 
 skinparam sequenceBoxBorderColor #transparent
 skinparam boxPadding 50
