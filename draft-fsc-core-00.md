@@ -1048,11 +1048,13 @@ The Outway **MUST** use mTLS when connecting to the Directory or Inways with an 
 The Outway **MUST** proxy HTTP requests to the correct Service.
 
 The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which contains the hash of ServiceConnectionGrant to be used to route the request. For more information about the Grant hash read the [Grant hash section](#grant_hash)
-The ServiceConnectionGrant contains the serial number of the Peer offering the Service and the name of the Service, this information can be used to retrieve the Inway address from the Directory.
+The ServiceConnectionGrant contains the serial number of the Peer offering the Service and the name of the Service, this information can be used to retrieve the Inway address from the Manager of the Peer offering the Service .
+
+The Outway **MUST** include the HTTP header `Fsc-Grant-Hash` when proxying the HTTP request to the Inway.
 
 The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant with a hash that matches the hash provided in the `Fsc-Grant_hash` header.
 
-The Outway **MUST** use Service routing information provided by the Peer offering the Service.
+The Outway **MUST** use Service routing information provided by the Manager of the Peer offering the Service.
 
 The Outway **MUST NOT** alter the path of the HTTP Request.
 
