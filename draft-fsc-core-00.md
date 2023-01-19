@@ -740,6 +740,9 @@ field `GrantServiceConnection.Service.PeerSerialNumber` or `GrantServiceConnecti
 When filtering by `GRANT_TYPE_PEER_REGISTRATION` or `GRANT_TYPE_SERVICE_REGISTRATION` the Remote Procedure 
 Call `ListContracts` **MUST** return all contracts containing that Grant type.
 
+-> TODO: proposal: limit contracts to only contain a single type of grant. Otherwise you could retrieve contracts
+with a peer_registration grant and retrieve service_connections grants with it.
+
 The Remote Procedure Call `ListContracts` **MUST** be implemented with the following interface and messages:
 
 ```
