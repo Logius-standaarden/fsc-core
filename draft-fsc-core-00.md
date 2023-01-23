@@ -481,20 +481,21 @@ Validation is done by comparing the hash of the received Contract with the hash 
 The `contractContentHash` of the signature payload contains the signature hash. The algorithm to create a `contractContentHash` is described below.
 
 1. Create a byte array called `contentBytes`.
-2. Convert `Contract.Content.HashAlgorithm` to bytes and append the bytes to `contentBytes`.
-3. Append `Contract.Content.Id` to `contentBytes`.
-4. Convert `Contract.Content.GroupId` to bytes and append the bytes to `contentBytes`.
-5. Convert `Contract.Content.Validity.NotBefore` to bytes and append the bytes to `contentBytes`.
-6. Convert `Contract.Content.Validity.NotAfter` to bytes and append the bytes to `contentBytes`.
-7. Create an array of bytes arrays called `grantByteArrays`
-8. For each Grant in `Contract.Content.Grants`
+1. Convert `Contract.Content.HashAlgorithm` to bytes and append the bytes to `contentBytes`.
+1. Append `Contract.Content.Id` to `contentBytes`.
+1. Convert `Contract.Content.GroupId` to bytes and append the bytes to `contentBytes`.
+1. Convert `Contract.Content.Validity.NotBefore` to bytes and append the bytes to `contentBytes`.
+1. Convert `Contract.Content.Validity.NotAfter` to bytes and append the bytes to `contentBytes`.
+1. Convert `Contract.Content.CreatedAt` to bytes and append the bytes to `contentBytes`.
+1. Create an array of bytes arrays called `grantByteArrays`
+1. For each Grant in `Contract.Content.Grants`
   1. Create a byte array named `grantBytes`
-  2. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
-  3. Append `grantBytes` to `grantByteArrays`
-9. Sort the byte arrays in `grantByteArrays` in ascending order
-10. Append the bytes of `grantByteArrays` to `contentBytes`.
-11. Hash the `contentBytes` using the hash algorithm described in `Contract.Content.Algorithm`
-12. Encode the bytes of the hash as Base64.
+  1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
+  1. Append `grantBytes` to `grantByteArrays`
+1. Sort the byte arrays in `grantByteArrays` in ascending order
+1. Append the bytes of `grantByteArrays` to `contentBytes`.
+1. Hash the `contentBytes` using the hash algorithm described in `Contract.Content.Algorithm`
+1. Encode the bytes of the hash as Base64.
 
 #### Data types {#data_types}
 
@@ -508,12 +509,12 @@ The `contractContentHash` of the signature payload contains the signature hash. 
 The Grant hash can be created by executing the following steps:
 
 1. Create a byte array named `grantBytes`
-2. Convert `Contract.Content.Id` to bytes and append the bytes to `grantBytes`.
-3. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the proto definition](#contract_interface). If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
-4. Hash the `grantBytes` using the hash algorithm described in `Contract.Content.Algorithm`
-5. Encode the bytes of the hash as Base64.
-6. Convert the value of `Contract.Content.Algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value defined in [the proto definition](#contract_interface). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
-7. Prefix the Bas64 string with the string containing the hash algorithm.
+1. Convert `Contract.Content.Id` to bytes and append the bytes to `grantBytes`.
+1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the proto definition](#contract_interface). If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
+1. Hash the `grantBytes` using the hash algorithm described in `Contract.Content.Algorithm`
+1. Encode the bytes of the hash as Base64.
+1. Convert the value of `Contract.Content.Algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value defined in [the proto definition](#contract_interface). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
+1. Prefix the Bas64 string with the string containing the hash algorithm.
 
 ## Manager {#manager}
 
@@ -564,10 +565,10 @@ This service **MUST** offer the following Remote Procedure Calls (RPC):
 - `AcceptContract`, used to accept a Contract
 - `RejectContract`, used to reject a Contract
 - `RevokeContract`, used to revoke a Contract
-- `ListContracts`, lists Contracts of a specific Grant Type
-- `GetContractByGrantHash`, gets Contract containing a Grant
+- `ListContracts`, lists Contracts
 - `ListCertificates`, lists certificates matching the Public Key Fingerprints in the request
 - `GetInwayAddressForServices`, gets Inway addresses of specific Services
+- `GetVersion`, returns the version of the FSC standard and the enabled extensions
 
 RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
 
@@ -589,9 +590,10 @@ message Contract {
 message ContractContent {
   bytes id = 1;
   string group_id = 2;
-  Validity validity = 3;
-  repeated Grant grants = 4;
-  HashAlgorithm hash_algorithm = 5;
+  uint64 created_at = 3;
+  Validity validity = 4;
+  repeated Grant grants = 5;
+  HashAlgorithm hash_algorithm = 6;
 }
 
 message Validity {
@@ -754,6 +756,8 @@ rpc ListContracts(ListContractsRequest) returns (ListContractsResponse);
 message ListContractsRequest{
     message Filter {
       GrantType grant_type = 1;
+      string contract_hash = 2;
+      string grant_hash = 3;
     }
    
     Pagination pagination = 1;
@@ -762,24 +766,6 @@ message ListContractsRequest{
 
 message ListContractsResponse {
     repeated Contract contracts = 1;
-}
-```
-
-#### RPC GetContractByGrantHash
-
-The Remote Procedure Call `GetContractByGrantHash` **MUST** only return contracts that involve the Peer calling the RPC and contain a grant which hash matches the hash specified in the field `GetContractByGrantHashRequest.GrantHash`.
-
-The Remote Procedure Call `GetContractByGrantHash` **MUST** be implemented with the following interface and messages:
-
-```
-rpc GetContractByGrantHash(GetContractByGrantHashRequest) returns (GetContractByGrantHashResponse);
-
-message GetContractByGrantHashHashRequest{
-   string grant_hash = 1;
-}
-
-message GetContractByGrantHashResponse {
-    Contract contract = 1;
 }
 ```
 
@@ -821,6 +807,31 @@ message GetInwayAddressForServicesResponse {
   }
 
   repeated Service services = 1;
+}
+```
+
+##### RPC GetFSCInfo
+
+The Remote Procedure Call `GetFSCInfo` **MUST** be implemented with the following interface and messages:
+
+```
+rpc GetVersion(GetVersionRequest) returns (GetVersionResponse);
+
+message GetVersionRequest {}
+
+message GetVersionResponse {
+  FSCVersion fsc_version = 1;
+  repeated Extension extensions = 2;
+}
+
+enum FSCVersion {
+  FSC_VERSION_UNSPECIFIED = 0;
+  FSC_VERSION_1_0_0 = 1;
+}
+
+message Extension {
+  string name = 1;
+  string version = 2;
 }
 ```
 
@@ -897,6 +908,8 @@ The Directory **MUST** offer a list of the Peers in the Group. The listing inclu
 
 The Directory **MUST** only return a Peer for which the Directory has a Contract with a `PeerRegistrationGrant`.
 
+When multiple valid Contracts with a `PeerRegistrationGrant` for the same Peer exist, the Directory **MUST** use the data of the `PeerRegistrationGrant` in the Contract with the most recent date specified in the field `Contract.Content.CreatedAt`.
+
 ### Interfaces
 
 #### Directory Service
@@ -904,11 +917,10 @@ The Directory **MUST** only return a Peer for which the Directory has a Contract
 The Directory functionality **MUST** implement a gRPC service with the name `ContractManagerService`. 
 This service **MUST** implement the interface of the [Manager](#manager).  
 
-In addition to the Manager interface the Directory functionality **MUST** implement a gRPC service with the name `DirectoryService`. This service **MUST** offer three Remote Procedure Calls:  
+In addition to the Manager interface the Directory functionality **MUST** implement a gRPC service with the name `DirectoryService`. This service **MUST** offer two Remote Procedure Calls:  
 
 * `ListPeers`, lists the Peers known by the Directory
 * `ListServices`, lists the Services known by the Directory
-* `GetGroupInfo`, returns the version of the FSC standard used by the Group
 
 RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). 
 
@@ -1003,31 +1015,6 @@ message Peer {
 
 message Manager {
   string address = 1;
-}
-```
-
-##### RPC GetGroupInfo
-
-The Remote Procedure Call `GetGroupInfo` **MUST** be implemented with the following interface and messages:
-
-```
-rpc GetGroupInfo(GetGroupInfoRequest) returns (GetGroupInfoResponse);
-
-message GetGroupInfoRequest {}
-
-message GetGroupInfoResponse {
-  FSCVersion fsc_version = 1;
-  repeated Extension extensions = 2;
-}
-
-enum FSCVersion {
-  FSC_VERSION_UNSPECIFIED = 0;
-  FSC_VERSION_1_0_0 = 1;
-}
-
-message Extension {
-  string name = 1;
-  string version = 2;
 }
 ```
 
