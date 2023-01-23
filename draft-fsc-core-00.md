@@ -269,6 +269,7 @@ FSC places specific requirements on the subject fields of a certificate. [@!RFC5
 - SerialNumber: A unique identifier which serves as the Peers identity in the FSC Group.
 - CommonName: This should correspond to the Fully Qualified Domain Name (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve.
 - Subject Alternative Name [@!RFC5280, section 4.2.1.6]: This should contain to the Fully Qualified Domain Names (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve.
+- Subject Organization [@!RFC5280, section 4.2.1.6]: This should contain to the name of the Organization.  
 
 #### Public Key Fingerprints {#public_key_fingerprint}
 
@@ -351,7 +352,7 @@ The gRPC interfaces of the Grants are defined in the [Contract Interface section
   * *ManagerAddress(string):*  
     Address of the Manager  
 
-#### ServicePublicationGrant
+#### ServicePublicationGrant {#service_publication_grant}
 
 * *Directory:*
   * *PeerSerialNumber(string):*  
@@ -362,7 +363,7 @@ The gRPC interfaces of the Grants are defined in the [Contract Interface section
   * *Name(string):*  
     Name of the Service
 
-#### ServiceConnectionGrant
+#### ServiceConnectionGrant {#service_connection_grant}
 
 * *Outway:*  
   * *PeerSerialNumber(string):*  
@@ -384,6 +385,9 @@ The gRPC interfaces of the Grants are defined in the [Contract Interface section
 - A valid date is provided in `Contract.Validity.NotAfter`
 - The date provided in `Contract.Validity.NotAfter` must be greater than the date provided in the field `Contract.Validity.NotBefore`
 - At least one Grant is set in the field `Contract.Grants`
+- A `PeerRegistrationGrant` cannot be mixed with other Grants.
+- Only one `PeerRegistrationGrant` is allowed per Contract
+- A `ServicePublicationGrant` cannot be mixed with other Grants.
 
 Per Grant type different validation rules apply.
 
@@ -536,6 +540,12 @@ It is **RECOMMENDED** to implement the Manager functionality separate from the I
 
 The Manager **MUST** accept only mTLS connections from other external Managers with an X.509 certificate that is signed by the Thrust Anchor of the Group.
 
+#### Contracts
+
+The Manager **MUST** support Contracts containing Grants of the type [ServiceConnectionGrant](#service_connection_grant).
+
+The Manager **MUST** validate Contracts using the rules described in [Contract validation section](#contract_validation)
+
 #### Receiving Signatures
 
 The Manager **MUST** validate the signature according to the rules described in the [signature section](#signature).
@@ -570,11 +580,13 @@ This service **MUST** offer the following Remote Procedure Calls (RPC):
 - `GetInwayAddressForServices`, gets Inway addresses of specific Services
 - `GetPeerInfo`, returns the info about the Peer
 
-RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
+RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). 
+
+The messages are specified below.
 
 #### Contract {#contract_interface}
 
-The interface Contract is used in RPCs of the gRPC service `ContractManagerService`
+The interface Contract is used in RPCs of the gRPC service `ManagerService`
 
 ```
 enum HashAlgorithm {
@@ -880,15 +892,19 @@ enum ErrorReason {
 
 The Directory **MUST** only accept connection from clients that use mTLS, the client **MUST** use an X.509 certificate that is signed by the chosen Certificate Authority (CA) that acts as the Trust Anchor of the Group.
 
+#### Contracts 
+
+In addition to the Grant types supported by the [Manager](#manager), the Directory **MUST** support Contracts with Grants of the type [PeerRegistrationGrant](#peer_registration_grant) and [ServicePublicationGrant](#service_publication_grant).
+
+The Directory **MUST** validate Contracts using the rules described in [Contract validation section](#contract_validation)
+
 #### Peer registration
 
 Peer registration is accomplished by offering a Contract to the Directory which contains a `PeerRegistrationGrant`.
 
 The Directory **MUST** be able to sign Contracts with Grants of the type `PeerRegistrationGrant`.
 
-The Directory **MUST** validate the Contract using the rules described in [Contract validation section](#contract_validation)
-
-The Directory **MUST** validate the `PeerRegistrationGrants` in the Contract using the rules described in [Contract validation section](#peer_registration_grant_validation)
+The Directory **MUST** validate the `PeerRegistrationGrants` in the Contract using the rules described in [PeerRegistrationGrant validation section](#peer_registration_grant_validation)
 
 #### Service publication
 
@@ -896,9 +912,7 @@ Service publication is accomplished by offering a Contract to the Directory whic
 
 The Directory **MUST** be able to sign Contracts with Grants of the type `ServicePublicationGrant`.
 
-The Directory **MUST** validate the Contract using the rules described in [Contract validation section](#contract_validation)
-
-The Directory **MUST** validate the `ServicePublicationGrant` in the Contract using the rules described in [Contract validation section](#peer_service_publication_validation)
+The Directory **MUST** validate the `ServicePublicationGrant` in the Contract using the rules described in [ServicePublicationGrant validation section](#peer_service_publication_validation)
 
 The Directory **MUST** only accept `ServicePublicationGrants` of Peers which have a valid Contract with a `PeerRegistrationGrant` containing both the Peer and the Directory.
 
@@ -920,7 +934,7 @@ When multiple valid Contracts with a `PeerRegistrationGrant` for the same Peer e
 
 #### Directory Service
 
-The Directory functionality **MUST** implement a gRPC service with the name `ContractManagerService`. 
+The Directory functionality **MUST** implement a gRPC service with the name `ManagerService`. 
 This service **MUST** implement the interface of the [Manager](#manager).  
 
 In addition to the Manager interface the Directory functionality **MUST** implement a gRPC service with the name `DirectoryService`. This service **MUST** offer two Remote Procedure Calls:  
@@ -930,7 +944,7 @@ In addition to the Manager interface the Directory functionality **MUST** implem
 
 RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). 
 
-The messages are specified below.  
+The messages are specified below.
 
 ##### RPC ListServices
 
