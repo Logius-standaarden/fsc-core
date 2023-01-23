@@ -361,8 +361,6 @@ The gRPC interfaces of the Grants are defined in the [Contract Interface section
     Serial number of the Peer offering the Service
   * *Name(string):*  
     Name of the Service
-  * *InwayAddress(string):*  
-    Address of the Inway that is offering the Service.  
 
 #### ServiceConnectionGrant
 
@@ -410,7 +408,6 @@ Validation rules:
 - The subject serial number of the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `ServicePublicationGrant.Directory.PeerSerialNumber`
 - The subject serial number of the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `ServicePublicationGrant.Service.PeerSerialNumber`
 - A Service name which matches the regular expression `^[a-zA-Z0-9-.]{1,100}$` is provided in the field  `ServicePublicationGrant.Service.Name` 
-- An Inway address is provided in the field `ServicePublicationGrant.Service.InwayAddress`. The value should be a valid URL as specified in [@!RFC1738]
 
 Signature requirements:  
 
@@ -643,7 +640,6 @@ message GrantServicePublication {
     message Service {
         string peer_serial_number = 1;
         string name = 2;
-        string inway_address = 3;
     }
     
     message Directory {
