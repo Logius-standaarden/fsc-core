@@ -568,7 +568,7 @@ This service **MUST** offer the following Remote Procedure Calls (RPC):
 - `ListContracts`, lists Contracts
 - `ListCertificates`, lists certificates matching the Public Key Fingerprints in the request
 - `GetInwayAddressForServices`, gets Inway addresses of specific Services
-- `GetVersion`, returns the version of the FSC standard and the enabled extensions
+- `GetPeerInfo`, returns the info about the Peer
 
 RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). The messages are specified below.
 
@@ -810,18 +810,24 @@ message GetInwayAddressForServicesResponse {
 }
 ```
 
-##### RPC GetFSCInfo
+##### RPC GetPeerInfo
 
-The Remote Procedure Call `GetFSCInfo` **MUST** be implemented with the following interface and messages:
+The Remote Procedure Call `GetPeerInfo` **MUST** be implemented with the following interface and messages:
 
 ```
-rpc GetVersion(GetVersionRequest) returns (GetVersionResponse);
+rpc GetPeerInfo(GetPeerInfoRequest) returns (GetPeerInfoResponse);
 
-message GetVersionRequest {}
+message GetPeerInfoRequest {}
 
-message GetVersionResponse {
-  FSCVersion fsc_version = 1;
-  repeated Extension extensions = 2;
+message GetPeerInfoResponse {
+  message Peer {
+    string serial_number = 1;
+    string name = 2;
+  }
+  
+  Peer peer = 1;
+  FSCVersion fsc_version = 2;
+  repeated Extension enabled_extensions = 3;
 }
 
 enum FSCVersion {
