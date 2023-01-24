@@ -252,6 +252,10 @@ Port `8443` is **RECOMMENDED** for management traffic i.e. submitting/signing Co
 Data traffic: Inway, Outway  
 Management Traffic: Directory, Manager
 
+### Group ID
+
+The ID of the Group is the URI of the Directory. The URI **MUST** contain the port number used by the Directory.
+
 ### TLS configuration
 
 Connections between Inways, Outways, Managers and the Directory of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
