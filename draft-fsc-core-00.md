@@ -46,6 +46,14 @@ organization = "ND Software"
   [author.address]
    email = "niels@nd-software.be"
 
+[[author]]
+initials = "E."
+surname = "van Gelderen"
+fullname = "Edward van Gelderen"
+organization = "vanG IT"
+  [author.address]
+   email = "e.van.gelderen@vang.nl"
+
 %%%
 
 .# Abstract
