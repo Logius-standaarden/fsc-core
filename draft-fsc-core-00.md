@@ -2,7 +2,7 @@
 title = "FSC - core"
 abbrev = "FSC - core"
 ipr = "trust200902"
-submissiontype = "independent"
+submissionType = "IETF"
 area = "Internet"
 workgroup = ""
 keyword = ["Internet-Draft"]
@@ -10,7 +10,7 @@ keyword = ["Internet-Draft"]
 [seriesInfo]
 name = "Internet-Draft"
 value = "draft-fsc-core-00"
-stream = "independent"
+stream = "IETF"
 status = "informational"
 # date = 2022-11-01T00:00:00Z
 
