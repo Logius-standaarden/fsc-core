@@ -1,0 +1,34 @@
+@startuml
+
+header: Core
+title Protocols
+
+legend right
+    | Color | Protocol |
+    |<#0000FF>| gRPC |
+    |<#00FF00>| HTTP 1.1 / 2 |
+end legend
+
+frame "Group" {
+  frame "Peer B" {
+    component Outway as outway
+    component "Manager" as managerPeerB
+  }
+  frame "Peer A" {
+     Component Inway as inway
+     component "Manager" as managerPeerA
+  }
+  component Directory as directory
+}
+
+managerPeerB <-[bold,#0000FF]l-> managerPeerA
+managerPeerA -[bold,#0000FF]d-> directory
+managerPeerB -[bold,#0000FF]d-> directory
+outway -[bold,#0000FF]d-> directory
+outway -[bold,#00FF00]l-> inway
+outway -[hidden]u-> managerPeerB
+inway -[hidden]u-> managerPeerA
+
+skinparam boxPadding 50
+
+@enduml

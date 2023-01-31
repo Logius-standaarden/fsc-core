@@ -11,7 +11,7 @@ box "Directory"
   participant "Manager" as managerDirectory
 end box
 
-managerPeer -> managerPeer: Create Contract with a __PeerRegistrationGrant__
+managerPeer -> managerPeer: Create Contract with a  __PeerRegistrationGrant__
 managerPeer -> managerPeer: Add accept signature
 managerPeer -> managerDirectory: Submit Contract
 managerDirectory -> managerDirectory: Add accept signature
