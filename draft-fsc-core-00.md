@@ -497,7 +497,6 @@ Validation is done by comparing the hash of the received Contract with the hash 
 The `contractContentHash` of the signature payload contains the signature hash. The algorithm to create a `contractContentHash` is described below.
 
 1. Create a byte array called `contentBytes`.
-1. Convert `Contract.Content.HashAlgorithm` to bytes and append the bytes to `contentBytes`.
 1. Append `Contract.Content.Id` to `contentBytes`.
 1. Convert `Contract.Content.GroupId` to bytes and append the bytes to `contentBytes`.
 1. Convert `Contract.Content.Validity.NotBefore` to bytes and append the bytes to `contentBytes`.
@@ -505,13 +504,16 @@ The `contractContentHash` of the signature payload contains the signature hash. 
 1. Convert `Contract.Content.CreatedAt` to bytes and append the bytes to `contentBytes`.
 1. Create an array of bytes arrays called `grantByteArrays`
 1. For each Grant in `Contract.Content.Grants`
-  1. Create a byte array named `grantBytes`
-  1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
-  1. Append `grantBytes` to `grantByteArrays`
+   1. Create a byte array named `grantBytes`
+   1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
+   1. Append `grantBytes` to `grantByteArrays`
 1. Sort the byte arrays in `grantByteArrays` in ascending order
 1. Append the bytes of `grantByteArrays` to `contentBytes`.
 1. Hash the `contentBytes` using the hash algorithm described in `Contract.Content.Algorithm`
 1. Encode the bytes of the hash as Base64.
+1. Convert the value of `Contract.Content.Algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the proto definition](#contract_interface). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
+1. Append the string `1$` to the string created in step 13. This is the enum`HASH_TYPE_CONTRACT` defined in [the proto definition](#contract_interface) as int32. E.g. if the string created in step 13 is `$1$`, the string should be `$1$1$`
+1. Prefix the Bas64 string generated in step 12 with the string generated in step 14.
 
 #### Data types {#data_types}
 
@@ -529,8 +531,10 @@ The Grant hash can be created by executing the following steps:
 1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the proto definition](#contract_interface). If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
 1. Hash the `grantBytes` using the hash algorithm described in `Contract.Content.Algorithm`
 1. Encode the bytes of the hash as Base64.
-1. Convert the value of `Contract.Content.Algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value defined in [the proto definition](#contract_interface). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
-1. Prefix the Bas64 string with the string containing the hash algorithm.
+1. Convert the value of `Contract.Content.Algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the proto definition](#contract_interface). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
+1. Determine the `HashType` that matches with value of `Grant.Type` and convert it to an int32 and add a `$` as suffix. To convert the `HastType` to an integer take the enum value of `HashType` defined in [the proto definition](#contract_interface). E.g. The enum `HASH_TYPE_GRANT_PEER_REGISTRATION` becomes `2$`.
+1. Combine the strings containing the hash algorithm(step 6) and Hash type(step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_PEER_REGISTRATION` should result in the string `$1$2$`
+1. Prefix the Bas64 string generated in step 5 with the string generated in step 8.
 
 ## Manager {#manager}
 
@@ -604,6 +608,14 @@ The interface Contract is used in RPCs of the gRPC service `ManagerService`
 enum HashAlgorithm {
     HASH_ALGORITHM_UNSPECIFIED = 0;
     HASH_ALGORITHM_SHA3_512 = 1;
+}
+
+enum HashType {
+  HASH_TYPE_UNSPECIFIED = 0;
+  HASH_TYPE_CONTRACT = 1;
+  HASH_TYPE_GRANT_PEER_REGISTRATION = 2;
+  HASH_TYPE_GRANT_SERVICE_PUBLICATION = 3;
+  HASH_TYPE_GRANT_SERVICE_CONNECTION = 4;
 }
 
 message Contract {
