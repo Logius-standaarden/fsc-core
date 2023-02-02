@@ -82,7 +82,7 @@ Functionality required to achieve technical interoperability is provided by APIs
 
 ## Overall Operation of FSC Core
 
-Peers in a Group announce their HTTP APIs to the Group by publishing them as a Service to the Directory. A Group uses a single Directory that defines the scope of the Group. Peers use the Directory to discover which Services and Peers are available in the Group.
+Peers in a Group announce their HTTP APIs to the Group by publishing them as a Service to the Directory. A Group uses a single Directory that defines the scope of the Group. Peers use the Directory to discover what Services and Peers are available in the Group.
 Inways of a Peer expose Services to the Group. 
 Outways of a Peer connect to the Inway of a Peer providing a Service.
 Contracts define the registration of a Peer to the Group, Service publication to the Group and connections between Peers.
@@ -104,8 +104,8 @@ FSC Core specifies the basics for setting up and managing connections in a Group
 
 A typical use case is a cooperation of many organizations that use APIs to exchange data or provide business services to each other.
 
-Organizations can participate in multiple FSC Groups at the same time, for example when using different environments for production and test deployments.
-Or when participating in different ecosystems, for example health industry and government industry.
+Organizations can participate in multiple FSC Groups at the same time. 
+Reasons for participating in multiple FCS Groups could be the use of different environments for production and test deployments or when participating in different ecosystems like health industry and government industry.
 
 An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a Service in the Directory of each Group using a different Inway for each Group.
 
@@ -139,7 +139,7 @@ Forward proxy that handles outgoing connections to Inways.
 
 *Contract:*  
   
-Document between Peers defining which interactions between Peers are possible.
+Document between Peers defining what interactions between Peers are possible.
 
 *Manager:*  
   
@@ -159,7 +159,7 @@ An HTTP API offered to the Group.
 
 *Trust Anchor:*      
   
-The Trust Anchor is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
+The Trust Anchor (TA) is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
 # Architecture
 
@@ -167,7 +167,9 @@ This chapter describes the basic architecture of an FSC system.
 
 ## Identity and Trust  {#trustanchor}
 
-Connections between Managers, Inways, Outways and connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. Components in the Group are configured to accept the same (Sub-) Certificate Authority (CA) as Trust Anchor. The Trust Anchor is a Trusted Third Party that ensures the identity of all Peers by issuing `Subject.organization` and `Subject.serialnumber` [@!RFC5280, section 4.1.2.6] in each certificate.
+Connections between Managers, Inways, Outways and connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. 
+Components in the Group are configured to accept the same (Sub-) Certificate Authorities (CA) as Trust Anchors (TA). Each TA is a Trusted Third Party that ensures the identity of the Peers by issuing `Subject.organization` and `Subject.serialnumber` [@!RFC5280, section 4.1.2.6] in each certificate.
+When multiple TA's are used the TA's must ensure that the subject serial number used to identify an organization is the same across the TA's. 
 
 !---
 ![mTLS Connections](diagrams/seq-mtls-connections.svg "mTLS Connections")
@@ -186,18 +188,25 @@ Connections between Peers are based on Contracts with ServiceConnectionGrants. T
 
 ### Contract states
 
-Any Peer can submit a Contract to other Peers. This Contract becomes valid when all Peers mentioned in the Contract accept the Contract by placing an accept signature. 
+Any Peer can submit a Contract to other Peers. This Contract becomes valid when the Peers mentioned in the Contract accept the Contract by placing an accept signature. 
 
-A Contract becomes invalid when at least one Peer mentioned in de Contract revokes its content.
+A Contract becomes invalid when at least one Peer mentioned in the Contract revokes its content.
+
+A Contract becomes invalid when at least one Peer mentioned in the Contract rejects its content.
 
 Accepting, rejecting and revoking is done by adding a digital signature.
 
-Contracts are immutable. When the content of a Contract has to change, the contract is invalidated and replaced by a new one.
+Contracts are immutable. When the content of a Contract is subject to change, the contract is invalidated and replaced by a new one.
+
+!---
+![State Contract](diagrams/state-contract.svg "State Contract")
+![State Contract](diagrams/state-contract.ascii-art "State Contract")
+!---
 
 ## Registering a Peer {#registering}
 
 A Peer needs to register with the Directory of the Group before a Peer is allowed to provide or consume Services available in the Group. 
-The Peer registration is required to validate that the Peer meets the requirements set by the Group. In case of FSC Core only an x.509 Certificate signed by the Trust Anchor is required but extensions on Core might, for example, require the Peer to sign a "Terms of Service" document before allowing a Peer to participate in a Group.
+The Peer registration is required to validate that the Peer meets the requirements set by the Group. In case of FSC Core only an X.509 Certificate signed by the TA is required but extensions on Core might, for example, require the Peer to sign a "Terms of Service" document before allowing a Peer to participate in a Group.
 
 To register, the Peer needs to create a Contract with a [PeerRegistrationGrant](#peer-registration). The PeerRegistrationGrant contains information about the Peer, the address of the Manager of the Peer and the Directory that should accept the registration.
 
@@ -247,7 +256,16 @@ Clients make requests to Outways, the Outway proxies the request to the Inway an
 
 # Specifications
 
-## General 
+## General
+
+## Protocols
+
+The transport protocol **MUST** be TCP.
+
+!---
+![Protocols](diagrams/seq-protocols.svg "Protocols")
+![Protocols](diagrams/seq-protocols.ascii-art "Protocols")
+!---
 
 ### Port configuration
 
@@ -268,20 +286,21 @@ The ID of the Group is the URI of the Directory. The URI **MUST** contain the po
 
 Connections between Inways, Outways, Managers and the Directory of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
 
-The certificates must be provided by a Trust Anchor (CA) who **SHOULD** validate a Peers identity. 
+The certificates must be provided by a TA who **SHOULD** validate a Peers identity, i.e. the TA **MUST** preform Organization Validation. 
 
 The certificate guarantees the identity of a Peer.
 
-Each Group has a single Trust Anchor.
+Each Group can have multiple TAs.
 
-Every Peer in a Group **MUST** accept the same Trust Anchor.
+Every Peer in a Group **MUST** accept the same TAs.
 
 FSC places specific requirements on the subject fields of a certificate. [@!RFC5280, section 4.2.1.6] which are listed below
 
 - SerialNumber: A unique identifier which serves as the Peers identity in the FSC Group.
-- CommonName: This should correspond to the Fully Qualified Domain Name (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve.
-- Subject Alternative Name [@!RFC5280, section 4.2.1.6]: This should contain to the Fully Qualified Domain Names (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve.
-- Subject Organization [@!RFC5280, section 4.2.1.6]: This should contain to the name of the Organization.  
+- Subject Alternative Name: This should contain to the Fully Qualified Domain Names (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve.
+- Subject Organization: This should contain to the name of the Organization.  
+
+The representation and verification of domains specified in the X.509 certificate **MUST** adhere to [@!RFC6125] 
 
 #### Public Key Fingerprints {#public_key_fingerprint}
 
@@ -348,7 +367,7 @@ A list of grants
 ### Grants
 
 There are multiple types of Grants. The type of a Grant is stored in its `Type` property.
-Every type of Grant contains a specific set of information. That is contained in the `Data` field of the Grant.
+Every type of Grant contains a specific set of information contained in the `Data` field of the Grant.
 The gRPC interfaces of the Grants are defined in the [Contract Interface section](#contract_interface).
 
 #### PeerRegistrationGrant {#peer_registration_grant}
@@ -554,7 +573,7 @@ It is **RECOMMENDED** to implement the Manager functionality separate from the I
 
 #### Authentication
 
-The Manager **MUST** accept only mTLS connections from other external Managers with an X.509 certificate that is signed by the Thrust Anchor of the Group.
+The Manager **MUST** only accept mTLS connections from other external Managers with an X.509 certificate that is signed by the TA of the Group.
 
 #### Contracts
 
@@ -570,7 +589,7 @@ The Manager **MUST** generate an error response if a signature is invalid.
 
 The Manager **MUST** propagate the signature to each of the Peers in the Contract when the Peer signs the Contract.
 
-It is **RECOMMENDED** to implement a retry mechanism in case the signature propagation fails.
+It is **RECOMMENDED** to implement a retry and backoff mechanism in case the signature propagation fails.
 
 #### Providing X.509 certificates
 
@@ -584,7 +603,7 @@ The Manager **MUST** provide existing Contracts for a specific Peer. A Contract 
 
 ### Interfaces {#manager_interface}
 
-The Manager functionality **MUST** implement an gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ManagerService`. 
+The Manager functionality **MUST** implement a gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ManagerService`. 
 This service **MUST** offer the following Remote Procedure Calls (RPC):
 
 - `SubmitContract`, used to offer a Contract to be signed by the receiver
@@ -914,7 +933,7 @@ enum ErrorReason {
 
 #### Authentication
 
-The Directory **MUST** only accept connection from clients that use mTLS, the client **MUST** use an X.509 certificate that is signed by the chosen Certificate Authority (CA) that acts as the Trust Anchor of the Group.
+The Directory **MUST** only accept connection from clients that use mTLS, the client **MUST** use an X.509 certificate that is signed by the TA of the Group.
 
 #### Contracts 
 
@@ -1068,7 +1087,7 @@ message Manager {
 
 #### Authentication
 
-The Outway **MUST** use mTLS when connecting to the Directory or Inways with an X.509 certificate signed by the chosen Certificate Authority (CA) of the Group.
+The Outway **MUST** use mTLS when connecting to the Directory or Inways with an X.509 certificate signed by the chosen TA of the Group.
 
 #### Routing
 
@@ -1079,7 +1098,7 @@ The ServiceConnectionGrant contains the serial number of the Peer offering the S
 
 The Outway **MUST** include the HTTP header `Fsc-Grant-Hash` when proxying the HTTP request to the Inway.
 
-The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant with a hash that matches the hash provided in the `Fsc-Grant_hash` header.
+The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant with a hash that matches the hash provided in the `Fsc-Grant-Hash` header.
 
 The Outway **MUST** use Service routing information provided by the Manager of the Peer offering the Service.
 
@@ -1114,7 +1133,7 @@ The code field of the error response **MUST** contain one of the following codes
 
 #### Authentication
 
-The Inway **MUST** only accept connections from Outways using mTLS with an X.509 certificates signed by the chosen Certificate Authority (CA) that acts as Trust Anchor of the network.
+The Inway **MUST** only accept connections from Outways using mTLS with an X.509 certificate signed by the chosen TA of the Group.
 
 #### Authorization
 
