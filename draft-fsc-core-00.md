@@ -347,8 +347,10 @@ The Contract fields are described below. The gRPC interface used by the Manager 
 UUID of the Contract.   
 * *GroupID(string):*  
 The URI of the Directory  
-* *HashAlgorithm(string):*  
-Hash algorithm that needs to be used to generate the hash of the Contract. This hash is used to validate if two contracts are equal and verify that a signature is intended for the Contract  
+* *CreatedAt(uint64):*
+A unix timestamp of the creation date of the Contract.
+* *HashAlgorithm(int32):*  
+Hash algorithm that needs to be used to generate the hash of the Contract. This hash is used to validate if two contracts are equal and verify that a signature is intended for the Contract. The possible values are defined in the [HashAlgorithm enum](#contract_interface).
 * *Validity:*  
   * *NotBefore(uint64):*  
   A unix timestamp, the contract is not valid before this date.  
@@ -411,10 +413,12 @@ The gRPC interfaces of the Grants are defined in the [Contract Interface section
 
 - A Contract ID is provided as a UUID V4 in the field `Contract.ID` 
 - A hash algorithm is provided in the field `Contract.HashAlgorithm`
+- The date provided in `Contract.CreatedAt` can not be in the future.
 - The Directory URI of the Group matches the GroupID defined in the field `Contract.GroupID`
 - A valid date is provided in `Contract.Validity.NotBefore` 
 - A valid date is provided in `Contract.Validity.NotAfter`
 - The date provided in `Contract.Validity.NotAfter` must be greater than the date provided in the field `Contract.Validity.NotBefore`
+- The date provided in `Contract.Validity.NotAfter` must be in the future.
 - At least one Grant is set in the field `Contract.Grants`
 - A `PeerRegistrationGrant` cannot be mixed with other Grants.
 - Only one `PeerRegistrationGrant` is allowed per Contract
@@ -618,6 +622,10 @@ This service **MUST** offer the following Remote Procedure Calls (RPC):
 RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). 
 
 The messages are specified below.
+
+#### gRPC Metadata
+
+The Manager is required to include its public address as gRPC metadata in each request sent to another Manager, using the key `fcs-manager-address`.
 
 #### Contract {#contract_interface}
 
@@ -856,12 +864,7 @@ message GetInwayAddressForServicesRequest {
 }
 
 message GetInwayAddressForServicesResponse {
-  message Service {
-    string name = 1;
-    string inway_address = 2;
-  }
-
-  repeated Service services = 1;
+  map<string, string> service_names_inway_address = 1;
 }
 ```
 
