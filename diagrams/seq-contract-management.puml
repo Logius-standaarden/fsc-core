@@ -14,11 +14,13 @@ box "Peer B"
   participant "Manager" as m2
 end box
 
-m1 -> directory: Get Manager address of Peer B
+m1 -> directory ++ : Get Manager address of Peer B
 return Manager address of Peer B
-m1 -> m2 ++ : Contract proposal (signed by initiating Peer)
+m1 -> m2 ++ : Contract proposal
+note over directory: Signed by Peer A
 
-return Valid Contract (signed by all Peers)
+return Valid Contract
+note over directory: Signed by all Peers
 
 skinparam sequenceBoxBorderColor #transparent
 skinparam boxPadding 50

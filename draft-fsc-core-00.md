@@ -76,7 +76,7 @@ The Core part of the FSC specification achieves inter-organizational, technical 
 
 - to discover Services
 - to route requests to Services in other contexts (e.g. from within organization A to organization B)
-- to request and managing connection rights needed to connect to said Services
+- to request and manage authorizations needed to connect to said Services
 
 Functionality required to achieve technical interoperability is provided by APIs as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling upscaling of inter-organizational usage of services.
 
@@ -87,12 +87,12 @@ Inways of a Peer expose Services to the Group.
 Outways of a Peer connect to the Inway of a Peer providing a Service.
 Contracts define the registration of a Peer to the Group, Service publication to the Group and connections between Peers.
 
-Inways are reverse proxies that route incoming connections from Outways to Services.
-Outways are forward proxies that discover all available Services in the Group and route outgoing connections to Inways.
-Managers negotiate Contracts between Peers.
-Routing information for the Services in the Group can be requested from the Directory.
-The address of Managers of Peers can be requested from the Directory.
-The address of an Inway offering a Service can be request from the Manager of the Peer offering the Service.
+Inways are reverse proxies that route incoming connections from Outways to Services.  
+Outways are forward proxies that discover Services in the Group via the Directory and route outgoing connections to Inways.  
+Managers negotiate Contracts between Peers.  
+Routing information for the Services in the Group can be requested from the Directory.  
+The address of Managers of Peers can be requested from the Directory.  
+The address of an Inway offering a Service can be request from the Manager of the Peer offering the Service.  
 
 To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once a right to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the HTTPS service is made.
 
@@ -102,7 +102,7 @@ FSC Core specifies the basics for setting up and managing connections in a Group
 
 ### Use cases
 
-A typical use case is a cooperation of many organizations that use APIs to exchange data or provide business services to each other.
+A typical use case is a cooperation of many organizations that use APIs to exchange data or provide other business services to each other.
 
 Organizations can participate in multiple FSC Groups at the same time. 
 Reasons for participating in multiple FCS Groups could be the use of different environments for production and test deployments or when participating in different ecosystems like health industry and government industry.
@@ -149,9 +149,9 @@ The Manager manages Contracts and configures Inways and Outways based on informa
   
 Defines an interaction between Peers. In FSC Core three Grants are described.  
 
-1. The PeerRegistrationGrant which specifies the right of a Peer to participate as a Peer in the Group.
-2. The ServicePublicationGrant which specifies the right of a Peer to publish a Service in the Group.
-3. The ServiceConnectionGrant which specifies the right of a Peer to connect to a Service provided by a Peer.
+1. The PeerRegistrationGrant which specifies the authorization of a Peer to participate as a Peer in the Group.
+2. The ServicePublicationGrant which specifies the authorization of a Peer to publish a Service in the Group.
+3. The ServiceConnectionGrant which specifies the authorization of a Peer to connect to a Service provided by a Peer.
 
 *Service:*      
   
@@ -190,9 +190,9 @@ Connections between Peers are based on Contracts with ServiceConnectionGrants. T
 
 Any Peer can submit a Contract to other Peers. This Contract becomes valid when the Peers mentioned in the Contract accept the Contract by placing an accept signature. 
 
-A Contract becomes invalid when at least one Peer mentioned in the Contract revokes its content.
+A Contract becomes invalid when at least one Peer mentioned in the Contract revokes the Contract.
 
-A Contract becomes invalid when at least one Peer mentioned in the Contract rejects its content.
+A Contract becomes invalid when at least one Peer mentioned in the Contract rejects the Contract.
 
 Accepting, rejecting and revoking is done by adding a digital signature.
 
@@ -297,7 +297,7 @@ Every Peer in a Group **MUST** accept the same TAs.
 FSC places specific requirements on the subject fields of a certificate. [@!RFC5280, section 4.2.1.6] which are listed below
 
 - SerialNumber: A unique identifier which serves as the Peers identity in the FSC Group.
-- Subject Alternative Name: This should contain to the Fully Qualified Domain Names (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve.
+- Subject Alternative Name: This should contain the Fully Qualified Domain Names (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve.
 - Subject Organization: This should contain to the name of the Organization.  
 
 The representation and verification of domains specified in the X.509 certificate **MUST** adhere to [@!RFC6125] 
@@ -330,7 +330,7 @@ In case of an error in the scope of FSC these components **MUST** return the HTT
 The Manager and Directory are both gRPC services.
 
 gRPC services defined in this RFC must return structured error responses using the [Status interface](https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto). 
-In case of an FSC specific error the `Status.Details` field should contain a [ErrorInfo](https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto) message. 
+In case of an FSC specific error the `Status.Details` field should contain an [ErrorInfo](https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto) message. 
 
 The fields of the `ErrorInfo` interface are described below.
 
@@ -433,8 +433,8 @@ Validation rules:
 
 Signature requirements:  
 
-- A signature is present with the serial number of the Peer defined the field `PeerRegistrationGrant.Directory.PeerSerialNumber`
-- A signature is present with the serial number of the Peer defined the field `PeerRegistrationGrant.Peer.SerialNumber`
+- A signature is present with the serial number of the Peer defined in the field `PeerRegistrationGrant.Directory.PeerSerialNumber`
+- A signature is present with the serial number of the Peer defined in the field `PeerRegistrationGrant.Peer.SerialNumber`
 
 #### ServicePublicationGrant {#service_publication_grant_validation}
 
@@ -446,8 +446,8 @@ Validation rules:
 
 Signature requirements:  
 
-- A signature is present with the subject serial number of the Peer defined the field `ServicePublicationGrant.Directory.PeerSerialNumber`
-- A signature is present with the subject serial number of the Peer defined the field `ServicePublicationGrant.Service.PeerSerialNumber`
+- A signature is present with the subject serial number of the Peer defined in the field `ServicePublicationGrant.Directory.PeerSerialNumber`
+- A signature is present with the subject serial number of the Peer defined in the field `ServicePublicationGrant.Service.PeerSerialNumber`
 
 #### ServiceConnectionGrant {#service_connection_grant_validation}
 
@@ -460,8 +460,8 @@ Validation rules:
 
 Signature requirements:
 
-- A signature is present with the subject serial number of the Peer defined the field `ServiceConnectionGrant.Outway.PeerSerialNumber`
-- A signature is present with the subject serial number of the Peer defined the field `ServiceConnectionGrant.Service.PeerSerialNumber`
+- A signature is present with the subject serial number of the Peer defined in the field `ServiceConnectionGrant.Outway.PeerSerialNumber`
+- A signature is present with the subject serial number of the Peer defined in the field `ServiceConnectionGrant.Service.PeerSerialNumber`
 
 ### Signatures {#signatures}
 
