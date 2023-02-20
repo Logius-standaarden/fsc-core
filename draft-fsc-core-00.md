@@ -168,8 +168,8 @@ This chapter describes the basic architecture of an FSC system.
 ## Identity and Trust  {#trustanchor}
 
 Connections between Managers, Inways, Outways and connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. 
-Components in the Group are configured to accept the same (Sub-) Certificate Authorities (CA) as Trust Anchors (TA). Each TA is a Trusted Third Party that ensures the identity of the Peers by issuing `Subject.organization` and `Subject.serialnumber` [@!RFC5280, section 4.1.2.6] in each certificate.
-When multiple TA's are used the TA's must ensure that the subject serial number used to identify an organization is the same across the TA's. 
+Components in the Group are configured to accept the same (Sub-) Certificate Authorities (CA) as Trust Anchors (TA). Each TA is a Trusted Third Party that ensures the identity of the Peers by verifying a set of fields of the subject field [@!RFC5280, section 4.1.2.6] that act as [PeerID](#peer_id) in each X.509 certificate.
+When multiple TAs are used the TAs must ensure that the elements of the subject field used to identify a Peer are the same across the TAs. 
 
 !---
 ![mTLS Connections](diagrams/seq-mtls-connections.svg "mTLS Connections")
@@ -282,6 +282,11 @@ Management Traffic: Directory, Manager
 
 The ID of the Group is the URI of the Directory. The URI **MUST** contain the port number used by the Directory.
 
+### Peer ID {#peer_id}
+
+Each Peer **MUST** have a unique identifier within the Group, this identifier is called the PeerID. The PeerID is determined by at least one element from the subject field [@!RFC5280, section 4.1.2.6] of an X.509 certificate. Each Group **MUST** define which element(s) of the subject field of the X.509 certificate act as PeerID.
+The TA(s) issuing the certificates must ensure that PeerID is always the same for a Peer in each issued certificate for said Peer.    
+
 ### TLS configuration
 
 Connections between Inways, Outways, Managers and the Directory of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
@@ -292,13 +297,12 @@ The certificate guarantees the identity of a Peer.
 
 Each Group can have multiple TAs.
 
-Every Peer in a Group **MUST** accept the same TAs.
+Every Peer in a Group **MUST** accept the same TA(s).
 
-FSC places specific requirements on the subject fields of a certificate. [@!RFC5280, section 4.2.1.6] which are listed below
+FSC places specific requirements on the subject fields of a certificate. [@!RFC5280, section 4.1.2.6] which are listed below
 
-- SerialNumber: A unique identifier which serves as the Peers identity in the FSC Group.
-- Subject Alternative Name: This should contain the Fully Qualified Domain Names (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve.
-- Subject Organization: This should contain to the name of the Organization.  
+- Subject Alternative Name[@!RFC5280, section 4.2.1.6]: This should contain the Fully Qualified Domain Names (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve externally.
+- Subject Organization: This should contain to the name of the Organization.
 
 The representation and verification of domains specified in the X.509 certificate **MUST** adhere to [@!RFC6125] 
 
@@ -358,11 +362,11 @@ Hash algorithm that needs to be used to generate the hash of the Contract. This 
   A unix timestamp, the contract is not valid after this date.  
 * *Signatures:*  
   * *Accept(map<string,string>):*  
-    A map of accept signatures. The key is the serial number of the Peer, the value is the JWT.  
+    A map of accept signatures. The key is the ID of the Peer, the value is the JWT.  
   * *Reject(map<string,string>):*  
-   A map of reject signatures. The key is the serial number of the Peer, the value is the JWT.  
+   A map of reject signatures. The key is the ID of the Peer, the value is the JWT.  
   * *Revoke(map<string,string>):*  
-  A map of revoke signatures. The key is the serial number of the Peer, the value is the JWT.  
+  A map of revoke signatures. The key is the ID of the Peer, the value is the JWT.  
 * *Grants(list of grants):*  
 A list of grants
 
@@ -375,11 +379,11 @@ The gRPC interfaces of the Grants are defined in the [Contract Interface section
 #### PeerRegistrationGrant {#peer_registration_grant}
 
 * *Directory:*
-  * *PeerSerialNumber(string):*  
-    The serial number of the Peer hosting the Directory
+  * *PeerID(string):*  
+    The ID of the Peer hosting the Directory
 * *Peer:*
-  * *SerialNumber(string):*  
-    Serial number of the Peer
+  * *ID(string):*  
+    The ID of the Peer
   * *Name(string):*  
     Name of the Peer
   * *ManagerAddress(string):*  
@@ -388,24 +392,24 @@ The gRPC interfaces of the Grants are defined in the [Contract Interface section
 #### ServicePublicationGrant {#service_publication_grant}
 
 * *Directory:*
-  * *PeerSerialNumber(string):*  
-    Serial number of the Peer hosting the Directory
+  * *PeerID(string):*  
+    The ID of the Peer hosting the Directory
 * *Service:*
-  * *PeerSerialNumber(string):*  
-    Serial number of the Peer offering the Service
+  * *PeerID(string):*  
+    The ID of the Peer offering the Service
   * *Name(string):*  
     Name of the Service
 
 #### ServiceConnectionGrant {#service_connection_grant}
 
 * *Outway:*  
-  * *PeerSerialNumber(string):*  
-  Serial number of the Peer that is allowed to connect
+  * *PeerID(string):*  
+  The ID of the Peer that is allowed to connect
   * *PublicKeyFingerprints(list of strings):*  
   A list of public key fingerprints that are allowed to connect. Read [the Public Key Fingerprint section](#public_key_fingerprint) for more information.
 * *Service:*  
-  * *PeerSerialNumber(string):* 
-  Serial number of the Peer offering the Service
+  * *PeerID(string):* 
+  The ID of the Peer offering the Service
   * *Name(string):*  
   The name of the Service  
 
@@ -430,42 +434,42 @@ Per Grant type different validation rules apply.
 
 Validation rules:  
 
-- The subject serial number of the X.509 certificate used by the Manager of the Directory matches the value of the field `PeerRegistrationGrant.Directory.PeerSerialNumber`
-- The subject serial number of the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `PeerRegistrationGrant.Peer.SerialNumber`
+- The Peer ID provided by the X.509 certificate used by the Manager of the Directory matches the value of the field `PeerRegistrationGrant.Directory.PeerID`
+- The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `PeerRegistrationGrant.Peer.ID`
 - The subject organization of the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `PeerRegistrationGrant.Peer.Name`
 - A Manager address is provided in the field `PeerRegistrationGrant.Peer.ContractManagerAddress`. The value should be a valid URL as specified in [@!RFC1738]
 
 Signature requirements:  
 
-- A signature is present with the serial number of the Peer defined in the field `PeerRegistrationGrant.Directory.PeerSerialNumber`
-- A signature is present with the serial number of the Peer defined in the field `PeerRegistrationGrant.Peer.SerialNumber`
+- A signature is present with the Peer ID of the Peer defined in the field `PeerRegistrationGrant.Directory.PeerID`
+- A signature is present with the Peer ID of the Peer defined in the field `PeerRegistrationGrant.Peer.ID`
 
 #### ServicePublicationGrant {#service_publication_grant_validation}
 
 Validation rules:
 
-- The subject serial number of the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `ServicePublicationGrant.Directory.PeerSerialNumber`
-- The subject serial number of the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `ServicePublicationGrant.Service.PeerSerialNumber`
+- The Peer ID provided by the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `ServicePublicationGrant.Directory.PeerID`
+- The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `ServicePublicationGrant.Service.PeerID`
 - A Service name which matches the regular expression `^[a-zA-Z0-9-.]{1,100}$` is provided in the field  `ServicePublicationGrant.Service.Name` 
 
 Signature requirements:  
 
-- A signature is present with the subject serial number of the Peer defined in the field `ServicePublicationGrant.Directory.PeerSerialNumber`
-- A signature is present with the subject serial number of the Peer defined in the field `ServicePublicationGrant.Service.PeerSerialNumber`
+- A signature is present with the Peer ID of the Peer defined in the field `ServicePublicationGrant.Directory.PeerID`
+- A signature is present with the Peer ID of the Peer defined in the field `ServicePublicationGrant.Service.PeerID`
 
 #### ServiceConnectionGrant {#service_connection_grant_validation}
 
 Validation rules:
 
-- The subject serial number of the X.509 certificate used by the Manager of the Peer providing the Service matches the value of the field `ServiceConnectionGrant.Service.PeerSerialNumber`
-- The subject serial number of the X.509 certificate used by the Manager offering the Contract to the Service providing Peer matches the value of the field `ServiceConnectionGrant.Outway.PeerSerialNumber`
-- The Service provided in the field `ServiceConnectionGrant.Service.Name` is offered by the Peer provided in the field `ServiceConnectionGrant.Service.PeerSerialNumber`
+- The Peer ID provided by the X.509 certificate used by the Manager of the Peer providing the Service matches the value of the field `ServiceConnectionGrant.Service.PeerID`
+- The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Service providing Peer matches the value of the field `ServiceConnectionGrant.Outway.PeerID`
+- The Service provided in the field `ServiceConnectionGrant.Service.Name` is offered by the Peer provided in the field `ServiceConnectionGrant.Service.PeerID`
 - At least one Public Key Fingerprint is provided in the field `ServiceConnectionGrant.Outway.PublicKeyFingerprints`
 
 Signature requirements:
 
-- A signature is present with the subject serial number of the Peer defined in the field `ServiceConnectionGrant.Outway.PeerSerialNumber`
-- A signature is present with the subject serial number of the Peer defined in the field `ServiceConnectionGrant.Service.PeerSerialNumber`
+- A signature is present with the Peer ID of the Peer defined in the field `ServiceConnectionGrant.Outway.PeerID`
+- A signature is present with the Peer ID of the Peer defined in the field `ServiceConnectionGrant.Service.PeerID`
 
 ### Signatures {#signatures}
 
@@ -473,12 +477,12 @@ A signature **MUST** follow the JSON Web Signature (JWS) format specified in [@!
 
 A signature **SHOULD** only be accepted if the Peer is present in the Contract content as:
 
-- `GrantServiceConnection.Outway.PeerSerialNumber`
-- `GrantServiceConnection.Service.PeerSerialNumber`
-- `GrantServicePublication.Directory.PeerSerialNumber`
-- `GrantServicePublication.Service.PeerSerialNumber`
-- `GrantPeerRegistration.Directory.PeerSerialNumber`
-- `GrantPeerRegistration.Peer.SerialNumber`
+- `GrantServiceConnection.Outway.PeerID`
+- `GrantServiceConnection.Service.PeerID`
+- `GrantServicePublication.Directory.PeerID`
+- `GrantServicePublication.Service.PeerID`
+- `GrantPeerRegistration.Directory.PeerID`
+- `GrantPeerRegistration.Peer.ID`
 
 The JWS **MUST** specify the X.509 certificate containing the public key used to create 
 the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8] field of the `JOSE Header` [@!RFC7515, section 4].
@@ -688,11 +692,11 @@ message Grant {
 
 message GrantPeerRegistration {
     message Directory {
-        string peer_serial_number = 1;
+        string peer_id = 1;
     }
     
     message Peer {
-        string serial_number = 1;
+        string id = 1;
         string name = 2;
         string manager_address = 3;
     }
@@ -703,12 +707,12 @@ message GrantPeerRegistration {
 
 message GrantServicePublication {
     message Service {
-        string peer_serial_number = 1;
+        string peer_id = 1;
         string name = 2;
     }
     
     message Directory {
-        string peer_serial_number = 1;
+        string peer_id = 1;
     }
     
     Directory directory = 1;
@@ -717,12 +721,12 @@ message GrantServicePublication {
 
 message GrantServiceConnection{
     message Service {
-        string peer_serial_number = 1;
+        string peer_id = 1;
         string name = 2;
     }
        
     message Outway {
-        string peer_serial_number = 1;
+        string peer_id = 1;
         repeated string public_key_fingerprints = 2;
     }
     
@@ -879,7 +883,7 @@ message GetPeerInfoRequest {}
 
 message GetPeerInfoResponse {
   message Peer {
-    string serial_number = 1;
+    string id = 1;
     string name = 2;
   }
   
@@ -916,8 +920,8 @@ enum ErrorReason {
     // Peer certificate could not be verified
     ERROR_REASON_PEER_CERTIFICATE_VERIFICATION_FAILED = 3;
 
-    // Subject Serial Number of the signature does not match the Subject Serial Number of the certificate with the public key used to verify the signature
-    ERROR_REASON_CERTIFICATE_SUBJECT_SERIAL_NUMBER_SIGNATURE_MISMATCH = 4;
+    // Peer ID of the signature does not match the Peer ID of the certificate with the public key used to verify the signature
+    ERROR_REASON_CERTIFICATE_PEER_ID_SIGNATURE_MISMATCH = 4;
 
     // Peer certificate could not be retrieved from the peer
     ERROR_REASON_PEER_CERTIFICATE_UNAVAILABLE = 5;
@@ -1013,7 +1017,7 @@ rpc ListServices(ListServicesRequest) returns (ListServicesResponse);
 
 message ListServicesRequest {
   message Filter {
-    string peer_serial_number = 1;
+    string peer_id = 1;
     string service name = 2;
   }
 
@@ -1023,7 +1027,7 @@ message ListServicesRequest {
 
 message ListServicesResponse {
   message Service {
-    Organization organization = 1;
+    Peer peer = 1;
     string name = 2;
     Inway inway = 3;
   }
@@ -1031,8 +1035,8 @@ message ListServicesResponse {
   repeated Service services = 1;
 }
 
-message Organization {
-  string serial_number = 1;
+message Peer {
+  string id = 1;
   string name = 2;
 }
 
@@ -1062,7 +1066,7 @@ rpc ListPeers(ListPeersRequest) returns (ListPeersResponse);
 
 message ListPeersRequest {
   message Filter {
-    string peer_serial_number = 1;
+    string peer_id = 1;
   }
 
   Pagination pagination = 1;
@@ -1074,7 +1078,7 @@ message ListPeersResponse {
 }
 
 message Peer {
-  string serial_number = 1;
+  string id = 1;
   string name = 2;
   Manager manager = 3;
 }
@@ -1097,7 +1101,7 @@ The Outway **MUST** use mTLS when connecting to the Directory or Inways with an 
 The Outway **MUST** proxy HTTP requests to the correct Service.
 
 The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which contains the hash of ServiceConnectionGrant to be used to route the request. For more information about the Grant hash read the [Grant hash section](#grant_hash)
-The ServiceConnectionGrant contains the serial number of the Peer offering the Service and the name of the Service, this information can be used to retrieve the Inway address from the Manager of the Peer offering the Service .
+The ServiceConnectionGrant contains the Peer ID of the Peer offering the Service and the name of the Service. This information can be used to retrieve the Inway address from the Manager of the Peer offering the Service .
 
 The Outway **MUST** include the HTTP header `Fsc-Grant-Hash` when proxying the HTTP request to the Inway.
 
@@ -1144,7 +1148,7 @@ The Inway **MUST** deny the request when the Peer does not have a Contract conta
 
 The request **MUST** be authorized if the ServiceConnectionGrant meets the following conditions:  
 
-- The subject serial number of the X.509 certificate used by the Outway matches the value of the field `ServiceConnectionGrant.Outway.PeerSerialNumber`
+- The Peer ID in the X.509 certificate used by the Outway matches the value of the field `ServiceConnectionGrant.Outway.PeerID`
 - The Public Key Fingerprint of the Public Key used by the Outway matches a value of the field `ServiceConnectionGrant.Outway.publicKeyFingerprints`
 
 #### Routing
@@ -1157,7 +1161,7 @@ The Inway **MUST** route the request based on the Service specified in the Servi
 
 The Inway **MUST** delete the HTTP Header `Fsc-Grant-Hash` from the HTTP Request before forwarding the request to the Service.
 
-The Inway **MUST** add the HTTP Header `Fsc-Peer-Serial-Number` which contains the subject serial number of the X.509 certificate of the Outway making the request.
+The Inway **MUST** add the HTTP Header `Fsc-Peer-Id` which contains the Peer ID provided by the X.509 certificate of the Outway making the request.
 
 ### Interfaces
 
