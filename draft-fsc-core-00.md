@@ -220,7 +220,7 @@ Once the Contract between Peer and Directory is signed by both parties, the Peer
 ## Service discovery
 
 Every Group is defined by one Directory that contains routing information for the Services in the Group.
-Managers register Services by offering Contracts with a ServicePublicationGrant to the Directory. This Grant contains information about the Service and the Directory that should list the Service.
+Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) to the Directory. This Grant contains information about the Service and the Directory that should list the Service.
 Outways discover Services by requesting a list from the Directory.
 
 !---
@@ -235,7 +235,7 @@ Outways discover Services by requesting a list from the Directory.
 
 ## Creating a connection to a Service
 
-A Peer can connect to a Service by setting up a connection between an Outway and the Inway that is providing the Service. This connection can only be established if the Peer connecting to the Service has a valid Contract containing a ServiceConnectionGrant with the Peer providing the Service.
+A Peer can connect to a Service by setting up a connection between an Outway and the Inway that is providing the Service. This connection can only be established if the Peer connecting to the Service has a valid Contract containing a [ServiceConnectionGrant](#service_connection_grant) with the Peer providing the Service.
 The ServiceConnectionGrant contains information about the Service and the public keys of the Outways that are allowed to connect to the Service.
 
 Once the Contract between providing Peer and consuming Peer is signed by both parties, the connection between Inway and Outway can be established.
@@ -260,7 +260,7 @@ Clients make requests to Outways, the Outway proxies the request to the Inway an
 
 ## Protocols
 
-The transport protocol **MUST** be TCP.
+The transport protocol **MUST** be TCP [@!RFC9293].
 
 !---
 ![Protocols](diagrams/seq-protocols.svg "Protocols")
@@ -280,7 +280,7 @@ Management Traffic: Directory, Manager
 
 ### Group ID
 
-The ID of the Group is the URI of the Directory. The URI **MUST** contain the port number used by the Directory.
+The ID of the Group is the URI[@!RFC3986] of the Directory. The URI **MUST** contain the port number used by the Directory.
 
 ### Peer ID {#peer_id}
 
@@ -310,7 +310,7 @@ The representation and verification of domains specified in the X.509 certificat
 
 The Public Key Fingerprint used in the ServiceConnectionGrant can be created by:
 
-1. Encoding the public key as PEM.
+1. Encoding the public key as PEM [@!RFC7468].
 2. Creating an SHA-256 hash of the Public Key PEM.
 3. Encoding the hash as Base64.
 
