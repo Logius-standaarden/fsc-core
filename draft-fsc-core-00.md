@@ -362,11 +362,11 @@ Hash algorithm that needs to be used to generate the hash of the Contract. This 
   A unix timestamp, the contract is not valid after this date.  
 * *Signatures:*  
   * *Accept(map<string,string>):*  
-    A map of accept signatures. The key is the ID of the Peer, the value is the JWT.  
+    A map of accept signatures. The key is the ID of the Peer, the value is the JWS.  
   * *Reject(map<string,string>):*  
-   A map of reject signatures. The key is the ID of the Peer, the value is the JWT.  
+   A map of reject signatures. The key is the ID of the Peer, the value is the JWS.  
   * *Revoke(map<string,string>):*  
-  A map of revoke signatures. The key is the ID of the Peer, the value is the JWT.  
+  A map of revoke signatures. The key is the ID of the Peer, the value is the JWS.  
 * *Grants(list of grants):*  
 A list of grants
 
