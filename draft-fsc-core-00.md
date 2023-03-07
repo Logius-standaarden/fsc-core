@@ -1025,14 +1025,19 @@ message ListServicesRequest {
   repeated Filter filters = 2;
 }
 
-message ListServicesResponse {
-  message Service {
+message Service {
     Peer peer = 1;
     string name = 2;
-    Inway inway = 3;
-  }
+}
 
-  repeated Service services = 1;
+message ListServicesResponse {
+  message ResponseService {
+    oneof service {
+        Service service = 1;
+    }
+  }
+  
+  repeated ResponseService services = 1;
 }
 
 message Peer {
