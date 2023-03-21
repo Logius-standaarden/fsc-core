@@ -1,0 +1,29 @@
+@startuml
+
+autonumber
+header: Core
+title: Establish a connection to a Service
+
+skinparam sequenceBoxBorderColor #transparent
+skinparam boxPadding 50
+hide footbox
+
+box "Consumer"
+    participant "Client" as clientConsumer
+    participant "Outway" as outwayConsumer
+end box
+
+box "API Provider"
+    participant "Inway" as inwayAPIProvider
+    participant "Service" as serviceAPIProvider
+end box
+
+clientConsumer -> outwayConsumer: Request to Service
+outwayConsumer -> inwayAPIProvider: Request\nwith access token
+inwayAPIProvider -> inwayAPIProvider: Validate access token
+inwayAPIProvider -> serviceAPIProvider: Request
+return Response
+inwayAPIProvider --> outwayConsumer: Response
+outwayConsumer --> clientConsumer: Response
+
+@enduml

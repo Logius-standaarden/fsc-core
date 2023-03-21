@@ -78,7 +78,7 @@ The Core part of the FSC specification achieves inter-organizational, technical 
 - to route requests to Services in other contexts (e.g. from within organization A to organization B)
 - to request and manage authorizations needed to connect to said Services
 
-Functionality required to achieve technical interoperability is provided by APIs as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling upscaling of inter-organizational usage of services.
+Functionality required to achieve technical interoperability is provided by APIs as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling up-scaling of inter-organizational usage of services.
 
 ## Overall Operation of FSC Core
 
@@ -90,11 +90,13 @@ Contracts define the registration of a Peer to the Group, Service publication to
 Inways are reverse proxies that route incoming connections from Outways to Services.  
 Outways are forward proxies that discover Services in the Group via the Directory and route outgoing connections to Inways.  
 Managers negotiate Contracts between Peers.  
+Managers provide access tokens to Outways which contain the authorization to connect a Service.
+Inways authorize connection attempts by validating access tokens.
 Routing information for the Services in the Group can be requested from the Directory.  
 The address of Managers of Peers can be requested from the Directory.  
-The address of an Inway offering a Service can be request from the Manager of the Peer offering the Service.  
+The address of an Inway offering a Service can be requested from the Manager of the Peer offering the Service.  
 
-To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once a right to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the HTTPS service is made.
+To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once an authorization to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the HTTPS service is made.
 
 FSC Core specifies the basics for setting up and managing connections in a Group. It is **RECOMMENDED** to use FSC Core with the following extensions, each specified in a dedicated RFC:
 
@@ -143,7 +145,7 @@ Document between Peers defining what interactions between Peers are possible.
 
 *Manager:*  
   
-The Manager manages Contracts and configures Inways and Outways based on information from a Directory and Contracts.
+The Manager manages Contracts and configures Inways and Outways based on information from a Directory and Contracts. And acts as an authorization server which provides access tokens.
 
 *Grant:*  
   
@@ -233,16 +235,26 @@ Outways discover Services by requesting a list from the Directory.
 ![Service discovery](diagrams/seq-service-discovery.ascii-art "Service discovery")
 !---
 
-## Creating a connection to a Service
+## Create an authorization to connect to a Service
 
-A Peer can connect to a Service by setting up a connection between an Outway and the Inway that is providing the Service. This connection can only be established if the Peer connecting to the Service has a valid Contract containing a [ServiceConnectionGrant](#service_connection_grant) with the Peer providing the Service.
-The ServiceConnectionGrant contains information about the Service and the public keys of the Outways that are allowed to connect to the Service.
+A connection can only be established if the Peer connecting to the Service has a valid Contract containing a [ServiceConnectionGrant](#service_connection_grant) with the Peer providing the Service.
+The ServiceConnectionGrant contains information about the Service and the public keys of the Outways that are authorized to connect to the Service.
 
 Once the Contract between providing Peer and consuming Peer is signed by both parties, the connection between Inway and Outway can be established.
 
 !---
-![Connecting to a Service](diagrams/seq-connecting-to-a-service.svg "Connecting to a Service")
-![Connecting to a Service](diagrams/seq-connecting-to-a-service.ascii-art "Connecting to a Service")
+![Create an authorization to connect](diagrams/seq-create-an-authorization-to-connect.svg "Connecting to a Service")
+![Create an authorization to connect](diagrams/seq-create-an-authorization-to-connect.ascii-art "Connecting to a Service")
+!---
+
+## Consuming a Service
+
+A Peer can consume a Service by sending request for said Service to an Outway. The Outway will request an access token from the Peer offering the Service before proxying the request to the Inway. The access token is used to authorize the connection.
+The Inway will validate the access token and proxy the request to the Service.
+
+!---
+![Consuming a Service](diagrams/seq-consuming-a-service.svg "Consuming a Service")
+![Consuming a Service](diagrams/seq-consuming-a-service.ascii-art "Consuming a Service")
 !---
 
 ## Request flow
@@ -484,7 +496,7 @@ A signature **SHOULD** only be accepted if the Peer is present in the Contract c
 - `GrantPeerRegistration.Directory.PeerID`
 - `GrantPeerRegistration.Peer.ID`
 
-The JWS **MUST** specify the X.509 certificate containing the public key used to create 
+The JWS **MUST** specify the public key fingerprint of the keypair used to create 
 the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8] field of the `JOSE Header` [@!RFC7515, section 4].
 
 The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1]
@@ -563,6 +575,58 @@ The Grant hash can be created by executing the following steps:
 1. Combine the strings containing the hash algorithm(step 6) and Hash type(step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_PEER_REGISTRATION` should result in the string `$1$2$`
 1. Prefix the Bas64 string generated in step 5 with the string generated in step 8.
 
+## Access token {#access_token}
+
+The access token is a JSON Web Token (JWT) as specified in [@!RFC7519]
+
+The JWT **MUST** specify the public key fingerprint of the keypair used to sign the JWT using the `x5t#S256`[@!RFC7515, section 4.1.8] field of the `JOSE Header` [@!RFC7515, section 4].
+
+The JWT **MUST** be created using one of the following digital signature algorithms:
+
+* RS256
+* RS384
+* RS512
+
+The access token is a certificate-bound access token as specified in [@!RFC8705, section 3]
+
+### JWT Payload
+
+The payload of the JWT **MUST** contain the field specified below:
+
+* *grh(string):*  
+  The hash of the Grant that serves as basis for the authorization
+* *svc(string):*
+  Name of the Service
+* *exp(int):*
+  Expiration time [@!RFC7519, section 4.1.4]
+* *nbf(int):*
+  Not before [@!RFC7519, section 4.1.5]
+* *cnf(object):*
+    * *x5t#S256(string):*
+    The fingerprint of the public key that is allowed ot use the access token
+* *add(object):*
+  An object which can be used to provide additional data.  
+    * *pid(string):*
+    The ID of the Peer for whom the access token is created
+
+Example payload:
+
+```json
+{
+    "gth": "$1$4$+PQI7we01qIfEwq4O5UioLKzjGBgRva6F5+bUfDlKxUjcY5yX1MRsn6NKquDbL8VcklhYO9sk18rHD6La3w/mg==",
+    "pid": "123456890",
+    "svc": "serviceName", 
+    "exp": 1493726400,
+    "nbf": 1493722800,
+    "cnf": {
+      "x5t#S256": "DpAyDYakmVAQ4oOJC3UYLRk/ONRCqMj00TeGJemMiLA="
+    },
+    "add": {
+      "pid":"123456890" 
+    }
+}
+```
+
 ## Manager {#manager}
 
 The Manager is responsible for:
@@ -574,6 +638,7 @@ The Manager is responsible for:
 - Providing the X.509 certificates containing the Public Key of the keypair of which the private key was used by the Peer to create signatures
 - Providing Contracts involving a specific Peer
 - Providing Inway addresses of Services offered by the Peer
+- Providing access tokes 
 
 It is **RECOMMENDED** to implement the Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Manager.
 
@@ -609,6 +674,18 @@ The Manager **MUST** provide the complete certificate chain excluding the root C
 
 The Manager **MUST** provide existing Contracts for a specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.
 
+#### Tokens
+
+The Manager **MUST** be able to provide an [access token](#access_token) to Peers that have a valid Contract containing a [ServiceConnectionGrant](#service_connection_grant).
+
+Before issuing an access token the Manager **MUST** validate that:
+
+1. A valid Contract exists with a [ServiceConnectionGrant](#service_connection_grant) matching the Grant hash in the access token request.
+1. The Manager is provided by a Peer with the same PeerID as specified in `ServiceConnectionGrant.Service.PeerID`.
+1. The Manager is provided by a Peer who has an Inway which is offering the Service specified in `ServiceConnectionGrant.Service.Name`. 
+1. The Peer ID provided by the X.509 certificate used by the Outway requesting the access token matches the value of the field `ServiceConnectionGrant.Outway.PeerID`.
+1. The fingerprint of the public key provided by the X.509 certificate used by the Outway requesting the access token is present in the value of the field `ServiceConnectionGrant.Outway.PublicKeyFingerprints`.
+
 ### Interfaces {#manager_interface}
 
 The Manager functionality **MUST** implement a gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ManagerService`. 
@@ -622,6 +699,7 @@ This service **MUST** offer the following Remote Procedure Calls (RPC):
 - `ListCertificates`, lists certificates matching the Public Key Fingerprints in the request
 - `GetInwayAddressForServices`, gets Inway addresses of specific Services
 - `GetPeerInfo`, returns the info about the Peer
+- `GetAccessToken`, returns an access token
 
 RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). 
 
@@ -903,6 +981,22 @@ message Extension {
 }
 ```
 
+#### RPC GetAccessToken {#get_access_token}
+
+The Remote Procedure Call `GetAccessToken` **MUST** be implemented with the following interface and messages:
+
+```
+rpc GetAccessToken(GetAccessTokenRequest) returns (GetAccessTokenResponse);
+
+message GetAccessTokenRequest {
+    string grants_hash = 1; 
+}
+
+message GetAccessTokenResponse {
+    string access_token = 1;
+}
+```
+
 #### Error codes
 
 The gRPC service **MUST** implement the following error codes:
@@ -1108,15 +1202,21 @@ The Outway **MUST** proxy HTTP requests to the correct Service.
 The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which contains the hash of ServiceConnectionGrant to be used to route the request. For more information about the Grant hash read the [Grant hash section](#grant_hash)
 The ServiceConnectionGrant contains the Peer ID of the Peer offering the Service and the name of the Service. This information can be used to retrieve the Inway address from the Manager of the Peer offering the Service .
 
-The Outway **MUST** include the HTTP header `Fsc-Grant-Hash` when proxying the HTTP request to the Inway.
+The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant with a hash that matches the hash provided in the `Fsc-Grant-Hash` header.  
 
-The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant with a hash that matches the hash provided in the `Fsc-Grant-Hash` header.
+The Outway **MUST** request an [access token](#access_token) from the Peer specified in the `Service.PeerID` field of the ServiceConnectionGrant.
 
-The Outway **MUST** use Service routing information provided by the Manager of the Peer offering the Service.
+The Outway **MUST** use the [RPC GetAccessToken]($get_access_token) provided by the Manager of the Peer specified in the `Service.PeerID` field of the ServiceConnectionGrant.
+
+The Outway **MUST** deny the request when the Outway is unable to obtain an access token.  
+
+The Outway **MUST** include the access token in the HTTP header `Fsc-Authorization` when proxying the HTTP request to the Inway.  
+
+The Outway **MUST** use Service routing information provided by the Manager of the Peer specified in the `Service.PeerID` field of the ServiceConnectionGrant.
 
 The Outway **MUST NOT** alter the path of the HTTP Request.
 
-The Outway **SHALL** use the last available address of a Service in case the Directory is unreachable.
+The Outway **SHALL** use the last available address of a Service in case the Directory or the Manager of the Peer specified in the `Service.PeerID` field of the ServiceConnectionGrant is unreachable.
 
 Clients **MAY** use TLS when communicating with the Outway.
 
@@ -1149,24 +1249,25 @@ The Inway **MUST** only accept connections from Outways using mTLS with an X.509
 
 #### Authorization
 
-The Inway **MUST** deny the request when the Peer does not have a Contract containing a ServiceConnectionGrant with the same hash as specified in the HTTP header `Fsc-Grant-Hash`.
+The Inway **MUST** validate the access token provided in the HTTP `Fsc-Authorization`.   
 
-The request **MUST** be authorized if the ServiceConnectionGrant meets the following conditions:  
+The request **MUST** be authorized if the access token meets the following conditions:  
 
-- The Peer ID in the X.509 certificate used by the Outway matches the value of the field `ServiceConnectionGrant.Outway.PeerID`
-- The Public Key Fingerprint of the Public Key used by the Outway matches a value of the field `ServiceConnectionGrant.Outway.publicKeyFingerprints`
+- The Peer ID in the X.509 certificate used by the connecting Outway matches the value of the field `ServiceConnectionGrant.Outway.PeerID`.
+- The Public Key Fingerprint of the Public Key used by the connecting Outway matches a value of the field `ServiceConnectionGrant.Outway.publicKeyFingerprints`.
+- The access token is signed by the same Peer that owns Inway.
+- The access token is used by an Outway that uses the X.509 certificate to which the access token is bound. This is verified by applying the JWT Certificate Thumbprint Confirmation Method specified in [@!RFC8705,section 3.1].
+- The Service specified in the access token is known to the Inway.
 
 #### Routing
 
 The Inway **MUST** proxy HTTP requests to the correct Service.
 
-The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which contains the hash of the ServiceConnectionGrant.
+The HTTP request **MUST** contain the HTTP Header `Fsc-Authorization` which contains the access token obtained by the Outway.
 
-The Inway **MUST** route the request based on the Service specified in the ServiceConnectionGrant.
+The Inway **MUST** not delete the HTTP Header `Fsc-Authorization` from the HTTP Request before forwarding the request to the Service.
 
-The Inway **MUST** delete the HTTP Header `Fsc-Grant-Hash` from the HTTP Request before forwarding the request to the Service.
-
-The Inway **MUST** add the HTTP Header `Fsc-Peer-Id` which contains the Peer ID provided by the X.509 certificate of the Outway making the request.
+The Inway **MUST** route the request based on the Service specified in the access token.
 
 ### Interfaces
 

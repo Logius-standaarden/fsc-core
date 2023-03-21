@@ -2,7 +2,7 @@
 
 autonumber
 header: Core
-title: Connecting to a Service
+title: Create an authorization to connect to a Service
 
 box "Consuming Peer"
   participant "Manager" as managerConsumingPeer
@@ -21,4 +21,5 @@ managerProvidingPeer -> managerConsumingPeer: Accept Contract
 skinparam sequenceBoxBorderColor #transparent
 skinparam boxPadding 50
 hide footbox
+
 @enduml
