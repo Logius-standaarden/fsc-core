@@ -107,7 +107,7 @@ FSC Core specifies the basics for setting up and managing connections in a Group
 A typical use case is a cooperation of many organizations that use APIs to exchange data or provide other business services to each other.
 
 Organizations can participate in multiple FSC Groups at the same time. 
-Reasons for participating in multiple FCS Groups could be the use of different environments for production and test deployments or when participating in different ecosystems like health industry and government industry.
+Codes for participating in multiple FCS Groups could be the use of different environments for production and test deployments or when participating in different ecosystems like health industry and government industry.
 
 An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a Service in the Directory of each Group using a different Inway for each Group.
 
@@ -145,7 +145,7 @@ Document between Peers defining what interactions between Peers are possible.
 
 *Manager:*  
   
-The Manager manages Contracts and configures Inways and Outways based on information from a Directory and Contracts. And acts as an authorization server which provides access tokens.
+The Manager is an API which manages Contracts and configures Inways and Outways based on information from a Directory and Contracts. And acts as an authorization server which provides access tokens.
 
 *Grant:*  
   
@@ -341,103 +341,21 @@ In case of an error in the scope of FSC these components **MUST** return the HTT
 }
 ```
 
-#### gRPC
+## Contracts
 
-The Manager and Directory are both gRPC services.
+### Contract Validation {#contract_validation}
 
-gRPC services defined in this RFC must return structured error responses using the [Status interface](https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto). 
-In case of an FSC specific error the `Status.Details` field should contain an [ErrorInfo](https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto) message. 
-
-The fields of the `ErrorInfo` interface are described below.
-
-* *Reason(string):*  
-The FSC specific error code
-* *Domain(string):*  
-The FSC component which generated the error. The following components are allowed `directory`,`manager`, `inway`, `outway`
-
-## Contract
-
-The Contract fields are described below. The gRPC interface used by the Manager is defined in the [Contract Interface section](#contract_interface). 
-
-* *ID(bytes):*  
-UUID of the Contract.   
-* *GroupID(string):*  
-The URI of the Directory  
-* *CreatedAt(uint64):*
-A unix timestamp of the creation date of the Contract.
-* *HashAlgorithm(int32):*  
-Hash algorithm that needs to be used to generate the hash of the Contract. This hash is used to validate if two contracts are equal and verify that a signature is intended for the Contract. The possible values are defined in the [HashAlgorithm enum](#contract_interface).
-* *Validity:*  
-  * *NotBefore(uint64):*  
-  A unix timestamp, the contract is not valid before this date.  
-  * *NotAfter(uint64):*  
-  A unix timestamp, the contract is not valid after this date.  
-* *Signatures:*  
-  * *Accept(map<string,string>):*  
-    A map of accept signatures. The key is the ID of the Peer, the value is the JWS.  
-  * *Reject(map<string,string>):*  
-   A map of reject signatures. The key is the ID of the Peer, the value is the JWS.  
-  * *Revoke(map<string,string>):*  
-  A map of revoke signatures. The key is the ID of the Peer, the value is the JWS.  
-* *Grants(list of grants):*  
-A list of grants
-
-### Grants
-
-There are multiple types of Grants. The type of a Grant is stored in its `Type` property.
-Every type of Grant contains a specific set of information contained in the `Data` field of the Grant.
-The gRPC interfaces of the Grants are defined in the [Contract Interface section](#contract_interface).
-
-#### PeerRegistrationGrant {#peer_registration_grant}
-
-* *Directory:*
-  * *PeerID(string):*  
-    The ID of the Peer hosting the Directory
-* *Peer:*
-  * *ID(string):*  
-    The ID of the Peer
-  * *Name(string):*  
-    Name of the Peer
-  * *ManagerAddress(string):*  
-    Address of the Manager  
-
-#### ServicePublicationGrant {#service_publication_grant}
-
-* *Directory:*
-  * *PeerID(string):*  
-    The ID of the Peer hosting the Directory
-* *Service:*
-  * *PeerID(string):*  
-    The ID of the Peer offering the Service
-  * *Name(string):*  
-    Name of the Service
-
-#### ServiceConnectionGrant {#service_connection_grant}
-
-* *Outway:*  
-  * *PeerID(string):*  
-  The ID of the Peer that is allowed to connect
-  * *PublicKeyFingerprints(list of strings):*  
-  A list of public key fingerprints that are allowed to connect. Read [the Public Key Fingerprint section](#public_key_fingerprint) for more information.
-* *Service:*  
-  * *PeerID(string):* 
-  The ID of the Peer offering the Service
-  * *Name(string):*  
-  The name of the Service  
-
-### Validation {#contract_validation}
-
-- A Contract ID is provided as a UUID V4 in the field `Contract.ID` 
-- A hash algorithm is provided in the field `Contract.HashAlgorithm`
-- The date provided in `Contract.CreatedAt` can not be in the future.
-- The Directory URI of the Group matches the GroupID defined in the field `Contract.GroupID`
-- A valid date is provided in `Contract.Validity.NotBefore` 
-- A valid date is provided in `Contract.Validity.NotAfter`
-- The date provided in `Contract.Validity.NotAfter` must be greater than the date provided in the field `Contract.Validity.NotBefore`
-- The date provided in `Contract.Validity.NotAfter` must be in the future.
-- At least one Grant is set in the field `Contract.Grants`
+- A Contract ID is provided as a UUID V4 in the field `contract.id`. 
+- A hash algorithm is provided in the field `contract.content.hash_algorithm`.
+- The date provided in `contract.content.created_at` can not be in the future.
+- The Directory URI of the Group matches the GroupID defined in the field `contract.group_id`.
+- A valid date is provided in `contract.content.validity.not_before`. 
+- A valid date is provided in `contract.content.validity.not_after`.
+- The date provided in `contract.content.Validity.not_after` must be greater than the date provided in the field `contract.validity.not_before`.
+- The date provided in `contract.content.validity.not_after` must be in the future.
+- At least one Grant is set in the field `Contract.Grants`.
 - A `PeerRegistrationGrant` cannot be mixed with other Grants.
-- Only one `PeerRegistrationGrant` is allowed per Contract
+- Only one `PeerRegistrationGrant` is allowed per Contract.
 - A `ServicePublicationGrant` cannot be mixed with other Grants.
 
 Per Grant type different validation rules apply.
@@ -446,55 +364,64 @@ Per Grant type different validation rules apply.
 
 Validation rules:  
 
-- The Peer ID provided by the X.509 certificate used by the Manager of the Directory matches the value of the field `PeerRegistrationGrant.Directory.PeerID`
-- The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `PeerRegistrationGrant.Peer.ID`
-- The subject organization of the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `PeerRegistrationGrant.Peer.Name`
-- A Manager address is provided in the field `PeerRegistrationGrant.Peer.ContractManagerAddress`. The value should be a valid URL as specified in [@!RFC1738]
+- The Peer ID provided by the X.509 certificate used by the Manager of the Directory matches the value of the field `grant.data.directory.peer_id`
+- The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `grant.data.peer.id`
+- The subject organization of the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `grant.data.peer.name`
+- A Manager address is provided in the field `grant.data.peer.contract_manager_address`. The value should be a valid URL as specified in [@!RFC1738]
 
 Signature requirements:  
 
-- A signature is present with the Peer ID of the Peer defined in the field `PeerRegistrationGrant.Directory.PeerID`
-- A signature is present with the Peer ID of the Peer defined in the field `PeerRegistrationGrant.Peer.ID`
+- A signature is present with the Peer ID of the Peer defined in the field `grant.data.directory.peer_id`
+- A signature is present with the Peer ID of the Peer defined in the field `grant.data.peer.id`
 
 #### ServicePublicationGrant {#service_publication_grant_validation}
 
 Validation rules:
 
-- The Peer ID provided by the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `ServicePublicationGrant.Directory.PeerID`
-- The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `ServicePublicationGrant.Service.PeerID`
-- A Service name which matches the regular expression `^[a-zA-Z0-9-.]{1,100}$` is provided in the field  `ServicePublicationGrant.Service.Name` 
+- The Peer ID provided by the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `grant.data.directory.peer_ic`
+- The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `grant.data.service.peer_id`
+- A Service name which matches the regular expression `^[a-zA-Z0-9-.]{1,100}$` is provided in the field  `grant.data.service.name` 
 
 Signature requirements:  
 
-- A signature is present with the Peer ID of the Peer defined in the field `ServicePublicationGrant.Directory.PeerID`
-- A signature is present with the Peer ID of the Peer defined in the field `ServicePublicationGrant.Service.PeerID`
+- A signature is present with the Peer ID of the Peer defined in the field `grant.data.directory.peer_id`
+- A signature is present with the Peer ID of the Peer defined in the field `grant.data.service.peer_id`
 
 #### ServiceConnectionGrant {#service_connection_grant_validation}
 
 Validation rules:
 
-- The Peer ID provided by the X.509 certificate used by the Manager of the Peer providing the Service matches the value of the field `ServiceConnectionGrant.Service.PeerID`
-- The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Service providing Peer matches the value of the field `ServiceConnectionGrant.Outway.PeerID`
-- The Service provided in the field `ServiceConnectionGrant.Service.Name` is offered by the Peer provided in the field `ServiceConnectionGrant.Service.PeerID`
-- At least one Public Key Fingerprint is provided in the field `ServiceConnectionGrant.Outway.PublicKeyFingerprints`
+- The Peer ID provided by the X.509 certificate used by the Manager of the Peer providing the Service matches the value of the field `grant.data.service.peer_id`
+- The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Service providing Peer matches the value of the field `grant.data.outway.peer_id`
+- The Service provided in the field `grant.data.service.name` is offered by the Peer provided in the field `grant.data.service.peer_id`
+- At least one Public Key Fingerprint is provided in the field `grant.data.outway.public_key_fingerprints`
 
 Signature requirements:
 
-- A signature is present with the Peer ID of the Peer defined in the field `ServiceConnectionGrant.Outway.PeerID`
-- A signature is present with the Peer ID of the Peer defined in the field `ServiceConnectionGrant.Service.PeerID`
+- A signature is present with the Peer ID of the Peer defined in the field `grant.data.outway.peer_id`
+- A signature is present with the Peer ID of the Peer defined in the field `grant.data.service.peer_id`
 
 ### Signatures {#signatures}
 
 A signature **MUST** follow the JSON Web Signature (JWS) format specified in [@!RFC7515]
 
-A signature **SHOULD** only be accepted if the Peer is present in the Contract content as:
+A signature on a Contract **SHOULD** only be accepted if the Peer is present in one of the Grants as:
 
-- `GrantServiceConnection.Outway.PeerID`
-- `GrantServiceConnection.Service.PeerID`
-- `GrantServicePublication.Directory.PeerID`
-- `GrantServicePublication.Service.PeerID`
-- `GrantPeerRegistration.Directory.PeerID`
-- `GrantPeerRegistration.Peer.ID`
+*PeerRegistrationGrant*
+
+- `grant.data.directory.peer_id`
+- `grant.data.peer.id`
+
+*ServiceConnectionGrant*
+
+- `grant.data.outway.peer_id`
+- `grant.data.service.peer_id`
+
+*ServicePublicationGrant*
+
+- `grant.data.directory.peer_id`
+- `grant.data.service.peer_id`
+
 
 The JWS **MUST** specify the public key fingerprint of the keypair used to create 
 the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8] field of the `JOSE Header` [@!RFC7515, section 4].
@@ -536,22 +463,22 @@ Validation is done by comparing the hash of the received Contract with the hash 
 The `contractContentHash` of the signature payload contains the signature hash. The algorithm to create a `contractContentHash` is described below.
 
 1. Create a byte array called `contentBytes`.
-1. Append `Contract.Content.Id` to `contentBytes`.
-1. Convert `Contract.Content.GroupId` to bytes and append the bytes to `contentBytes`.
-1. Convert `Contract.Content.Validity.NotBefore` to bytes and append the bytes to `contentBytes`.
-1. Convert `Contract.Content.Validity.NotAfter` to bytes and append the bytes to `contentBytes`.
-1. Convert `Contract.Content.CreatedAt` to bytes and append the bytes to `contentBytes`.
+1. Append `contract.content.id` to `contentBytes`.
+1. Convert `contract.content.group_id` to bytes and append the bytes to `contentBytes`.
+1. Convert `contract.content.validity.not_before` to bytes and append the bytes to `contentBytes`.
+1. Convert `contract.content.validity.not_after` to bytes and append the bytes to `contentBytes`.
+1. Convert `contract.content.created_at` to bytes and append the bytes to `contentBytes`.
 1. Create an array of bytes arrays called `grantByteArrays`
-1. For each Grant in `Contract.Content.Grants`
+1. For each Grant in `contract.content.grants`
    1. Create a byte array named `grantBytes`
-   1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the proto definition. If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
+   1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the [OpenAPI Specification definition](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml). If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
    1. Append `grantBytes` to `grantByteArrays`
 1. Sort the byte arrays in `grantByteArrays` in ascending order
 1. Append the bytes of `grantByteArrays` to `contentBytes`.
-1. Hash the `contentBytes` using the hash algorithm described in `Contract.Content.Algorithm`
+1. Hash the `contentBytes` using the hash algorithm described in `contract.content.algorithm`
 1. Encode the bytes of the hash as Base64.
-1. Convert the value of `Contract.Content.Algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the proto definition](#contract_interface). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
-1. Append the string `1$` to the string created in step 13. This is the enum`HASH_TYPE_CONTRACT` defined in [the proto definition](#contract_interface) as int32. E.g. if the string created in step 13 is `$1$`, the string should be `$1$1$`
+1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer look up the enum value in the field `.components.schemas.HashAlgorithm` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml) and interpret the position in the list. E.g. The enum `HASH_ALGORITHM_SHA3_512` is the first item in the list so the value becomes `$1$`.
+1. Append the string `1$` to the string created in step 13. This is the enum`HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml) as int32. E.g. if the string created in step 13 is `$1$`, the string should be `$1$1$`
 1. Prefix the Bas64 string generated in step 12 with the string generated in step 14.
 
 #### Data types {#data_types}
@@ -559,19 +486,19 @@ The `contractContentHash` of the signature payload contains the signature hash. 
 - `int32`: use `Little-endian` as endianness when converting to a byte array
 - `int64`: use `Little-endian` as endianness when converting to a byte array
 - `string`: use `utf-8` encoding when converting to a byte array
-- `GrantType`: should be represented as an int32
+- `GrantType`: should be represented as an int32. The integer value is the position in the list as defined in the field `.components.schemas.GrantType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml)
 
 ### Grant hash {#grant_hash}
 
 The Grant hash can be created by executing the following steps:
 
 1. Create a byte array named `grantBytes`
-1. Convert `Contract.Content.Id` to bytes and append the bytes to `grantBytes`.
+1. Convert `contract.content.id` to bytes and append the bytes to `grantBytes`.
 1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the proto definition](#contract_interface). If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
-1. Hash the `grantBytes` using the hash algorithm described in `Contract.Content.Algorithm`
+1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
 1. Encode the bytes of the hash as Base64.
-1. Convert the value of `Contract.Content.Algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the proto definition](#contract_interface). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
-1. Determine the `HashType` that matches with value of `Grant.Type` and convert it to an int32 and add a `$` as suffix. To convert the `HastType` to an integer take the enum value of `HashType` defined in [the proto definition](#contract_interface). E.g. The enum `HASH_TYPE_GRANT_PEER_REGISTRATION` becomes `2$`.
+1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
+1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. To convert the `HastType` to an integer take the position of the `HashType` in the field `.components.schemas.HashType` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml)). E.g. The enum `HASH_TYPE_GRANT_PEER_REGISTRATION` becomes `2$`.
 1. Combine the strings containing the hash algorithm(step 6) and Hash type(step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_PEER_REGISTRATION` should result in the string `$1$2$`
 1. Prefix the Bas64 string generated in step 5 with the string generated in step 8.
 
@@ -595,8 +522,12 @@ The payload of the JWT **MUST** contain the field specified below:
 
 * *grh(string):*  
   The hash of the Grant that serves as basis for the authorization
+* *sub(string):*
+  The subject [@!RFC7519, section 4.1.2]. This should be the ID of the Peer for whom the token is intended 
 * *svc(string):*
   Name of the Service
+* *aud(string):*
+  The audience [@!RFC7519, section 4.1.3]. This should be address of the Inway providing the Service
 * *exp(int):*
   Expiration time [@!RFC7519, section 4.1.4]
 * *nbf(int):*
@@ -605,25 +536,22 @@ The payload of the JWT **MUST** contain the field specified below:
     * *x5t#S256(string):*
     The fingerprint of the public key that is allowed ot use the access token
 * *add(object):*
-  An object which can be used to provide additional data.  
-    * *pid(string):*
-    The ID of the Peer for whom the access token is created
+  An object which can be used to provide additional data 
 
 Example payload:
 
 ```json
 {
     "gth": "$1$4$+PQI7we01qIfEwq4O5UioLKzjGBgRva6F5+bUfDlKxUjcY5yX1MRsn6NKquDbL8VcklhYO9sk18rHD6La3w/mg==",
-    "pid": "123456890",
+    "sub": "1234567890",
     "svc": "serviceName", 
+    "aud": "https://inway.com",
     "exp": 1493726400,
     "nbf": 1493722800,
     "cnf": {
       "x5t#S256": "DpAyDYakmVAQ4oOJC3UYLRk/ONRCqMj00TeGJemMiLA="
     },
-    "add": {
-      "pid":"123456890" 
-    }
+    "add": {}
 }
 ```
 
@@ -650,7 +578,7 @@ The Manager **MUST** only accept mTLS connections from other external Managers w
 
 #### Contracts
 
-The Manager **MUST** support Contracts containing Grants of the type [ServiceConnectionGrant](#service_connection_grant).
+The Manager **MUST** support Contracts containing Grants of the type ServiceConnectionGrant.
 
 The Manager **MUST** validate Contracts using the rules described in [Contract validation section](#contract_validation)
 
@@ -676,357 +604,27 @@ The Manager **MUST** provide existing Contracts for a specific Peer. A Contract 
 
 #### Tokens
 
-The Manager **MUST** be able to provide an [access token](#access_token) to Peers that have a valid Contract containing a [ServiceConnectionGrant](#service_connection_grant).
+The Manager **MUST** be able to provide an [access token](#access_token) to Peers that have a valid Contract containing a ServiceConnectionGrant.
 
 Before issuing an access token the Manager **MUST** validate that:
 
-1. A valid Contract exists with a [ServiceConnectionGrant](#service_connection_grant) matching the Grant hash in the access token request.
-1. The Manager is provided by a Peer with the same PeerID as specified in `ServiceConnectionGrant.Service.PeerID`.
-1. The Manager is provided by a Peer who has an Inway which is offering the Service specified in `ServiceConnectionGrant.Service.Name`. 
-1. The Peer ID provided by the X.509 certificate used by the Outway requesting the access token matches the value of the field `ServiceConnectionGrant.Outway.PeerID`.
-1. The fingerprint of the public key provided by the X.509 certificate used by the Outway requesting the access token is present in the value of the field `ServiceConnectionGrant.Outway.PublicKeyFingerprints`.
+1. A valid Contract exists with a ServiceConnectionGrant matching the Grant hash in the access token request.
+1. The Manager is provided by a Peer with the same PeerID as specified in `grant.data.service.peer_id`.
+1. The Manager is provided by a Peer who has an Inway which is offering the Service specified in `grant.data.service.name`. 
+1. The Peer ID provided by the X.509 certificate used by the Outway requesting the access token matches the value of the field `grant.data.outway.peer_id`.
+1. The fingerprint of the public key provided by the X.509 certificate used by the Outway requesting the access token is present in the value of the field `grant.data.outway.public_key_fingerprints`.
+
+The Manager **MUST** include the address of the Inway in the field `aud` of the access token.
 
 ### Interfaces {#manager_interface}
 
-The Manager functionality **MUST** implement a gRPC service, as specified on [grpc.io](https://grpc.io/docs/), with the name `ManagerService`. 
-This service **MUST** offer the following Remote Procedure Calls (RPC):
+The Manager functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](#open_api_specification).  
 
-- `SubmitContract`, used to offer a Contract to be signed by the receiver
-- `AcceptContract`, used to accept a Contract
-- `RejectContract`, used to reject a Contract
-- `RevokeContract`, used to revoke a Contract
-- `ListContracts`, lists Contracts
-- `ListCertificates`, lists certificates matching the Public Key Fingerprints in the request
-- `GetInwayAddressForServices`, gets Inway addresses of specific Services
-- `GetPeerInfo`, returns the info about the Peer
-- `GetAccessToken`, returns an access token
+All methods in the OpenAPI Specification with the tags `manager` **MUST** be implemented. 
 
-RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). 
+###  FSC manager address 
 
-The messages are specified below.
-
-#### gRPC Metadata
-
-The Manager is required to include its public address as gRPC metadata in each request sent to another Manager, using the key `fcs-manager-address`.
-
-#### Contract {#contract_interface}
-
-The interface Contract is used in RPCs of the gRPC service `ManagerService`
-
-```
-enum HashAlgorithm {
-    HASH_ALGORITHM_UNSPECIFIED = 0;
-    HASH_ALGORITHM_SHA3_512 = 1;
-}
-
-enum HashType {
-  HASH_TYPE_UNSPECIFIED = 0;
-  HASH_TYPE_CONTRACT = 1;
-  HASH_TYPE_GRANT_PEER_REGISTRATION = 2;
-  HASH_TYPE_GRANT_SERVICE_PUBLICATION = 3;
-  HASH_TYPE_GRANT_SERVICE_CONNECTION = 4;
-}
-
-message Contract {
-    ContractContent content = 1;
-    Signatures signatures = 2;
-}
-
-message ContractContent {
-  bytes id = 1;
-  string group_id = 2;
-  uint64 created_at = 3;
-  Validity validity = 4;
-  repeated Grant grants = 5;
-  HashAlgorithm hash_algorithm = 6;
-}
-
-message Validity {
-    uint64 not_before = 1;
-    uint64 not_after = 2;
-}
-
-message Signatures {
-    map<string, string> accept = 1;
-    map<string, string> reject = 2;
-    map<string, string> revoke = 3;
-}
-
-enum GrantType {
-  GRANT_TYPE_UNSPECIFIED = 0;
-  GRANT_TYPE_PEER_REGISTRATION = 1;
-  GRANT_TYPE_SERVICE_PUBLICATION = 2;
-  GRANT_TYPE_SERVICE_CONNECTION = 3;
-}
-
-message Grant {
-    GrantType type = 1;
-    oneof data {
-        GrantPeerRegistration peer_registration = 2;
-        GrantServicePublication service_publication = 3;
-        GrantServiceConnection service_connection = 4;
-    }
-}
-
-message GrantPeerRegistration {
-    message Directory {
-        string peer_id = 1;
-    }
-    
-    message Peer {
-        string id = 1;
-        string name = 2;
-        string manager_address = 3;
-    }
-    
-    Directory directory = 1;
-    Peer peer = 2;
-}
-
-message GrantServicePublication {
-    message Service {
-        string peer_id = 1;
-        string name = 2;
-    }
-    
-    message Directory {
-        string peer_id = 1;
-    }
-    
-    Directory directory = 1;
-    Service service = 2;
-}
-
-message GrantServiceConnection{
-    message Service {
-        string peer_id = 1;
-        string name = 2;
-    }
-       
-    message Outway {
-        string peer_id = 1;
-        repeated string public_key_fingerprints = 2;
-    }
-    
-    Outway outway = 1;
-    Service service = 2;
-}
-```
-
-#### RPC SubmitContract
-
-The Remote Procedure Call `SubmitContract` **MUST** be implemented with the following interface and messages:
-
-```
-rpc SubmitContract(SubmitContractRequest) returns (SubmitContractResponse);
-
-message SubmitContractRequest {
-  ContractContent contract_content = 1;
-  string signature = 2;
-  bytes certificate_chain = 3;
-}
-
-message SubmitContractResponse {}
-```
-
-#### RPC AcceptContract
-
-The Remote Procedure Call `AcceptContract` **MUST** be implemented with the following interface and messages:
-
-```
-rpc AcceptContract(AcceptContractRequest) returns (AcceptContractResponse);
-
-message AcceptContractRequest {
-    ContractContent contract_content = 1;
-    string signature = 2;
-    bytes certificate_chain = 3;
-}
-message AcceptContractResponse{}
-```
-
-#### RPC RejectContract
-
-The Remote Procedure Call `RejectContract` **MUST** be implemented with the following interface and messages:
-
-```
-rpc RejectContract(RejectContractRequest) returns (RejectContractResponse);
-
-message RejectContractRequest {
-    ContractContent contract_content = 1;
-    string signature = 2;
-    bytes certificate_chain = 3;
-}
-
-
-message RejectContractResponse{}
-```
-
-#### RPC RevokeContract
-
-The Remote Procedure Call `RevokeContract` **MUST** be implemented with the following interface and messages:
-
-```
-rpc RevokeContract(RevokeContractRequest) returns (RevokeContractResponse);
-
-message RevokeContractRequest {
-    ContractContent contract_content = 1;
-    string signature = 2;
-    bytes certificate_chain = 3;
-}
-
-message RevokeContractResponse{}
-```
-
-#### RPC ListContracts
-
-The Remote Procedure Call `ListContracts` **MUST** only return contracts involving the Peer calling the RPC when the GrantType is `GRANT_TYPE_SERVICE_CONNECTION`.
-
-The Remote Procedure Call `ListContracts` **MUST** be implemented with the following interface and messages:
-
-```
-enum SortOrder {
-  SORT_ORDER_UNSPECIFIED = 0;
-  SORT_ORDER_ASCENDING = 1;
-  SORT_ORDER_DESCENDING = 2;
-}
-
-message Pagination {
-  string start_id = 1;
-  uint32 limit = 2; 
-  SortOrder order = 3;
-}
-
-rpc ListContracts(ListContractsRequest) returns (ListContractsResponse);
-
-message ListContractsRequest{
-    message Filter {
-      GrantType grant_type = 1;
-      string contract_hash = 2;
-      string grant_hash = 3;
-    }
-   
-    Pagination pagination = 1;
-    repeated Filter filters = 2;
-}
-
-message ListContractsResponse {
-    repeated Contract contracts = 1;
-}
-```
-
-#### RPC ListCertificates
-
-The Remote Procedure Call `ListCertificates` **MUST** be implemented with the following interface and messages:
-
-```
-rpc ListCertificates(ListCertificatesRequest) returns (ListCertificatesResponse);
-
-message ListCertificatesRequest{
-    repeated string public_key_fingerprints = 1;
-}
-
-message ListCertificatesResponse {
-    map<string, bytes> certificates = 1;
-}
-```
-
-##### RPC GetInwayAddressForServices
-
-The Remote Procedure Call `GetInwayAddressForServices` **MUST** be implemented with the following interface and messages:
-
-```
-rpc GetInwayAddressForServices(GetInwayAddressForServicesRequest) returns (GetInwayAddressForServicesResponse);
-
-message GetInwayAddressForServicesRequest {
-  message Service {
-    string name = 2;
-  }
-  
-  repeated Service services = 1;
-}
-
-message GetInwayAddressForServicesResponse {
-  map<string, string> service_names_inway_address = 1;
-}
-```
-
-##### RPC GetPeerInfo
-
-The Remote Procedure Call `GetPeerInfo` **MUST** be implemented with the following interface and messages:
-
-```
-rpc GetPeerInfo(GetPeerInfoRequest) returns (GetPeerInfoResponse);
-
-message GetPeerInfoRequest {}
-
-message GetPeerInfoResponse {
-  message Peer {
-    string id = 1;
-    string name = 2;
-  }
-  
-  Peer peer = 1;
-  FSCVersion fsc_version = 2;
-  repeated Extension enabled_extensions = 3;
-}
-
-enum FSCVersion {
-  FSC_VERSION_UNSPECIFIED = 0;
-  FSC_VERSION_1_0_0 = 1;
-}
-
-message Extension {
-  string name = 1;
-  string version = 2;
-}
-```
-
-#### RPC GetAccessToken {#get_access_token}
-
-The Remote Procedure Call `GetAccessToken` **MUST** be implemented with the following interface and messages:
-
-```
-rpc GetAccessToken(GetAccessTokenRequest) returns (GetAccessTokenResponse);
-
-message GetAccessTokenRequest {
-    string grants_hash = 1; 
-}
-
-message GetAccessTokenResponse {
-    string access_token = 1;
-}
-```
-
-#### Error codes
-
-The gRPC service **MUST** implement the following error codes:
-
-```
-enum ErrorReason {
-    ERROR_REASON_UNSPECIFIED = 0;
-
-    // Peer is not part of the contract
-    ERROR_REASON_PEER_NOT_PART_OF_CONTRACT = 1;
-
-    // Signature contentHash does not match the hash of the contract content
-    ERROR_REASON_SIGNATURE_CONTRACT_CONTENT_HASH_MISMATCH = 2;
-
-    // Peer certificate could not be verified
-    ERROR_REASON_PEER_CERTIFICATE_VERIFICATION_FAILED = 3;
-
-    // Peer ID of the signature does not match the Peer ID of the certificate with the public key used to verify the signature
-    ERROR_REASON_CERTIFICATE_PEER_ID_SIGNATURE_MISMATCH = 4;
-
-    // Peer certificate could not be retrieved from the peer
-    ERROR_REASON_PEER_CERTIFICATE_UNAVAILABLE = 5;
-
-    // Signature could not be verified
-    ERROR_REASON_SIGNATURE_VERIFICATION_FAILED = 6;
-    
-    // Inway address could not be provided because the Service is unknown
-    ERROR_REASON_SERVICE_UNKNOWN = 7;
-}
-```
+The Manager is required to include its public address as HTTP Header `Fsc-Manager-Address` in each request sent to another Manager.
 
 ## Directory
 
@@ -1038,154 +636,49 @@ The Directory **MUST** only accept connection from clients that use mTLS, the cl
 
 #### Contracts 
 
-In addition to the Grant types supported by the [Manager](#manager), the Directory **MUST** support Contracts with Grants of the type [PeerRegistrationGrant](#peer_registration_grant) and [ServicePublicationGrant](#service_publication_grant).
+In addition to the Grant types supported by the [Manager](#manager), the Directory **MUST** support Contracts with Grants of the type PeerRegistrationGrant and ServicePublicationGrant.
 
 The Directory **MUST** validate Contracts using the rules described in [Contract validation section](#contract_validation)
 
 #### Peer registration
 
-Peer registration is accomplished by offering a Contract to the Directory which contains a `PeerRegistrationGrant`.
+Peer registration is accomplished by offering a Contract to the Directory which contains a PeerRegistrationGrant.
 
-The Directory **MUST** be able to sign Contracts with Grants of the type `PeerRegistrationGrant`.
+The Directory **MUST** be able to sign Contracts with Grants of the type PeerRegistrationGrant.
 
-The Directory **MUST** validate the `PeerRegistrationGrants` in the Contract using the rules described in [PeerRegistrationGrant validation section](#peer_registration_grant_validation)
+The Directory **MUST** validate the PeerRegistrationGrants in the Contract using the rules described in [PeerRegistrationGrant validation section](#peer_registration_grant_validation)
 
 #### Service publication
 
-Service publication is accomplished by offering a Contract to the Directory which contains one or more `ServicePublicationGrants` with each `ServicePublicationGrant` containing a single Service. Once the Directory and the Peer offering the Service have both signed the Contract, the Service is published in the Directory.
+Service publication is accomplished by offering a Contract to the Directory which contains one or more ServicePublicationGrants with each ServicePublicationGrant containing a single Service. Once the Directory and the Peer offering the Service have both signed the Contract, the Service is published in the Directory.
 
-The Directory **MUST** be able to sign Contracts with Grants of the type `ServicePublicationGrant`.
+The Directory **MUST** be able to sign Contracts with Grants of the type ServicePublicationGrant.
 
-The Directory **MUST** validate the `ServicePublicationGrant` in the Contract using the rules described in [ServicePublicationGrant validation section](#peer_service_publication_validation)
+The Directory **MUST** validate the ServicePublicationGrant in the Contract using the rules described in [ServicePublicationGrant validation section](#peer_service_publication_validation)
 
-The Directory **MUST** only accept `ServicePublicationGrants` of Peers which have a valid Contract with a `PeerRegistrationGrant` containing both the Peer and the Directory.
+The Directory **MUST** only accept ServicePublicationGrants of Peers which have a valid Contract with a PeerRegistrationGrant containing the Peer and the Directory.
 
-Although multiple `ServicePublicationGrants` are allowed in a single Contract it is **RECOMMENDED** to limit this to one per Contract.
+Although multiple ServicePublicationGrants are allowed in a single Contract it is **RECOMMENDED** to limit this to one per Contract.
 
 #### Service listing
 
-The Directory **MUST** list a Service when a valid Contract containing a `ServicePublicationGrant` for the Service exists.
+The Directory **MUST** list a Service when a valid Contract containing a ServicePublicationGrant for the Service exists.
 
 #### Peer listing
 
-The Directory **MUST** offer a list of the Peers in the Group. The listing includes the Manager of each Peer. This information is used to negotiate Contracts between Peers.
+The Directory **MUST** offer a list of the Peers in the Group. 
 
-The Directory **MUST** only return a Peer for which the Directory has a Contract with a `PeerRegistrationGrant`.
+The Directory **MUST** only return a Peer for which the Directory has a valid Contract with a PeerRegistrationGrant.
 
-When multiple valid Contracts with a `PeerRegistrationGrant` for the same Peer exist, the Directory **MUST** use the data of the `PeerRegistrationGrant` in the Contract with the most recent date specified in the field `Contract.Content.CreatedAt`.
+When multiple valid Contracts with a PeerRegistrationGrant for the same Peer exist, the Directory **MUST** use the data of the PeerRegistrationGrant in the Contract with the most recent date specified in the field `Contract.content.created_at`.
 
 ### Interfaces
 
-#### Directory Service
+#### Directory API
 
-The Directory functionality **MUST** implement a gRPC service with the name `ManagerService`. 
-This service **MUST** implement the interface of the [Manager](#manager).  
+The Directory functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](#open_api_specification)
 
-In addition to the Manager interface the Directory functionality **MUST** implement a gRPC service with the name `DirectoryService`. This service **MUST** offer two Remote Procedure Calls:  
-
-* `ListPeers`, lists the Peers known by the Directory
-* `ListServices`, lists the Services known by the Directory
-
-RPCs **MUST** use Protocol Buffers of the version 3 Language Specification to exchange messages, as specified on [developers.google.com](https://developers.google.com/protocol-buffers/docs/reference/proto3-spec). 
-
-The messages are specified below.
-
-##### RPC ListServices
-
-The Remote Procedure Call `ListServices` **MUST** be implemented with the following interface and messages:
-
-```
-type SortOrder enum {
-  SORT_ORDER_UNSPECIFIED = 0;
-  SORT_ORDER_ASCENDING = 1;
-  SORT_ORDER_DESCENDING = 2;
-}
-
-message Pagination {
-  string start_id = 1;
-  uint32 limit = 2; 
-  SortOrder order = 3;
-}
-
-rpc ListServices(ListServicesRequest) returns (ListServicesResponse);
-
-message ListServicesRequest {
-  message Filter {
-    string peer_id = 1;
-    string service name = 2;
-  }
-
-  Pagination pagination = 1;
-  repeated Filter filters = 2;
-}
-
-message Service {
-    Peer peer = 1;
-    string name = 2;
-}
-
-message ListServicesResponse {
-  message ResponseService {
-    oneof service {
-        Service service = 1;
-    }
-  }
-  
-  repeated ResponseService services = 1;
-}
-
-message Peer {
-  string id = 1;
-  string name = 2;
-}
-
-message Inway {
-  string address = 1;
-}
-```
-
-##### RPC ListPeers
-
-The Remote Procedure Call `ListPeers` **MUST** be implemented with the following interface and messages:
-
-```
-type SortOrder enum {
-  SORT_ORDER_UNSPECIFIED = 0;
-  SORT_ORDER_ASCENDING = 1;
-  SORT_ORDER_DESCENDING = 2;
-}
-
-message Pagination {
-  string start_id = 1;
-  uint32 limit = 2; 
-  SortOrder order = 3;
-}
-
-rpc ListPeers(ListPeersRequest) returns (ListPeersResponse);
-
-message ListPeersRequest {
-  message Filter {
-    string peer_id = 1;
-  }
-
-  Pagination pagination = 1;
-  repeated Filter filters = 2;
-}
-
-message ListPeersResponse {
-  repeated Peer peers = 1;
-}
-
-message Peer {
-  string id = 1;
-  string name = 2;
-  Manager manager = 3;
-}
-
-message Manager {
-  string address = 1;
-}
-```
+All methods in the OpenAPI Specification with the tags `manager` and `directory` **MUST** be implemented.
 
 ## Outway
 
@@ -1199,24 +692,19 @@ The Outway **MUST** use mTLS when connecting to the Directory or Inways with an 
 
 The Outway **MUST** proxy HTTP requests to the correct Service.
 
-The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which contains the hash of ServiceConnectionGrant to be used to route the request. For more information about the Grant hash read the [Grant hash section](#grant_hash)
-The ServiceConnectionGrant contains the Peer ID of the Peer offering the Service and the name of the Service. This information can be used to retrieve the Inway address from the Manager of the Peer offering the Service .
+The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which contains the hash of ServiceConnectionGrant to be used to route the request. For more information about the Grant hash review the [Grant hash section](#grant_hash)
 
 The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant with a hash that matches the hash provided in the `Fsc-Grant-Hash` header.  
 
-The Outway **MUST** request an [access token](#access_token) from the Peer specified in the `Service.PeerID` field of the ServiceConnectionGrant.
-
-The Outway **MUST** use the [RPC GetAccessToken]($get_access_token) provided by the Manager of the Peer specified in the `Service.PeerID` field of the ServiceConnectionGrant.
+The Outway **MUST** either request an [access token](#access_token) from the Peer specified in the `grant.data.service.peer_id` field of the ServiceConnectionGrant.
 
 The Outway **MUST** deny the request when the Outway is unable to obtain an access token.  
 
-The Outway **MUST** include the access token in the HTTP header `Fsc-Authorization` when proxying the HTTP request to the Inway.  
+The Outway **MUST** include an access token in the HTTP header `Fsc-Authorization` when proxying the HTTP request to the Inway.  
 
-The Outway **MUST** use Service routing information provided by the Manager of the Peer specified in the `Service.PeerID` field of the ServiceConnectionGrant.
+The Outway **MUST** proxy the request to the address of the Inway specified in the field `aud` of the access token.
 
 The Outway **MUST NOT** alter the path of the HTTP Request.
-
-The Outway **SHALL** use the last available address of a Service in case the Directory or the Manager of the Peer specified in the `Service.PeerID` field of the ServiceConnectionGrant is unreachable.
 
 Clients **MAY** use TLS when communicating with the Outway.
 
@@ -1228,16 +716,24 @@ The HTTP endpoint `/` **MUST** be implemented.
 
 #### Error response
 
-The Outway **MUST** return an error response of a Service to the client without altering the response.
+If the Error has occurred in the Inway or Service the Outway **MUST** return the error without altering the response. 
 
-The Outway **MUST** return the HTTP status code `540` with an error response defined in the [section Error Handling ]({#error_handling_http}) when an error occurs within the scope of FSC.
+The Outway **MUST** return the HTTP status code `540` with an error response defined as `.components.schemas.Error` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml) when the error is produced by the Outway.
 
-The code field of the error response **MUST** contain one of the following codes:
+The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.OutwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml).
 
-- `FSC_GRANT_HASH_HEADER_MISSING`: The FSC Grant Hash header is missing.
-- `UNSUPPORTED_METHOD`: Outway called with an unsupported method, the CONNECT method is not supported.
-- `GRANT_UNKOWN`: The Grant provided in the `Fsc-Grant-Hash` header is not present at the Peer.
-- `SERVER_ERROR`: General error code.
+The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_OUTWAY`.
+
+##### Codes
+
+*ERROR_CODE_GRANT_HASH_MISSING:*
+The Outway received a request without the mandatory `Fsc-Grant-Hash` HTTP header.
+
+*ERROR_CODE_UNKNOWN:*
+The Peer does not have a Grant with the same hash as specified in `Fsc-Grant-Hash`.
+
+*ERROR_CODE_METHOD_UNSUPPORTED:*
+The Outway received a request with an HTTP Method that is not supported. The CONNECT method is not supported.
 
 ## Inway
 
@@ -1253,8 +749,8 @@ The Inway **MUST** validate the access token provided in the HTTP `Fsc-Authoriza
 
 The request **MUST** be authorized if the access token meets the following conditions:  
 
-- The Peer ID in the X.509 certificate used by the connecting Outway matches the value of the field `ServiceConnectionGrant.Outway.PeerID`.
-- The Public Key Fingerprint of the Public Key used by the connecting Outway matches a value of the field `ServiceConnectionGrant.Outway.publicKeyFingerprints`.
+- The Peer ID in the X.509 certificate used by the connecting Outway matches the value of the field `grant.data.outway.peer_id`.
+- The Public Key Fingerprint of the Public Key used by the connecting Outway matches a value of the field `grant.data.outway.public_key_fingerprints`.
 - The access token is signed by the same Peer that owns Inway.
 - The access token is used by an Outway that uses the X.509 certificate to which the access token is bound. This is verified by applying the JWT Certificate Thumbprint Confirmation Method specified in [@!RFC8705,section 3.1].
 - The Service specified in the access token is known to the Inway.
@@ -1279,19 +775,29 @@ The HTTP endpoint `/` **MUST** be implemented.
 
 The Inway **MUST** return the error response of a Service to the Outway without altering the response.
 
-The Inway **MUST** return the HTTP status code 540 with an error response defined in the [section Error Handling](#error_handling_http) when an error occurs within the scope of FSC.
+The Inway **MUST** return the HTTP status code `540` with an error response defined as `.components.schemas.Error` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml) when the error is produced by the Inway.
 
-The code field of the error response **MUST** contain one of the following codes:
+The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.InwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml).
 
-- `INVALID_CERTIFICATE`: The X.509 certificates does not meet the requirements of FSC.
-- `MISSING_PEER_CERTIFICATE`: the Inway is unable to extract the X.509 certificate from the connection.
-- `FSC_GRANT_HASH_HEADER_MISSING`: The FSC Grant Hash header is missing.
-- `ACCESS_DENIED`: No Contract with a ServiceConnectionGrant exists for the public key used by the client making the request.
-- `SERVICE_NOT_FOUND`: the Service is unknown to the Inway.
-- `SERVICE_UNREACHABLE`: the Inway knows the Service but is unable to proxy the request to the Service.
-- `SERVER_ERROR`: General error code.
+The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_INWAY`.
+
+##### Codes
+
+*ERROR_CODE_ACCESS_TOKEN_MISSING:*
+The HTTP header `Fsc-Authorization` does not contain an access token
+
+*ERROR_CODE_ACCESS_DENIED:*
+The access token is invalid
+
+*ERROR_CODE_SERVICE_NOT_FOUND:*
+The Service specified in the access token is not offered by the Inway
+
+*ERROR_CODE_SERVICE_UNREACHABLE:*
+The Inway is unable to reach the Service
 
 # References
+
+[OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml)
 
 # Acknowledgements
 
