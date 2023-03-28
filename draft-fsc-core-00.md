@@ -249,7 +249,7 @@ Once the Contract between providing Peer and consuming Peer is signed by both pa
 
 ## Consuming a Service
 
-A Peer can consume a Service by sending request for said Service to an Outway. The Outway will request an access token from the Peer offering the Service before proxying the request to the Inway. The access token is used to authorize the connection.
+A Peer can consume a Service by sending request for said Service to an Outway. The request must include an access token provided by the Peer providing the Service. 
 The Inway will validate the access token and proxy the request to the Service.
 
 !---
@@ -668,7 +668,7 @@ The Directory **MUST** list a Service when a valid Contract containing a Service
 
 The Directory **MUST** offer a list of the Peers in the Group. 
 
-The Directory **MUST** only return a Peer for which the Directory has a valid Contract with a PeerRegistrationGrant.
+The Directory **MUST** only return Peers for which the Directory has a valid Contract with a PeerRegistrationGrant.
 
 When multiple valid Contracts with a PeerRegistrationGrant for the same Peer exist, the Directory **MUST** use the data of the PeerRegistrationGrant in the Contract with the most recent date specified in the field `Contract.content.created_at`.
 
