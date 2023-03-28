@@ -249,7 +249,7 @@ Once the Contract between providing Peer and consuming Peer is signed by both pa
 
 ## Consuming a Service
 
-A Peer can consume a Service by sending request for said Service to an Outway. The Outway will request an access token from the Peer offering the Service before proxying the request to the Inway. The access token is used to authorize the connection.
+A Peer can consume a Service by sending request for said Service to an Outway. The request must include an access token provided by the Peer providing the Service. 
 The Inway will validate the access token and proxy the request to the Service.
 
 !---

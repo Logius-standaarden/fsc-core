@@ -357,14 +357,9 @@ paths:
                     description: A list of Services
                     type: array
                     items:
-                      properties:
-                        peer:
-                          $ref: '#/components/schemas/peer'
-                        name:
-                          $ref: '#/components/schemas/peerName'
-                      required:
-                        - peer
-                        - name
+                      oneOf:
+                        - $ref: '#/components/schemas/serviceListing'
+                        - $ref: '#/components/schemas/delegatedServiceListing'
                   pagination:
                     $ref: '#/components/schemas/paginationResult'
                 required:
@@ -540,6 +535,8 @@ components:
             - $ref: '#/components/schemas/grantPeerRegistration'
             - $ref: '#/components/schemas/grantServicePublication'
             - $ref: '#/components/schemas/grantServiceConnection'
+            - $ref: '#/components/schemas/grantDelegatedServiceConnection'
+            - $ref: '#/components/schemas/grantDelegatedServicePublication'
       discriminator:
         propertyName: type
     grantPeerRegistration:
@@ -547,13 +544,7 @@ components:
       type: object
       properties:
         directory:
-          description: The Details of the Directory to which the Peer is registering
-          type: object
-          properties:
-            peer_id:
-              $ref: '#/components/schemas/peerID'
-          required:
-            - peer_id
+          $ref: '#/components/schemas/directory'
         peer:
           description: The details of the Peer who is registering to the Directory
           type: object
@@ -578,30 +569,9 @@ components:
       type: object
       properties:
         outway:
-          description: The details of the Outway for which a connection authorization was granted
-          type: object
-          properties:
-            peer_id:
-              $ref: '#/components/schemas/peerID'
-            public_key_fingerprints:
-              description: The public key fingerprints that are authorized to connect to the Service
-              type: array
-              items:
-                $ref: '#/components/schemas/publicKeyFingerprint'
-          required:
-            - peer_id
-            - public_key_fingerprints
+          $ref: '#/components/schemas/outway'
         service:
-          description: The details of the Service for which a connection authorization is granted
-          type: object
-          properties:
-            peer_id:
-              $ref: '#/components/schemas/peerID'
-            name:
-              $ref: '#/components/schemas/serviceName'
-          required:
-            - peer_id
-            - name
+          $ref: '#/components/schemas/service'
       required:
         - outway
         - service
@@ -611,28 +581,103 @@ components:
       type: object
       properties:
         directory:
-          description: The details of the Directory in which a Service must be published
-          type: object
-          properties:
-            peer_id:
-              $ref: '#/components/schemas/peerID'
-          required:
-            - peer_id
+          $ref: '#/components/schemas/directory'
         service:
-          description: The details of the Service to be published
-          type: object
-          properties:
-            peer_id:
-              $ref: '#/components/schemas/peerID'
-            name:
-              $ref: '#/components/schemas/serviceName'
-          required:
-            - peer_id
-            - name
+          $ref: '#/components/schemas/service'
       required:
         - directory
         - service
         - peer_id
+        - name
+    grantDelegatedServiceConnection:
+      description: A DelegatedServiceConnectionGrant
+      type: object
+      properties:
+        delegator:
+          $ref: '#/components/schemas/delegator'
+        outway:
+          $ref: '#/components/schemas/outway'
+        service:
+          $ref: '#/components/schemas/service'
+      required:
+        - delegator
+        - outway
+        - service
+    grantDelegatedServicePublication:
+      description: A DelegatedServicePublicationGrant
+      type: object
+      properties:
+        delegator:
+          $ref: '#/components/schemas/delegator'
+        service:
+          $ref: '#/components/schemas/service'
+        directory:
+          $ref: '#/components/schemas/directory'
+      required:
+        - delegator
+        - service
+        - directory
+    outway:
+      description: The details of the Outway for which a connection authorization was granted
+      type: object
+      properties:
+        peer_id:
+          $ref: '#/components/schemas/peerID'
+        public_key_fingerprints:
+          description: The public key fingerprints that are authorized to connect to the Service
+          type: array
+          items:
+            $ref: '#/components/schemas/publicKeyFingerprint'
+      required:
+        - peer_id
+        - public_key_fingerprints
+    directory:
+      description: The details of the Directory
+      type: object
+      properties:
+        peer_id:
+          $ref: '#/components/schemas/peerID'
+      required:
+        - peer_id
+    service:
+      description: The details of a Service
+      type: object
+      properties:
+        peer_id:
+          $ref: '#/components/schemas/peerID'
+        name:
+          $ref: '#/components/schemas/serviceName'
+      required:
+        - peer_id
+        - name
+    delegator:
+      description: The details of a Delegator
+      type: object
+      properties:
+        peer_id:
+          $ref: '#/components/schemas/peerID'
+      required:
+        - peer_id
+    serviceListing:
+      properties:
+        peer:
+          $ref: '#/components/schemas/peer'
+        name:
+          $ref: '#/components/schemas/peerName'
+      required:
+        - peer
+        - name
+    delegatedServiceListing:
+      properties:
+        delegator:
+          $ref: '#/components/schemas/peer'
+        peer:
+          $ref: '#/components/schemas/peer'
+        name:
+          $ref: '#/components/schemas/peerName'
+      required:
+        - delegator
+        - peer
         - name
     hashType:
       description: The type of hash
@@ -642,6 +687,8 @@ components:
         - HASH_TYPE_PEER_REGISTRATION_GRANT
         - HASH_TYPE_SERVICE_PUBLICATION_GRANT
         - HASH_TYPE_SERVICE_CONNECTION_GRANT
+        - HASH_TYPE_DELEGATED_SERVICE_CONNECTION_GRANT
+        - HASH_TYPE_DELEGATED_SERVICE_PUBLICATION_GRANT
     grantType:
       description: The type of Grant
       type: string
@@ -649,6 +696,8 @@ components:
         - GRANT_TYPE_PEER_REGISTRATION
         - GRANT_TYPE_SERVICE_PUBLICATION
         - GRANT_TYPE_SERVICE_CONNECTION
+        - GRANT_TYPE_DELEGATED_SERVICE_CONNECTION
+        - GRANT_TYPE_DELEGATED_SERVICE_PUBLICATION
     sortOrder:
       description: The order in which the results should be returned
       type: string
