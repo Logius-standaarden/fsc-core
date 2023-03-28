@@ -668,7 +668,7 @@ The Directory **MUST** list a Service when a valid Contract containing a Service
 
 The Directory **MUST** offer a list of the Peers in the Group. 
 
-The Directory **MUST** only return a Peer for which the Directory has a valid Contract with a PeerRegistrationGrant.
+The Directory **MUST** only return Peers for which the Directory has a valid Contract with a PeerRegistrationGrant.
 
 When multiple valid Contracts with a PeerRegistrationGrant for the same Peer exist, the Directory **MUST** use the data of the PeerRegistrationGrant in the Contract with the most recent date specified in the field `Contract.content.created_at`.
 
