@@ -524,6 +524,8 @@ The payload of the JWT **MUST** contain the field specified below:
   The hash of the Grant that serves as basis for the authorization
 * *sub(string):*
   The subject [@!RFC7519, section 4.1.2]. This should be the ID of the Peer for whom the token is intended 
+* *iss(string):*
+  The issuer [@!RFC7519, section 4.1.1]. The ID of the Peer who issued the token. I.e. the Peer who is offering the Service
 * *svc(string):*
   Name of the Service
 * *aud(string):*
@@ -544,6 +546,7 @@ Example payload:
 {
     "gth": "$1$4$+PQI7we01qIfEwq4O5UioLKzjGBgRva6F5+bUfDlKxUjcY5yX1MRsn6NKquDbL8VcklhYO9sk18rHD6La3w/mg==",
     "sub": "1234567890",
+    "iss": "1234567891",
     "svc": "serviceName", 
     "aud": "https://inway.com",
     "exp": 1493726400,
