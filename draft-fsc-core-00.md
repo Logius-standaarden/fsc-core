@@ -74,9 +74,9 @@ The Federated Service Connectivity (FSC) specifications describe a way to implem
 
 The Core part of the FSC specification achieves inter-organizational, technical interoperability:
 
-- to discover Services
-- to route requests to Services in other contexts (e.g. from within organization A to organization B)
-- to request and manage authorizations needed to connect to said Services
+- to discover Services.
+- to route requests to Services in other contexts (e.g. from within organization A to organization B).
+- to request and manage authorizations needed to connect to said Services.
 
 Functionality required to achieve technical interoperability is provided by APIs as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling up-scaling of inter-organizational usage of services.
 
@@ -91,23 +91,24 @@ Inways are reverse proxies that route incoming connections from Outways to Servi
 Outways are forward proxies that discover Services in the Group via the Directory and route outgoing connections to Inways.  
 Managers negotiate Contracts between Peers.  
 Managers provide access tokens to Outways which contain the authorization to connect a Service.
+The address of an Inway offering a Service is contained in the access token.  
 Inways authorize connection attempts by validating access tokens.
-Routing information for the Services in the Group can be requested from the Directory.  
+Services in the Group can be discovered through the Directory.  
 The address of Managers of Peers can be requested from the Directory.  
-The address of an Inway offering a Service can be requested from the Manager of the Peer offering the Service.  
 
-To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once an authorization to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the HTTPS service is made.
+To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once an authorization to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the Service is made.
 
 FSC Core specifies the basics for setting up and managing connections in a Group. It is **RECOMMENDED** to use FSC Core with the following extensions, each specified in a dedicated RFC:
 
-- [FSC Delegation](delegation/README.md), to delegate the right to connect to a service
+- [FSC Delegation](delegation/README.md), to delegate the right to connect to a service.
+- [FSC Logging](logging/README.md), keep a log of requests to Services.
 
 ### Use cases
 
 A typical use case is a cooperation of many organizations that use APIs to exchange data or provide other business services to each other.
 
-Organizations can participate in multiple FSC Groups at the same time. 
-Codes for participating in multiple FCS Groups could be the use of different environments for production and test deployments or when participating in different ecosystems like health industry and government industry.
+Organizations can participate in multiple Groups at the same time. 
+Reasons for participating in multiple Groups could be the use of different environments for production and test deployments or when participating in different ecosystems like health industry and government industry.
 
 An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a Service in the Directory of each Group using a different Inway for each Group.
 
@@ -129,7 +130,7 @@ System of Peers using Inways, Outways and Managers that confirm to the FSC speci
 
 *Directory:*      
   
-A Directory holds information about the Services in the FSC Group to make them discoverable.
+A Directory holds information about the Services in the Group to make them discoverable.
 
 *Inway:*  
   
@@ -143,17 +144,17 @@ Forward proxy that handles outgoing connections to Inways.
   
 Document between Peers defining what interactions between Peers are possible.
 
-*Manager:*  
-  
-The Manager is an API which manages Contracts and configures Inways and Outways based on information from a Directory and Contracts. And acts as an authorization server which provides access tokens.
-
 *Grant:*  
   
-Defines an interaction between Peers. In FSC Core three Grants are described.  
+Defines an interaction between Peers. Grants are part of a Contract. In FSC Core three Grants are described.  
 
 1. The PeerRegistrationGrant which specifies the authorization of a Peer to participate as a Peer in the Group.
 2. The ServicePublicationGrant which specifies the authorization of a Peer to publish a Service in the Group.
 3. The ServiceConnectionGrant which specifies the authorization of a Peer to connect to a Service provided by a Peer.
+
+*Manager:*  
+
+The Manager is an API which manages Contracts and acts as an authorization server which provides access tokens.
 
 *Service:*      
   
@@ -180,8 +181,8 @@ When multiple TAs are used the TAs must ensure that the elements of the subject 
 
 ## Contract Management
 
-Contracts are negotiated between Managers of Peers. The Directory contains the Manager address of each Peer.
-Connections between Peers are based on Contracts with ServiceConnectionGrants. To create a new contract, the Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Management functionality, see [Registering a Peer](#registering)). For each desired connection, a ServiceConnectionGrant is formulated that contains identifying information about both the Outway from the requesting Peer and the Service of the Providing Peer. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
+Contracts are negotiated between the Managers of Peers. The Directory provides the address of each Manager.
+Connections to Services are authorized by Contracts with ServiceConnectionGrants. To create a new contract, the Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Management functionality, see [Registering a Peer](#registering_a_peer)). For each desired connection, a ServiceConnectionGrant is formulated that contains identifying information about both the Outway from the requesting Peer and the Service of the Providing Peer. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
 
 !---
 ![Contract Management](diagrams/seq-contract-management.svg "Contract Management")
@@ -198,19 +199,19 @@ A Contract becomes invalid when at least one Peer mentioned in the Contract reje
 
 Accepting, rejecting and revoking is done by adding a digital signature.
 
-Contracts are immutable. When the content of a Contract is subject to change, the contract is invalidated and replaced by a new one.
+The content of a Contract is immutable. When the content of a Contract is subject to change, the Contract is invalidated and replaced by a new one.
 
 !---
 ![State Contract](diagrams/state-contract.svg "State Contract")
 ![State Contract](diagrams/state-contract.ascii-art "State Contract")
 !---
 
-## Registering a Peer {#registering}
+## Registering a Peer {#registering_a_peer}
 
-A Peer needs to register with the Directory of the Group before a Peer is allowed to provide or consume Services available in the Group. 
+A Peer needs to register with the Directory of the Group before a Peer is allowed to provide or consume Services in the Group. 
 The Peer registration is required to validate that the Peer meets the requirements set by the Group. In case of FSC Core only an X.509 Certificate signed by the TA is required but extensions on Core might, for example, require the Peer to sign a "Terms of Service" document before allowing a Peer to participate in a Group.
 
-To register, the Peer needs to create a Contract with a [PeerRegistrationGrant](#peer-registration). The PeerRegistrationGrant contains information about the Peer, the address of the Manager of the Peer and the Directory that should accept the registration.
+To register, the Peer needs to create a Contract with a [PeerRegistrationGrant](#peer_registration_grant). The PeerRegistrationGrant contains information about the Peer, the address of the Manager of the Peer and the Directory that should accept the registration.
 
 Once the Contract between Peer and Directory is signed by both parties, the Peer is considered a Peer of the Group.
 
@@ -343,6 +344,8 @@ In case of an error in the scope of FSC these components **MUST** return the HTT
 
 ## Contracts
 
+The content of a Contract is defined in the object `.components/schemas/contractContent` of the [OpenAPI Specification](./manager.yaml)
+
 ### Contract Validation {#contract_validation}
 
 - A Contract ID is provided as a UUID V4 in the field `contract.id`. 
@@ -360,7 +363,9 @@ In case of an error in the scope of FSC these components **MUST** return the HTT
 
 Per Grant type different validation rules apply.
 
-#### PeerRegistrationGrant {#peer_registration_grant_validation}
+#### PeerRegistrationGrant {#peer_registration_grant}
+
+The content of a PeerRegistrationGrant is defined in the object `.components/schemas/grantPeerRegistration` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)
 
 Validation rules:  
 
@@ -374,7 +379,9 @@ Signature requirements:
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.directory.peer_id`
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.peer.id`
 
-#### ServicePublicationGrant {#service_publication_grant_validation}
+#### ServicePublicationGrant {#service_publication_grant}
+
+The content of a ServicePublicationGrant is defined in the object `.components/schemas/grantServicePublication` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)
 
 Validation rules:
 
@@ -387,7 +394,9 @@ Signature requirements:
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.directory.peer_id`
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.service.peer_id`
 
-#### ServiceConnectionGrant {#service_connection_grant_validation}
+#### ServiceConnectionGrant {#service_connection_grant}
+
+The content of a ServiceConnectionGrant is defined in the object `.components/schemas/grantServiceConnection` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)
 
 Validation rules:
 
@@ -471,14 +480,14 @@ The `contractContentHash` of the signature payload contains the signature hash. 
 1. Create an array of bytes arrays called `grantByteArrays`
 1. For each Grant in `contract.content.grants`
    1. Create a byte array named `grantBytes`
-   1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the [OpenAPI Specification definition](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml). If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
+   1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the [OpenAPI Specification definition](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml). If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
    1. Append `grantBytes` to `grantByteArrays`
 1. Sort the byte arrays in `grantByteArrays` in ascending order
 1. Append the bytes of `grantByteArrays` to `contentBytes`.
 1. Hash the `contentBytes` using the hash algorithm described in `contract.content.algorithm`
 1. Encode the bytes of the hash as Base64.
-1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer look up the enum value in the field `.components.schemas.HashAlgorithm` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml) and interpret the position in the list. E.g. The enum `HASH_ALGORITHM_SHA3_512` is the first item in the list so the value becomes `$1$`.
-1. Append the string `1$` to the string created in step 13. This is the enum`HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml) as int32. E.g. if the string created in step 13 is `$1$`, the string should be `$1$1$`
+1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer look up the enum value in the field `.components.schemas.HashAlgorithm` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) and interpret the position in the list. E.g. The enum `HASH_ALGORITHM_SHA3_512` is the first item in the list so the value becomes `$1$`.
+1. Append the string `1$` to the string created in step 13. This is the enum`HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) as int32. E.g. if the string created in step 13 is `$1$`, the string should be `$1$1$`
 1. Prefix the Bas64 string generated in step 12 with the string generated in step 14.
 
 #### Data types {#data_types}
@@ -486,7 +495,7 @@ The `contractContentHash` of the signature payload contains the signature hash. 
 - `int32`: use `Little-endian` as endianness when converting to a byte array
 - `int64`: use `Little-endian` as endianness when converting to a byte array
 - `string`: use `utf-8` encoding when converting to a byte array
-- `GrantType`: should be represented as an int32. The integer value is the position in the list as defined in the field `.components.schemas.GrantType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml)
+- `GrantType`: should be represented as an int32. The integer value is the position in the list as defined in the field `.components.schemas.GrantType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)
 
 ### Grant hash {#grant_hash}
 
@@ -498,7 +507,7 @@ The Grant hash can be created by executing the following steps:
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
 1. Encode the bytes of the hash as Base64.
 1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
-1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. To convert the `HastType` to an integer take the position of the `HashType` in the field `.components.schemas.HashType` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml)). E.g. The enum `HASH_TYPE_GRANT_PEER_REGISTRATION` becomes `2$`.
+1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. To convert the `HastType` to an integer take the position of the `HashType` in the field `.components.schemas.HashType` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)). E.g. The enum `HASH_TYPE_GRANT_PEER_REGISTRATION` becomes `2$`.
 1. Combine the strings containing the hash algorithm(step 6) and Hash type(step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_PEER_REGISTRATION` should result in the string `$1$2$`
 1. Prefix the Bas64 string generated in step 5 with the string generated in step 8.
 
@@ -621,7 +630,7 @@ The Manager **MUST** include the address of the Inway in the field `aud` of the 
 
 ### Interfaces {#manager_interface}
 
-The Manager functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](#open_api_specification).  
+The Manager functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).  
 
 All methods in the OpenAPI Specification with the tags `manager` **MUST** be implemented. 
 
@@ -649,7 +658,7 @@ Peer registration is accomplished by offering a Contract to the Directory which 
 
 The Directory **MUST** be able to sign Contracts with Grants of the type PeerRegistrationGrant.
 
-The Directory **MUST** validate the PeerRegistrationGrants in the Contract using the rules described in [PeerRegistrationGrant validation section](#peer_registration_grant_validation)
+The Directory **MUST** validate the PeerRegistrationGrants in the Contract using the rules described in [PeerRegistrationGrant section](#peer_registration_grant)
 
 #### Service publication
 
@@ -657,7 +666,7 @@ Service publication is accomplished by offering a Contract to the Directory whic
 
 The Directory **MUST** be able to sign Contracts with Grants of the type ServicePublicationGrant.
 
-The Directory **MUST** validate the ServicePublicationGrant in the Contract using the rules described in [ServicePublicationGrant validation section](#peer_service_publication_validation)
+The Directory **MUST** validate the ServicePublicationGrant in the Contract using the rules described in [ServicePublicationGrant section](#peer_service_publication)
 
 The Directory **MUST** only accept ServicePublicationGrants of Peers which have a valid Contract with a PeerRegistrationGrant containing the Peer and the Directory.
 
@@ -679,7 +688,7 @@ When multiple valid Contracts with a PeerRegistrationGrant for the same Peer exi
 
 #### Directory API
 
-The Directory functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](#open_api_specification)
+The Directory functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)
 
 All methods in the OpenAPI Specification with the tags `manager` and `directory` **MUST** be implemented.
 
@@ -721,9 +730,9 @@ The HTTP endpoint `/` **MUST** be implemented.
 
 If the Error has occurred in the Inway or Service the Outway **MUST** return the error without altering the response. 
 
-The Outway **MUST** return the HTTP status code `540` with an error response defined as `.components.schemas.Error` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml) when the error is produced by the Outway.
+The Outway **MUST** return the HTTP status code `540` with an error response defined as `.components.schemas.Error` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) when the error is produced by the Outway.
 
-The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.OutwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml).
+The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.OutwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
 
 The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_OUTWAY`.
 
@@ -778,9 +787,9 @@ The HTTP endpoint `/` **MUST** be implemented.
 
 The Inway **MUST** return the error response of a Service to the Outway without altering the response.
 
-The Inway **MUST** return the HTTP status code `540` with an error response defined as `.components.schemas.Error` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml) when the error is produced by the Inway.
+The Inway **MUST** return the HTTP status code `540` with an error response defined as `.components.schemas.Error` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) when the error is produced by the Inway.
 
-The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.InwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml).
+The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.InwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
 
 The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_INWAY`.
 
@@ -800,7 +809,7 @@ The Inway is unable to reach the Service
 
 # References
 
-[OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/core/manager.yaml)
+[OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)
 
 # Acknowledgements
 
