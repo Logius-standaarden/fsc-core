@@ -606,7 +606,7 @@ It is **RECOMMENDED** to implement a retry and backoff mechanism in case the sig
 
 #### Providing X.509 certificates
 
-The Manager **MUST** provide the X.509 certificates containing the Public Key of the keypair of which the Private Key was used by the Peer to create signatures.
+The Manager **MUST** provide X.509 certificates containing the Public Key of the keypairs used to sign Contracts and access tokens.
 
 The Manager **MUST** provide the complete certificate chain excluding the root CA certificate used by the Group as Thrust Anchor.
 
