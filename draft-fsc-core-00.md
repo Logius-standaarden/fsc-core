@@ -529,7 +529,7 @@ The access token is a certificate-bound access token as specified in [@!RFC8705,
 
 The payload of the JWT **MUST** contain the field specified below:
 
-* *grh(string):*  
+* *gth(string):*  
   The hash of the Grant that serves as basis for the authorization
 * *sub(string):*
   The subject [@!RFC7519, section 4.1.2]. This should be the ID of the Peer for whom the token is intended 
