@@ -258,15 +258,6 @@ The Inway will validate the access token and proxy the request to the Service.
 ![Consuming a Service](diagrams/seq-consuming-a-service.ascii-art "Consuming a Service")
 !---
 
-## Request flow
-
-Clients make requests to Outways, the Outway proxies the request to the Inway and Inway proxies the request to the Service (API).
-
-!---
-![Request Flow](diagrams/seq-request-flow.svg "Request Flow")
-![Request Flow](diagrams/seq-request-flow.ascii-art "Request Flow")
-!---
-
 # Specifications
 
 ## General
