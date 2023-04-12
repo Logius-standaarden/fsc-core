@@ -321,11 +321,12 @@ The representation and verification of domains specified in the X.509 certificat
 
 #### Public Key Fingerprints {#public_key_fingerprint}
 
-The Public Key Fingerprint used in the ServiceConnectionGrant can be created by:
+Public Keys used within the scope of FSC are always part of a x509 certificate.
 
-1. Encoding the public key as PEM [@!RFC7468].
-2. Creating an SHA-256 hash of the Public Key PEM.
-3. Encoding the hash as Base64.
+A Public Key fingerprint can be created by:
+
+1. Creating an SHA-256 hash of the subjectPublicKeyInfo field of the x.509 Certificate containing the Public Key[@!RFC5280, section 4.1].
+2. Encoding the hash as Base64.
 
 ###  Error Handling 
 
