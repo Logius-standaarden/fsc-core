@@ -434,6 +434,9 @@ The JWS **MUST** be created using one of the following digital signature algorit
 * RS256
 * RS384
 * RS512
+* ES256
+* ES384
+* ES512
 
 The JWS Payload as defined in [@!RFC7515, section 2], **MUST** contain a hash of the `Contract.Content` as described in the section [Content Hash](#content_hash) and one of the signature types described in the [signature type section](#signature_types).
 
@@ -514,6 +517,9 @@ The JWT **MUST** be created using one of the following digital signature algorit
 * RS256
 * RS384
 * RS512
+* ES256
+* ES384
+* ES512
 
 The access token is a certificate-bound access token as specified in [@!RFC8705, section 3]
 
