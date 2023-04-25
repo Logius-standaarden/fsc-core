@@ -264,12 +264,11 @@ The Inway will validate the access token and proxy the request to the Service.
 
 ## Protocols
 
-The transport protocol **MUST** be TCP [@!RFC9293].
+The Manager **MUST** support HTTP/1.1[@!RFC9112].
 
-!---
-![Protocols](diagrams/seq-protocols.svg "Protocols")
-![Protocols](diagrams/seq-protocols.ascii-art "Protocols")
-!---
+The Manager **MAY** support HTTP/2[@!RFC9113]. 
+
+The protocol used between the Inway and Outway can be either HTTP/1.1[@!RFC9112] or HTTP/2[@!RFC9113]. The protocol is determined by the `protocol` field of a Service as specified in the object `.components/schemas/serviceListingService` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
 
 ### Port configuration
 
