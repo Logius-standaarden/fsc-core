@@ -311,12 +311,12 @@ The representation and verification of domains specified in the X.509 certificat
 
 #### Public Key Fingerprints {#public_key_fingerprint}
 
-Public Keys used within the scope of FSC are always part of a x509 certificate.
+Public Keys used within the scope of FSC are always part of a X.509 certificate.
 
 A Public Key fingerprint can be created by:
 
 1. Creating an SHA-256 hash of the subjectPublicKeyInfo field of the x.509 Certificate containing the Public Key[@!RFC5280, section 4.1].
-2. Encoding the hash as Base64.
+2. Encoding the hash using Base64 URL encoding.
 
 ###  Error Handling 
 
@@ -479,7 +479,7 @@ The `contractContentHash` of the signature payload contains the signature hash. 
 1. Sort the byte arrays in `grantByteArrays` in ascending order
 1. Append the bytes of `grantByteArrays` to `contentBytes`.
 1. Hash the `contentBytes` using the hash algorithm described in `contract.content.algorithm`
-1. Encode the bytes of the hash as Base64.
+1. Encode the bytes of the hash using Base64 URL encoding.
 1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer look up the enum value in the field `.components.schemas.HashAlgorithm` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) and interpret the position in the list. E.g. The enum `HASH_ALGORITHM_SHA3_512` is the first item in the list so the value becomes `$1$`.
 1. Append the string `1$` to the string created in step 13. This is the enum`HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) as int32. E.g. if the string created in step 13 is `$1$`, the string should be `$1$1$`
 1. Prefix the Bas64 string generated in step 12 with the string generated in step 14.
@@ -499,7 +499,7 @@ The Grant hash can be created by executing the following steps:
 1. Convert `contract.content.id` to bytes and append the bytes to `grantBytes`.
 1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml). If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
-1. Encode the bytes of the hash as Base64.
+1. Encode the bytes of the hash using Base64 URL encoding.
 1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
 1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. To convert the `HastType` to an integer take the position of the `HashType` in the field `.components.schemas.HashType` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)). E.g. The enum `HASH_TYPE_GRANT_PEER_REGISTRATION` becomes `2$`.
 1. Combine the strings containing the hash algorithm(step 6) and Hash type(step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_PEER_REGISTRATION` should result in the string `$1$2$`
@@ -509,7 +509,7 @@ The Grant hash can be created by executing the following steps:
 
 The access token is a JSON Web Token (JWT) as specified in [@!RFC7519]
 
-The JWT **MUST** specify the public key fingerprint of the keypair used to sign the JWT using the `x5t#S256`[@!RFC7515, section 4.1.8] field of the `JOSE Header` [@!RFC7515, section 4].
+The JWT **MUST** specify the thumbprint of the X.509 certificate used to sign the JWT using the `x5t#S256`[@!RFC7515, section 4.1.8] field of the `JOSE Header` [@!RFC7515, section 4].
 
 The JWT **MUST** be created using one of the following digital signature algorithms:
 
