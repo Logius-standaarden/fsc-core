@@ -318,20 +318,12 @@ A Public Key fingerprint can be created by:
 1. Creating an SHA-256 hash of the subjectPublicKeyInfo field of the x.509 Certificate containing the Public Key[@!RFC5280, section 4.1].
 2. Encoding the hash using Base64 URL encoding.
 
-###  Error Handling 
-
-#### HTTP {#error_handling_http}
+###  Error Handling {#error_handling}
 
 The Inway and Outway both have a single endpoint which proxies HTTP requests. 
-In case of an error in the scope of FSC these components **MUST** return the HTTP status code `540` and the response body must contain an object as described below:  
+In case of an error within the scope of FSC these components **MUST** return the HTTP header `Fsc-Error-Code` which **MUST** contain the code specifying the error.  
 
-```json
-{
-  "message": "A message describing the error",
-  "domain": "The component that generated the error",
-  "reason": "A unique code describing the error"
-}
-```
+The response body must contain an object as described in `.components/schemas/error` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).  
 
 ## Contracts
 
@@ -727,7 +719,7 @@ The HTTP endpoint `/` **MUST** be implemented.
 
 If the Error has occurred in the Inway or Service the Outway **MUST** return the error without altering the response. 
 
-The Outway **MUST** return the HTTP status code `540` with an error response defined as `.components.schemas.Error` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) when the error is produced by the Outway.
+The Outway **MUST** return an error response defined in the [Error handling section](#error_handling) when the error is produced by the Outway.
 
 The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.OutwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
 
@@ -782,7 +774,7 @@ The HTTP endpoint `/` **MUST** be implemented.
 
 The Inway **MUST** return the error response of a Service to the Outway without altering the response.
 
-The Inway **MUST** return the HTTP status code `540` with an error response defined as `.components.schemas.Error` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) when the error is produced by the Inway.
+The Inway **MUST** return an error response defined in the [Error handling section](#error_handling) when the error is produced by the Inway.
 
 The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.InwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
 
