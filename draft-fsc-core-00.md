@@ -566,7 +566,6 @@ The Manager is responsible for:
 - Validating Contract signatures
 - Providing the X.509 certificates containing the Public Key of the keypair of which the private key was used by the Peer to create signatures
 - Providing Contracts involving a specific Peer
-- Providing Inway addresses of Services offered by the Peer
 - Providing access tokes 
 
 It is **RECOMMENDED** to implement the Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Manager.
@@ -582,6 +581,8 @@ The Manager **MUST** only accept mTLS connections from other external Managers w
 The Manager **MUST** support Contracts containing Grants of the type ServiceConnectionGrant.
 
 The Manager **MUST** validate Contracts using the rules described in [Contract validation section](#contract_validation)
+
+The Manager **MUST** persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
 
 #### Receiving Signatures
 
@@ -616,6 +617,16 @@ Before issuing an access token the Manager **MUST** validate that:
 1. The fingerprint of the public key provided by the X.509 certificate used by the Outway requesting the access token is present in the value of the field `grant.data.outway.public_key_fingerprints`.
 
 The Manager **MUST** include the address of the Inway in the field `aud` of the access token.
+
+#### Service listing
+
+The Manager **MUST** list a Service when a valid Contract containing a ServicePublicationGrant for the Service exists.
+
+#### Peer listing
+
+The Manager **MUST** list the Peer when a valid Contract with a PeerRegistrationGrant for the Peer exists.
+
+The Manager **MUST** list the Peers with whom the Peer has negotiated Contracts.
 
 ### Interfaces {#manager_interface}
 
@@ -672,14 +683,6 @@ The Directory **MUST** offer a list of the Peers in the Group.
 The Directory **MUST** only return Peers for which the Directory has a valid Contract with a PeerRegistrationGrant.
 
 When multiple valid Contracts with a PeerRegistrationGrant for the same Peer exist, the Directory **MUST** use the data of the PeerRegistrationGrant in the Contract with the most recent date specified in the field `Contract.content.created_at`.
-
-### Interfaces
-
-#### Directory API
-
-The Directory functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)
-
-All methods in the OpenAPI Specification with the tags `manager` and `directory` **MUST** be implemented.
 
 ## Outway
 
