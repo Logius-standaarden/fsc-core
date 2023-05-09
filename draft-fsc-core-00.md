@@ -368,7 +368,7 @@ The content of a ServicePublicationGrant is defined in the object `.components/s
 
 Validation rules:
 
-- The Peer ID provided by the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `grant.data.directory.peer_ic`
+- The Peer ID provided by the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `grant.data.directory.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `grant.data.service.peer_id`
 - A Service name which matches the regular expression `^[a-zA-Z0-9-.]{1,100}$` is provided in the field  `grant.data.service.name` 
 
