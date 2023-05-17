@@ -239,7 +239,7 @@ Outways discover Services by requesting a list from the Directory.
 ## Create an authorization to connect to a Service
 
 A connection can only be established if the Peer connecting to the Service has a valid Contract containing a [ServiceConnectionGrant](#service_connection_grant) with the Peer providing the Service.
-The ServiceConnectionGrant contains information about the Service and the public keys of the Outways that are authorized to connect to the Service.
+The ServiceConnectionGrant contains information about the Service and the certificates of the Outways that are authorized to connect to the Service.
 
 Once the Contract between providing Peer and consuming Peer is signed by both parties, the connection between Inway and Outway can be established.
 
@@ -309,14 +309,9 @@ FSC places specific requirements on the subject fields of a certificate. [@!RFC5
 
 The representation and verification of domains specified in the X.509 certificate **MUST** adhere to [@!RFC6125] 
 
-#### Public Key Fingerprints {#public_key_fingerprint}
+#### Certificate thumbprints {#certificate_thumbprints}
 
-Public Keys used within the scope of FSC are always part of a X.509 certificate.
-
-A Public Key fingerprint can be created by:
-
-1. Creating an SHA-256 hash of the subjectPublicKeyInfo field of the x.509 Certificate containing the Public Key[@!RFC5280, section 4.1].
-2. Encoding the hash using Base64 URL encoding.
+Certificate thumbprints used within the scope of FSC are always part of a X.509 certificate. Certificate thumbprints **MUST** be created as described in [@!RFC7515, section 4.1.8].
 
 ###  Error Handling {#error_handling}
 
@@ -386,7 +381,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager of the Peer providing the Service matches the value of the field `grant.data.service.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Service providing Peer matches the value of the field `grant.data.outway.peer_id`
 - The Service provided in the field `grant.data.service.name` is offered by the Peer provided in the field `grant.data.service.peer_id`
-- At least one Public Key Fingerprint is provided in the field `grant.data.outway.public_key_fingerprints`
+- At least one Certificate thumbprint is provided in the field `grant.data.outway.certificate_thumbprints`
 
 Signature requirements:
 
@@ -415,7 +410,7 @@ A signature on a Contract **SHOULD** only be accepted if the Peer is present in 
 - `grant.data.service.peer_id`
 
 
-The JWS **MUST** specify the public key fingerprint of the keypair used to create 
+The JWS **MUST** specify the certificate thumbprint of the keypair used to create 
 the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8] field of the `JOSE Header` [@!RFC7515, section 4].
 
 The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1]
@@ -534,7 +529,7 @@ The payload of the JWT **MUST** contain the field specified below:
   Not before [@!RFC7519, section 4.1.5]
 * *cnf(object):*
     * *x5t#S256(string):*
-    The fingerprint of the public key that is allowed ot use the access token
+    The thumbprint of the certificate that is allowed ot use the access token
 * *add(object):*
   An object which can be used to provide additional data 
 
@@ -564,7 +559,7 @@ The Manager is responsible for:
 - Validating Contracts
 - Receiving Contract signatures (accept, reject, revoke)
 - Validating Contract signatures
-- Providing the X.509 certificates containing the Public Key of the keypair of which the private key was used by the Peer to create signatures
+- Providing the X.509 certificates of the keypair of which the private key was used by the Peer to create signatures
 - Providing Contracts involving a specific Peer
 - Providing access tokes 
 
@@ -596,7 +591,7 @@ It is **RECOMMENDED** to implement a retry and backoff mechanism in case the sig
 
 #### Providing X.509 certificates
 
-The Manager **MUST** provide X.509 certificates containing the Public Key of the keypairs used to sign Contracts and access tokens.
+The Manager **MUST** provide X.509 certificates of the keypairs used to sign Contracts and access tokens.
 
 The Manager **MUST** provide the complete certificate chain excluding the root CA certificate used by the Group as Thrust Anchor.
 
@@ -614,7 +609,7 @@ Before issuing an access token the Manager **MUST** validate that:
 1. The Manager is provided by a Peer with the same PeerID as specified in `grant.data.service.peer_id`.
 1. The Manager is provided by a Peer who has an Inway which is offering the Service specified in `grant.data.service.name`. 
 1. The Peer ID provided by the X.509 certificate used by the Outway requesting the access token matches the value of the field `grant.data.outway.peer_id`.
-1. The fingerprint of the public key provided by the X.509 certificate used by the Outway requesting the access token is present in the value of the field `grant.data.outway.public_key_fingerprints`.
+1. The thumbprint of the X.509 certificate used by the Outway requesting the access token is present in the value of the field `grant.data.outway.certificate_thumbprints`.
 
 The Manager **MUST** include the address of the Inway in the field `aud` of the access token.
 
