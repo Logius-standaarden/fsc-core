@@ -385,7 +385,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager of the Peer providing the Service matches the value of the field `grant.data.service.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Service providing Peer matches the value of the field `grant.data.outway.peer_id`
 - The Service provided in the field `grant.data.service.name` is offered by the Peer provided in the field `grant.data.service.peer_id`
-- At least one Certificate thumbprint is provided in the field `grant.data.outway.certificate_thumbprints`
+- A Certificate thumbprint is provided in the field `grant.data.outway.certificate_thumbprint`
 
 Signature requirements:
 
@@ -613,7 +613,7 @@ Before issuing an access token the Manager **MUST** validate that:
 1. The Manager is provided by a Peer with the same PeerID as specified in `grant.data.service.peer_id`.
 1. The Manager is provided by a Peer who has an Inway which is offering the Service specified in `grant.data.service.name`. 
 1. The Peer ID provided by the X.509 certificate used by the Outway requesting the access token matches the value of the field `grant.data.outway.peer_id`.
-1. The thumbprint of the X.509 certificate used by the Outway requesting the access token is present in the value of the field `grant.data.outway.certificate_thumbprints`.
+1. The thumbprint of the X.509 certificate used by the Outway requesting the access token matches the value of the field `grant.data.outway.certificate_thumbprint`.
 
 The Manager **MUST** include the address of the Inway in the field `aud` of the access token.
 
