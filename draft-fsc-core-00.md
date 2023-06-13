@@ -290,6 +290,10 @@ The ID of the Group is the URI[@!RFC3986] of the Directory. The URI **MUST** con
 Each Peer **MUST** have a unique identifier within the Group, this identifier is called the PeerID. The PeerID is determined by at least one element from the subject field [@!RFC5280, section 4.1.2.6] of an X.509 certificate. Each Group **MUST** define which element(s) of the subject field of the X.509 certificate act as PeerID.
 The TA(s) issuing the certificates must ensure that PeerID is always the same for a Peer in each issued certificate for said Peer.    
 
+### Peer name
+
+Each Peer **MUST** have a human-readable name which can be used to identify a Peer. Unlike the PeerID the name does not have to be unique. The name of Peer is determined by an element in the subject field [@!RFC5280, section 4.1.2.6] of an X.509 certificate. The Group **MUST** define which element of the subject field is used.
+
 ### TLS configuration
 
 Connections between Inways, Outways, Managers and the Directory of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
