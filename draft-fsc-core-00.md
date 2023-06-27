@@ -591,13 +591,17 @@ The Manager **MUST** generate an error response if a signature is invalid.
 
 The Manager **MUST** propagate the signature to each of the Peers in the Contract when the Peer signs the Contract.
 
-It is **RECOMMENDED** to implement a retry and backoff mechanism in case the signature propagation fails.
-
 #### Providing X.509 certificates
 
 The Manager **MUST** provide X.509 certificates of the keypairs used to sign Contracts and access tokens.
 
 The Manager **MUST** provide the complete certificate chain excluding the root CA certificate used by the Group as Thrust Anchor.
+
+#### Retry mechanism
+
+The Manager **MUST** implement a retry mechanism in case Contract or signature propagation fails.
+
+The Manager **MUST** use a truncated exponential backoff algorithm with jitter.
 
 #### Providing contracts
 
