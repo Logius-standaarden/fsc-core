@@ -90,8 +90,9 @@ Contracts define the registration of a Peer to the Group, Service publication to
 Inways are reverse proxies that route incoming connections from Outways to Services.  
 Outways are forward proxies that discover Services in the Group via the Directory and route outgoing connections to Inways.  
 Managers negotiate Contracts between Peers.  
-Managers provide access tokens to Outways which contain the authorization to connect a Service.
-The address of an Inway offering a Service is contained in the access token.  
+Managers provide access tokens which contain the authorization to connect a Service. 
+Outways include the access tokens in a requests to Services
+The address of an Inway offering a Service is contained in the access token. 
 Inways authorize connection attempts by validating access tokens.
 Services in the Group can be discovered through the Directory.  
 The address of Managers of Peers can be requested from the Directory.  
@@ -130,7 +131,7 @@ System of Peers using Inways, Outways and Managers that confirm to the FSC speci
 
 *Directory:*      
   
-A Directory holds information about the Services in the Group to make them discoverable.
+A Directory holds information about the Services and Peers in the Group to make them discoverable.
 
 *Inway:*  
   
@@ -170,7 +171,7 @@ This chapter describes the basic architecture of an FSC system.
 
 ## Identity and Trust  {#trustanchor}
 
-Connections between Managers, Inways, Outways and connections with the Directory use Mutual Transport Layer Security (mTLS) with X.509 certificates. 
+Connections between Managers, Inways, Outways use Mutual Transport Layer Security (mTLS) with X.509 certificates. 
 Components in the Group are configured to accept the same (Sub-) Certificate Authorities (CA) as Trust Anchors (TA). Each TA is a Trusted Third Party that ensures the identity of the Peers by verifying a set of fields of the subject field [@!RFC5280, section 4.1.2.6] that act as [PeerID](#peer_id) in each X.509 certificate.
 When multiple TAs are used the TAs must ensure that the elements of the subject field used to identify a Peer are the same across the TAs. 
 
@@ -222,24 +223,18 @@ Once the Contract between Peer and Directory is signed by both parties, the Peer
 
 ## Service discovery
 
-Every Group is defined by one Directory that contains routing information for the Services in the Group.
-Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) to the Directory. This Grant contains information about the Service and the Directory that should list the Service.
-Outways discover Services by requesting a list from the Directory.
+Every Group is defined by one Directory that contains the Services in the Group.
+Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) to the Directory.
 
 !---
 ![Providing a Service](diagrams/seq-providing-a-service.svg "Providing a Service")
 ![Providing a Service](diagrams/seq-providing-a-service.ascii-art "Providing a Service")
 !---
 
-!---
-![Service discovery](diagrams/seq-service-discovery.svg "Service discovery")
-![Service discovery](diagrams/seq-service-discovery.ascii-art "Service discovery")
-!---
-
 ## Create an authorization to connect to a Service
 
 A connection can only be established if the Peer connecting to the Service has a valid Contract containing a [ServiceConnectionGrant](#service_connection_grant) with the Peer providing the Service.
-The ServiceConnectionGrant contains information about the Service and the certificates of the Outways that are authorized to connect to the Service.
+The ServiceConnectionGrant contains information about the Service and the certificate of the Outway that is authorized to connect to the Service.
 
 Once the Contract between providing Peer and consuming Peer is signed by both parties, the connection between Inway and Outway can be established.
 
@@ -250,7 +245,9 @@ Once the Contract between providing Peer and consuming Peer is signed by both pa
 
 ## Consuming a Service
 
-A Peer can consume a Service by sending request for said Service to an Outway. The request must include an access token provided by the Peer providing the Service. 
+A Peer can consume a Service by sending request for said Service to an Outway. 
+The Peer obtains an access token from the Manager of the Peer providing the Service. 
+The Outway proxies the request including the access token to the Inway.
 The Inway will validate the access token and proxy the request to the Service.
 
 !---
@@ -296,7 +293,7 @@ Each Peer **MUST** have a human-readable name which can be used to identify a Pe
 
 ### TLS configuration
 
-Connections between Inways, Outways, Managers and the Directory of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
+Connections between Inways, Outways, Managers of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
 
 The certificates must be provided by a TA who **SHOULD** validate a Peers identity, i.e. the TA **MUST** preform Organization Validation. 
 
@@ -336,9 +333,9 @@ The content of a Contract is defined in the object `.components/schemas/contract
 - The Directory URI of the Group matches the GroupID defined in the field `contract.group_id`.
 - A valid date is provided in `contract.content.validity.not_before`. 
 - A valid date is provided in `contract.content.validity.not_after`.
-- The date provided in `contract.content.Validity.not_after` must be greater than the date provided in the field `contract.validity.not_before`.
+- The date provided in `contract.content.validity.not_after` must be greater than the date provided in the field `contract.validity.not_before`.
 - The date provided in `contract.content.validity.not_after` must be in the future.
-- At least one Grant is set in the field `Contract.Grants`.
+- At least one Grant is set in the field `contract.content.grants`.
 - A `PeerRegistrationGrant` cannot be mixed with other Grants.
 - Only one `PeerRegistrationGrant` is allowed per Contract.
 - A `ServicePublicationGrant` cannot be mixed with other Grants.
@@ -413,9 +410,7 @@ A signature on a Contract **SHOULD** only be accepted if the Peer is present in 
 - `grant.data.directory.peer_id`
 - `grant.data.service.peer_id`
 
-
-The JWS **MUST** specify the certificate thumbprint of the keypair used to create 
-the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8] field of the `JOSE Header` [@!RFC7515, section 4].
+The JWS **MUST** specify the certificate thumbprint of the keypair used to create the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8] field of the `JOSE Header` [@!RFC7515, section 4].
 
 The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1]
 
@@ -428,7 +423,7 @@ The JWS **MUST** be created using one of the following digital signature algorit
 * ES384
 * ES512
 
-The JWS Payload as defined in [@!RFC7515, section 2], **MUST** contain a hash of the `Contract.Content` as described in the section [Content Hash](#content_hash), one of the signature types described in the [signature type section](#signature_types) and a Unix timestamp of the sign date.
+The JWS Payload as defined in [@!RFC7515, section 2], **MUST** contain a hash of the `contract.content` as described in the section [Content Hash](#content_hash), one of the signature types described in the [signature type section](#signature_types) and a Unix timestamp of the sign date.
 
 JWS Payload example:
 ```JSON
@@ -456,7 +451,7 @@ JWS Payload example:
 A Peer should ensure that a Contract signature is intended for the Contract.
 Validation is done by comparing the hash of the received Contract with the hash in the signature.
 
-The `contractContentHash` of the signature payload contains the signature hash. The algorithm to create a `contractContentHash` is described below.
+The `contract_content_hash` of the signature payload contains the signature hash. The algorithm to create a `contract_content_hash` is described below.
 
 1. Create a byte array called `contentBytes`.
 1. Append `contract.content.id` to `contentBytes`.
@@ -494,7 +489,7 @@ The Grant hash can be created by executing the following steps:
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
 1. Encode the bytes of the hash using Base64 URL encoding.
 1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
-1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. To convert the `HastType` to an integer take the position of the `HashType` in the field `.components.schemas.HashType` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)). E.g. The enum `HASH_TYPE_GRANT_PEER_REGISTRATION` becomes `2$`.
+1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. To convert the `HashType` to an integer take the position of the `HashType` in the field `.components.schemas.HashType` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)). E.g. The enum `HASH_TYPE_GRANT_PEER_REGISTRATION` becomes `2$`.
 1. Combine the strings containing the hash algorithm(step 6) and Hash type(step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_PEER_REGISTRATION` should result in the string `$1$2$`
 1. Prefix the Bas64 string generated in step 5 with the string generated in step 8.
 
@@ -579,7 +574,7 @@ The Manager **MUST** only accept mTLS connections from other external Managers w
 
 #### Contracts
 
-The Manager **MUST** support Contracts containing Grants of the type ServiceConnectionGrant.
+The Manager **MUST** support Contracts containing Grants of the type PeerRegistrationGrant, ServicePublicationGrant and ServiceConnectionGrant.
 
 The Manager **MUST** validate Contracts using the rules described in [Contract validation section](#contract_validation)
 
@@ -614,8 +609,7 @@ Before issuing an access token the Manager **MUST** validate that:
 1. A valid Contract exists with a ServiceConnectionGrant matching the Grant hash in the access token request.
 1. The Manager is provided by a Peer with the same PeerID as specified in `grant.data.service.peer_id`.
 1. The Manager is provided by a Peer who has an Inway which is offering the Service specified in `grant.data.service.name`. 
-1. The Peer ID provided by the X.509 certificate used by the Outway requesting the access token matches the value of the field `grant.data.outway.peer_id`.
-1. The thumbprint of the X.509 certificate used by the Outway requesting the access token matches the value of the field `grant.data.outway.certificate_thumbprint`.
+1. The Peer ID provided by the X.509 certificate used by the component requesting the access token matches the value of the field `grant.data.outway.peer_id`.
 
 The Manager **MUST** include the address of the Inway in the field `aud` of the access token.
 
@@ -633,8 +627,6 @@ The Manager **MUST** list the Peers with whom the Peer has negotiated Contracts.
 
 The Manager functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).  
 
-All methods in the OpenAPI Specification with the tags `manager` **MUST** be implemented. 
-
 ###  FSC manager address 
 
 The Manager is required to include its public address as HTTP Header `Fsc-Manager-Address` in each request sent to another Manager.
@@ -646,12 +638,6 @@ The Manager is required to include its public address as HTTP Header `Fsc-Manage
 #### Authentication
 
 The Directory **MUST** only accept connection from clients that use mTLS, the client **MUST** use an X.509 certificate that is signed by the TA of the Group.
-
-#### Contracts 
-
-In addition to the Grant types supported by the [Manager](#manager), the Directory **MUST** support Contracts with Grants of the type PeerRegistrationGrant and ServicePublicationGrant.
-
-The Directory **MUST** validate Contracts using the rules described in [Contract validation section](#contract_validation)
 
 #### Peer registration
 
@@ -691,33 +677,25 @@ When multiple valid Contracts with a PeerRegistrationGrant for the same Peer exi
 
 #### Authentication
 
-The Outway **MUST** use mTLS when connecting to the Directory or Inways with an X.509 certificate signed by the chosen TA of the Group.
+The Outway **MUST** use mTLS when connecting to Inways with an X.509 certificate signed by the chosen TA of the Group.
 
 #### Routing
 
-The Outway **MUST** proxy HTTP requests to the correct Service.
+The Outway **MUST** proxy the request to the address of the Inway specified in the field `aud` of the access token.
 
-The HTTP request **MUST** contain the HTTP Header `Fsc-Grant-Hash` which contains the hash of ServiceConnectionGrant to be used to route the request. For more information about the Grant hash review the [Grant hash section](#grant_hash)
-
-The Outway **MUST** deny the request when the Peer does not have a valid Contract containing a ServiceConnectionGrant with a hash that matches the hash provided in the `Fsc-Grant-Hash` header.  
-
-The Outway **MUST** either request an [access token](#access_token) from the Peer specified in the `grant.data.service.peer_id` field of the ServiceConnectionGrant.
-
-The Outway **MUST** deny the request when the Outway is unable to obtain an access token.  
+The Outway **MUST** use an [access token](#access_token) provided by the Peer specified in the `grant.data.service.peer_id` field of the ServiceConnectionGrant.
 
 The Outway **MUST** include an access token in the HTTP header `Fsc-Authorization` when proxying the HTTP request to the Inway.  
-
-The Outway **MUST** proxy the request to the address of the Inway specified in the field `aud` of the access token.
 
 The Outway **MUST NOT** alter the path of the HTTP Request.
 
 Clients **MAY** use TLS when communicating with the Outway.
 
-### Interfaces
+#### Obtaining access tokens
 
-#### Proxy endpoint
+How an Outway obtains an access token for a Service is an implementation detail and out of scope for this document.
 
-The HTTP endpoint `/` **MUST** be implemented.
+Access tokens can be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml
 
 #### Error response
 
@@ -730,12 +708,6 @@ The code field of the error response **MUST** contain one of the codes defined a
 The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_OUTWAY`.
 
 ##### Codes
-
-*ERROR_CODE_GRANT_HASH_MISSING:*
-The Outway received a request without the mandatory `Fsc-Grant-Hash` HTTP header.
-
-*ERROR_CODE_UNKNOWN:*
-The Peer does not have a Grant with the same hash as specified in `Fsc-Grant-Hash`.
 
 *ERROR_CODE_METHOD_UNSUPPORTED:*
 The Outway received a request with an HTTP Method that is not supported. The CONNECT method is not supported.
@@ -760,13 +732,11 @@ The request **MUST** be authorized if the access token meets the following condi
 
 #### Routing
 
-The Inway **MUST** proxy HTTP requests to the correct Service.
-
 The HTTP request **MUST** contain the HTTP Header `Fsc-Authorization` which contains the access token obtained by the Outway.
 
-The Inway **MUST** not delete the HTTP Header `Fsc-Authorization` from the HTTP Request before forwarding the request to the Service.
+The Inway **MUST** proxy the HTTP request to the Service specified in the field `svc` of the access token.
 
-The Inway **MUST** route the request based on the Service specified in the access token.
+The Inway **MUST** not delete the HTTP Header `Fsc-Authorization` from the HTTP Request before forwarding the request to the Service.
 
 ### Interfaces
 
