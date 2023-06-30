@@ -428,20 +428,22 @@ The JWS **MUST** be created using one of the following digital signature algorit
 * ES384
 * ES512
 
-The JWS Payload as defined in [@!RFC7515, section 2], **MUST** contain a hash of the `Contract.Content` as described in the section [Content Hash](#content_hash) and one of the signature types described in the [signature type section](#signature_types).
+The JWS Payload as defined in [@!RFC7515, section 2], **MUST** contain a hash of the `Contract.Content` as described in the section [Content Hash](#content_hash), one of the signature types described in the [signature type section](#signature_types) and a Unix timestamp of the sign date.
 
 JWS Payload example:
 ```JSON
 {
-  "contractContentHash": "--------",
-  "type": "accept"
+  "contract_content_hash": "--------",
+  "type": "accept",
+  "signed_at": 1672527600
 }
 ```
 
 #### Payload fields
 
-- `contractContentHash`, hash of the content of the contract.
+- `contract_content_hash`, hash of the content of the contract.
 - `type`, type of signature.
+- `signed_at` Unix timestamp of the sign date.
 
 ##### Signature types {#signature_types}
 
