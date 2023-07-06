@@ -131,7 +131,7 @@ System of Peers using Inways, Outways and Managers that confirm to the FSC speci
 
 *Directory:*      
   
-A Directory holds information about the Services and Peers in the Group to make them discoverable.
+A Manager which acts as a Service and Peer discovery point of the Group.  
 
 *Inway:*  
   
@@ -209,7 +209,6 @@ The content of a Contract is immutable. When the content of a Contract is subjec
 
 ## Registering a Peer {#registering_a_peer}
 
-A Peer needs to register with the Directory of the Group before a Peer is allowed to provide or consume Services in the Group. 
 The Peer registration is required to validate that the Peer meets the requirements set by the Group. In case of FSC Core only an X.509 Certificate signed by the TA is required but extensions on Core might, for example, require the Peer to sign a "Terms of Service" document before allowing a Peer to participate in a Group.
 
 To register, the Peer needs to create a Contract with a [PeerRegistrationGrant](#peer_registration_grant). The PeerRegistrationGrant contains information about the Peer, the address of the Manager of the Peer and the Directory that should accept the registration.
@@ -223,7 +222,7 @@ Once the Contract between Peer and Directory is signed by both parties, the Peer
 
 ## Service discovery
 
-Every Group is defined by one Directory that contains the Services in the Group.
+Every Group is defined by one Directory that contains the Services and Peers in the Group.
 Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) to the Directory.
 
 !---
@@ -351,7 +350,6 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager of the Directory matches the value of the field `grant.data.directory.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `grant.data.peer.id`
 - The subject organization of the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `grant.data.peer.name`
-- A Manager address is provided in the field `grant.data.peer.contract_manager_address`. The value should be a valid URL as specified in [@!RFC1738]
 
 Signature requirements:  
 
@@ -563,6 +561,8 @@ The Manager is responsible for:
 - Providing the X.509 certificates of the keypair of which the private key was used by the Peer to create signatures
 - Providing Contracts involving a specific Peer
 - Providing access tokes 
+- Listing Peers
+- Listing Services
 
 It is **RECOMMENDED** to implement the Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Manager.
 
@@ -619,9 +619,12 @@ The Manager **MUST** list a Service when a valid Contract containing a ServicePu
 
 #### Peer listing
 
-The Manager **MUST** list the Peer when a valid Contract with a PeerRegistrationGrant for the Peer exists.
+The Manager **MUST** list the Peers with whom the Peer has negotiated Contracts or who announced themselves to the Peer.
 
-The Manager **MUST** list the Peers with whom the Peer has negotiated Contracts.
+The Manager **MUST** persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
+
+The Manager **MUST** persist the Peer ID, name and Manager address of each Peer who called the `announce`  endpoint as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
+
 
 ### Interfaces {#manager_interface}
 
@@ -629,7 +632,7 @@ The Manager functionality **MUST** implement an HTTP interface as specified in t
 
 ###  FSC manager address 
 
-The Manager is required to include its public address as HTTP Header `Fsc-Manager-Address` in each request sent to another Manager.
+The Manager is required to include its public address as HTTP Header `Fsc-Manager-Address` in each POST or PUT request sent to another Manager.
 
 ## Directory
 
@@ -659,18 +662,6 @@ The Directory **MUST** only accept ServicePublicationGrants of Peers which have 
 
 Although multiple ServicePublicationGrants are allowed in a single Contract it is **RECOMMENDED** to limit this to one per Contract.
 
-#### Service listing
-
-The Directory **MUST** list a Service when a valid Contract containing a ServicePublicationGrant for the Service exists.
-
-#### Peer listing
-
-The Directory **MUST** offer a list of the Peers in the Group. 
-
-The Directory **MUST** only return Peers for which the Directory has a valid Contract with a PeerRegistrationGrant.
-
-When multiple valid Contracts with a PeerRegistrationGrant for the same Peer exist, the Directory **MUST** use the data of the PeerRegistrationGrant in the Contract with the most recent date specified in the field `Contract.content.created_at`.
-
 ## Outway
 
 ### Behavior
@@ -693,9 +684,9 @@ Clients **MAY** use TLS when communicating with the Outway.
 
 #### Obtaining access tokens
 
-How an Outway obtains an access token for a Service is an implementation detail and out of scope for this document.
+Access tokens **MUST** be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml
 
-Access tokens can be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml
+Which component obtains an access token for a Service is an implementation detail and out of scope for this document.
 
 #### Error response
 
