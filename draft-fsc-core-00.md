@@ -684,6 +684,8 @@ Clients **MAY** use TLS when communicating with the Outway.
 
 #### Obtaining access tokens
 
+Access tokens are obtained using the Client Credentials flow[@!RFC6749, section 4.4].
+
 Access tokens **MUST** be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml
 
 Which component obtains an access token for a Service is an implementation detail and out of scope for this document.
