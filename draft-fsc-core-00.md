@@ -279,7 +279,7 @@ Management Traffic: Directory, Manager
 
 ### Group ID
 
-The ID of the Group is the URI[@!RFC3986] of the Directory. The URI **MUST** contain the port number used by the Directory.
+The ID of the Group is the URI[@!RFC3986] of the Directory. The URI is a URL that **MUST** contain the scheme and port number used by the Directory.
 
 ### Peer ID {#peer_id}
 
@@ -521,7 +521,7 @@ The payload of the JWT **MUST** contain the field specified below:
 * *svc(string):*
   Name of the Service
 * *aud(string):*
-  The audience [@!RFC7519, section 4.1.3]. This should be address of the Inway providing the Service
+  The audience [@!RFC7519, section 4.1.3]. This should be URI[@!RFC3986] of the Inway providing the Service. The URI is a URL that **MUST** contain the scheme and port number used by the Inway
 * *exp(int):*
   Expiration time [@!RFC7519, section 4.1.4]
 * *nbf(int):*
