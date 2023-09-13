@@ -580,7 +580,9 @@ The Manager **MUST** validate Contracts using the rules described in [Contract v
 
 The Manager **MUST** persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
 
-#### Receiving Signatures
+It is **RECOMMENDED** to implement a retry and backoff mechanism in case the contract propagation fails.
+
+#### Signatures
 
 The Manager **MUST** validate the signature according to the rules described in the [signature section](#signature).
 
