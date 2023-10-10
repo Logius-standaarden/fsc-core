@@ -279,7 +279,8 @@ Management Traffic: Directory, Manager
 
 ### Group ID
 
-The ID of the Group is the URI[@!RFC3986] of the Directory. The URI is a URL that **MUST** contain the scheme and port number used by the Directory.
+The Group ID is the identifier of the Group. This identifier is chosen by the Group upon creation of the Group.  
+The Group ID **MUST** match the following regular expression `^[a-zA-Z0-9./_-]{3,100}$`
 
 ### Peer ID {#peer_id}
 
@@ -329,7 +330,7 @@ The content of a Contract is defined in the object `.components/schemas/contract
 - A Contract ID is provided as a UUID V4 in the field `contract.id`. 
 - A hash algorithm is provided in the field `contract.content.hash_algorithm`.
 - The date provided in `contract.content.created_at` can not be in the future.
-- The Directory URI of the Group matches the GroupID defined in the field `contract.group_id`.
+- The Group ID of the Manager matches the Group ID defined in the field `contract.group_id`.
 - A valid date is provided in `contract.content.validity.not_before`. 
 - A valid date is provided in `contract.content.validity.not_after`.
 - The date provided in `contract.content.validity.not_after` must be greater than the date provided in the field `contract.validity.not_before`.
@@ -482,6 +483,7 @@ The `contract_content_hash` of the signature payload contains the signature hash
 The Grant hash can be created by executing the following steps:
 
 1. Create a byte array named `grantBytes`
+1. Convert `contract.content.group_id` to bytes and append the bytes to `grantBytes`.
 1. Convert `contract.content.id` to bytes and append the bytes to `grantBytes`.
 1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml). If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
@@ -514,6 +516,8 @@ The payload of the JWT **MUST** contain the field specified below:
 
 * *gth(string):*  
   The hash of the Grant that serves as basis for the authorization
+* *gid(string):*
+  The ID of the Group
 * *sub(string):*
   The subject [@!RFC7519, section 4.1.2]. This should be the ID of the Peer for whom the token is intended 
 * *iss(string):*
@@ -537,6 +541,7 @@ Example payload:
 ```json
 {
     "gth": "$1$4$+PQI7we01qIfEwq4O5UioLKzjGBgRva6F5+bUfDlKxUjcY5yX1MRsn6NKquDbL8VcklhYO9sk18rHD6La3w/mg==",
+    "gid": "fsc.group.example.id",
     "sub": "1234567890",
     "iss": "1234567891",
     "svc": "serviceName", 
@@ -627,7 +632,6 @@ The Manager **MUST** persist the Peer ID, name and Manager address of each Peer 
 
 The Manager **MUST** persist the Peer ID, name and Manager address of each Peer who called the `announce`  endpoint as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
 
-
 ### Interfaces {#manager_interface}
 
 The Manager functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).  
@@ -680,6 +684,8 @@ The Outway **MUST** use an [access token](#access_token) provided by the Peer sp
 
 The Outway **MUST** include an access token in the HTTP header `Fsc-Authorization` when proxying the HTTP request to the Inway.  
 
+The Outway **MUST** validate that the Group ID specified in the claim `gid` of the access token matches the Group ID of the Outway.
+
 The Outway **MUST NOT** alter the path of the HTTP Request.
 
 Clients **MAY** use TLS when communicating with the Outway.
@@ -724,6 +730,7 @@ The request **MUST** be authorized if the access token meets the following condi
 - The access token is signed by the same Peer that owns Inway.
 - The access token is used by an Outway that uses the X.509 certificate to which the access token is bound. This is verified by applying the JWT Certificate Thumbprint Confirmation Method specified in [@!RFC8705,section 3.1].
 - The Service specified in the access token is known to the Inway.
+- The Group ID specified in the claim `gid` of the access token matches the Group ID of the Inway.
 
 #### Routing
 
