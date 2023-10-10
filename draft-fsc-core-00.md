@@ -280,7 +280,7 @@ Management Traffic: Directory, Manager
 ### Group ID
 
 The Group ID is the identifier of the Group. This identifier is chosen by the Group upon creation of the Group.  
-The Group ID **MUST** match the following regular expression `^[a-zA-Z0-9./_-]{3,100}$`
+The Group ID **MUST** match the following regular expression `^[a-zA-Z0-9./_-]{1,100}$`
 
 ### Peer ID {#peer_id}
 
