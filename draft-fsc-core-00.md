@@ -549,7 +549,7 @@ Example payload:
     "exp": 1493726400,
     "nbf": 1493722800,
     "cnf": {
-      "x5t#S256": "DpAyDYakmVAQ4oOJC3UYLRk/ONRCqMj00TeGJemMiLA="
+      "x5t#S256": "DpAyDYakmVAQ4oOJC3UYLRk/ONRCqMj00TeGJemMiLA"
     },
     "add": {}
 }
