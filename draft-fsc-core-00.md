@@ -365,7 +365,8 @@ Validation rules:
 
 - The Peer ID provided by the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `grant.data.directory.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `grant.data.service.peer_id`
-- A Service name which matches the regular expression `^[a-zA-Z0-9-._]{1,100}$` is provided in the field  `grant.data.service.name` 
+- A Service name which matches the regular expression `^[a-zA-Z0-9-._]{1,100}$` is provided in the field `grant.data.service.name` 
+- The Protocol used by the Outway to communicate with the Inway providing the Service. Optional. If set, it must be `PROTOCOL_TCP_HTTP_1` or `PROTOCOL_TCP_HTTP_2`. The value is provided in the field  `grant.data.service.protocol` 
 
 Signature requirements:  
 
