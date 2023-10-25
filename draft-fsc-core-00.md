@@ -327,7 +327,7 @@ The content of a Contract is defined in the object `.components/schemas/contract
 
 ### Contract Validation {#contract_validation}
 
-- A Contract ID is provided as a UUID V4 in the field `contract.id`. 
+- A Contract ID is provided as a UUID V7 in the field `contract.id`. 
 - A hash algorithm is provided in the field `contract.content.hash_algorithm`.
 - The date provided in `contract.content.created_at` can not be in the future.
 - The Group ID of the Manager matches the Group ID defined in the field `contract.group_id`.
