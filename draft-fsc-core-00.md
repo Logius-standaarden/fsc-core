@@ -88,7 +88,7 @@ Outways of a Peer connect to the Inway of a Peer providing a Service.
 Contracts define the registration of a Peer to the Group, Service publication to the Group and connections between Peers.
 
 Inways are reverse proxies that route incoming connections from Outways to Services.  
-Outways are forward proxies that discover Services in the Group via the Directory and route outgoing connections to Inways.  
+Outways are forward proxies that route outgoing connections to Inways.  
 Managers negotiate Contracts between Peers.  
 Managers provide access tokens which contain the authorization to connect a Service. 
 Outways include the access tokens in a requests to Services
