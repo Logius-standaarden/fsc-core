@@ -469,7 +469,7 @@ The `contract_content_hash` of the signature payload contains the signature hash
 1. Encode the bytes of the hash using Base64 URL encoding.
 1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer look up the enum value in the field `.components.schemas.HashAlgorithm` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) and interpret the position in the list. E.g. The enum `HASH_ALGORITHM_SHA3_512` is the first item in the list so the value becomes `$1$`.
 1. Append the string `1$` to the string created in step 13. This is the enum`HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) as int32. E.g. if the string created in step 13 is `$1$`, the string should be `$1$1$`
-1. Prefix the Bas64 string generated in step 12 with the string generated in step 14.
+1. Prefix the Base64 string generated in step 12 with the string generated in step 14.
 
 #### Data types {#data_types}
 
