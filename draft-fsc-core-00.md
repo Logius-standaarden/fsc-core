@@ -466,7 +466,7 @@ The `contract_content_hash` of the signature payload contains the signature hash
 1. Sort the byte arrays in `grantByteArrays` in ascending order
 1. Append the bytes of `grantByteArrays` to `contentBytes`.
 1. Hash the `contentBytes` using the hash algorithm described in `contract.content.algorithm`
-1. Encode the bytes of the hash using Base64 URL encoding.
+1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer look up the enum value in the field `.components.schemas.HashAlgorithm` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) and interpret the position in the list. E.g. The enum `HASH_ALGORITHM_SHA3_512` is the first item in the list so the value becomes `$1$`.
 1. Append the string `1$` to the string created in step 13. This is the enum`HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) as int32. E.g. if the string created in step 13 is `$1$`, the string should be `$1$1$`
 1. Prefix the Base64 string generated in step 12 with the string generated in step 14.
@@ -487,7 +487,7 @@ The Grant hash can be created by executing the following steps:
 1. Convert `contract.content.id` to bytes and append the bytes to `grantBytes`.
 1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml). If the value is a list; Create a byte array called `fieldBytes`, append the bytes of each item of the list to `fieldBytes`, sort `fieldBytes` in ascending order and append `fieldBytes` to `grantBytes`.
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
-1. Encode the bytes of the hash using Base64 URL encoding.
+1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
 1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. To convert the `HashType` to an integer take the position of the `HashType` in the field `.components.schemas.HashType` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)). E.g. The enum `HASH_TYPE_GRANT_PEER_REGISTRATION` becomes `2$`.
 1. Combine the strings containing the hash algorithm(step 6) and Hash type(step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_PEER_REGISTRATION` should result in the string `$1$2$`
@@ -540,7 +540,7 @@ Example payload:
 
 ```json
 {
-    "gth": "$1$4$+PQI7we01qIfEwq4O5UioLKzjGBgRva6F5+bUfDlKxUjcY5yX1MRsn6NKquDbL8VcklhYO9sk18rHD6La3w/mg==",
+    "gth": "$1$4$+PQI7we01qIfEwq4O5UioLKzjGBgRva6F5+bUfDlKxUjcY5yX1MRsn6NKquDbL8VcklhYO9sk18rHD6La3w/mg",
     "gid": "fsc.group.example.id",
     "sub": "1234567890",
     "iss": "1234567891",
