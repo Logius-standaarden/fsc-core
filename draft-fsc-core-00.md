@@ -317,9 +317,11 @@ Certificate thumbprints used within the scope of FSC are always part of a X.509 
 ###  Error Handling {#error_handling}
 
 The Inway and Outway both have a single endpoint which proxies HTTP requests. 
-In case of an error within the scope of FSC these components **MUST** return the HTTP header `Fsc-Error-Code` which **MUST** contain the code specifying the error.  
+In case of an error within the scope of FSC these components **MUST** return the HTTP header `Fsc-Error-Code` which **MUST** contain the code specifying the error. 
 
 The response body must contain an object as described in `.components/schemas/error` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).  
+
+The HTTP status codes that **MUST** be used in combination with the HTTP header `Fsc-Error-Code` are defined in the sections 3.7.1.4 and 3.8.2.2.
 
 ## Contracts
 
@@ -710,8 +712,9 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_OUTWAY
 
 ##### Codes
 
-*ERROR_CODE_METHOD_UNSUPPORTED:*
-The Outway received a request with an HTTP Method that is not supported. The CONNECT method is not supported.
+| Error code                          | HTTP status code | Description                                                                                                   |
+|-------------------------------------|-----------------|---------------------------------------------------------------------------------------------------------------|
+| ERROR_CODE_METHOD_UNSUPPORTED       | 405             | The Outway received a request with an HTTP Method that is not supported. The CONNECT method is not supported. |
 
 ## Inway
 
@@ -758,17 +761,13 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_INWAY`
 
 ##### Codes
 
-*ERROR_CODE_ACCESS_TOKEN_MISSING:*
-The HTTP header `Fsc-Authorization` does not contain an access token
-
-*ERROR_CODE_ACCESS_DENIED:*
-The access token is invalid
-
-*ERROR_CODE_SERVICE_NOT_FOUND:*
-The Service specified in the access token is not offered by the Inway
-
-*ERROR_CODE_SERVICE_UNREACHABLE:*
-The Inway is unable to reach the Service
+| Error code                          | HTTP status code | Description                                                                                                                                           |
+|-------------------------------------|------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ERROR_CODE_ACCESS_TOKEN_MISSING     | 401              | The HTTP header `Fsc-Authorization` does not contain an access token. In this scenario the HTTP header `WWW-Authenticate` **MUST** be set to `Bearer` |
+| ERROR_CODE_ACCESS_DENIED            | 401              | The access token is invalid. In this scenario the HTTP header `WWW-Authenticate` **MUST** be set to `Bearer`                                          |
+| ERROR_CODE_WRONG_GROUP_ID_IN_TOKEN  | 403              | The Group ID specified in the access token does not match the ID of the Group of the Inway                                                            |
+| ERROR_CODE_SERVICE_NOT_FOUND        | 404              | The Service specified in the access token is not offered by the Inway                                                                                 |
+| ERROR_CODE_SERVICE_UNREACHABLE      | 502              | The Inway is unable to reach the Service                                                                                                              |
 
 # References
 
