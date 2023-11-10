@@ -650,15 +650,23 @@ The Manager functionality **MUST** implement an HTTP interface as specified in t
 
 The Manager is required to include its public address as HTTP Header `Fsc-Manager-Address` in each POST or PUT request sent to another Manager.
 
-#### Error response
+### Error response
 
-The Manager **MUST** return error response object as described in `.components/schemas/error` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).  
+The Manager implements two error formats 
+
+#### OAuth 2.0 error response
+
+The `/token` endpoint **MUST** return an error response as described in [@!RFC6749, section 5.2].
+
+#### Other endpoints
+
+The Manager **MUST** return the error response object as described in `.components/schemas/error` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
 
 The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.ManagerErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).  
 
 The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_MANAGER`.  
 
-##### Codes
+#### Codes
 
 | Error code                                          | HTTP status code | Description                                                                                                                                         |
 |-----------------------------------------------------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
