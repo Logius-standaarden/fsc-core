@@ -463,8 +463,8 @@ Validation is done by comparing the hash of the received Contract with the hash 
 The `contract_content_hash` of the signature payload contains the signature hash. The algorithm to create a `contract_content_hash` is described below.
 
 1. Create a byte array called `contentBytes`.
-1. Append `contract.content.id` to `contentBytes`.
 1. Convert `contract.content.group_id` to bytes and append the bytes to `contentBytes`.
+1. Append `contract.content.id` to `contentBytes`.
 1. Convert `contract.content.validity.not_before` to bytes and append the bytes to `contentBytes`.
 1. Convert `contract.content.validity.not_after` to bytes and append the bytes to `contentBytes`.
 1. Convert `contract.content.created_at` to bytes and append the bytes to `contentBytes`.
