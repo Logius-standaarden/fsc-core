@@ -471,8 +471,10 @@ The `contract_content_hash` of the signature payload contains the signature hash
 1. Create an array of bytes arrays called `grantByteArrays`
 1. For each Grant in `contract.content.grants`
    1. Create a byte array named `grantBytes`
-   1. Convert the value of each field of the Grant to bytes. Append these bytes to the `grantBytes` in the same order as the fields are defined in the [OpenAPI Specification definition](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).  
-      Except for the field `type`. This field must be omitted.
+   1. Convert the value of each field of the Grant to bytes. The value of the `type` field should first be converted to an `int32`.  
+      The integer value is the position in the list as defined in the field `.components.schemas.GrantType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
+      E.g. The enum `GRANT_TYPE_PEER_REGISTRATION` is the first item in the list so its integer is 1.
+      Append these bytes to the `grantBytes` in the same order as the fields are defined in the [OpenAPI Specification definition](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
    1. Append `grantBytes` to `grantByteArrays`
 1. Sort the byte arrays in `grantByteArrays` in ascending order
 1. Append the bytes of `grantByteArrays` to `contentBytes`.
@@ -488,7 +490,6 @@ The `contract_content_hash` of the signature payload contains the signature hash
 - `int32`: use `Little-endian` as endianness when converting to a byte array
 - `int64`: use `Little-endian` as endianness when converting to a byte array
 - `string`: use `utf-8` encoding when converting to a byte array
-- `GrantType`: should be represented as an int32. The integer value is the position in the list as defined in the field `.components.schemas.GrantType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)
 
 ### Grant hash {#grant_hash}
 
