@@ -797,13 +797,14 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_INWAY`
 
 ##### Codes
 
-| Error code                          | HTTP status code | Description                                                                                                                                           |
-|-------------------------------------|------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ERROR_CODE_ACCESS_TOKEN_MISSING     | 401              | The HTTP header `Fsc-Authorization` does not contain an access token. In this scenario the HTTP header `WWW-Authenticate` **MUST** be set to `Bearer` |
-| ERROR_CODE_ACCESS_DENIED            | 401              | The access token is invalid. In this scenario the HTTP header `WWW-Authenticate` **MUST** be set to `Bearer`                                          |
-| ERROR_CODE_WRONG_GROUP_ID_IN_TOKEN  | 403              | The Group ID specified in the access token does not match the ID of the Group of the Inway                                                            |
-| ERROR_CODE_SERVICE_NOT_FOUND        | 404              | The Service specified in the access token is not offered by the Inway                                                                                 |
-| ERROR_CODE_SERVICE_UNREACHABLE      | 502              | The Inway is unable to reach the Service                                                                                                              |
+| Error code                         | HTTP status code | Description                                                                                                                                           |
+|------------------------------------|------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ERROR_CODE_ACCESS_TOKEN_MISSING    | 401              | The HTTP header `Fsc-Authorization` does not contain an access token. In this scenario the HTTP header `WWW-Authenticate` **MUST** be set to `Bearer` |
+| ERROR_CODE_ACCESS_TOKEN_INVALID    | 401              | The provided access token is invalid. In this scenario the HTTP header `WWW-Authenticate` **MUST** be set to `Bearer`                                 |
+| ERROR_CODE_ACCESS_TOKEN_EXPIRED    | 401              | The provided access token has expired. In this scenario the HTTP header `WWW-Authenticate` **MUST** be set to `Bearer`                                |
+| ERROR_CODE_WRONG_GROUP_ID_IN_TOKEN | 403              | The Group ID specified in the access token does not match the ID of the Group of the Inway                                                            |
+| ERROR_CODE_SERVICE_NOT_FOUND       | 404              | The Service specified in the access token is not offered by the Inway                                                                                 |
+| ERROR_CODE_SERVICE_UNREACHABLE     | 502              | The Inway is unable to reach the Service                                                                                                              |
 
 # References
 
