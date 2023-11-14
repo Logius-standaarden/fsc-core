@@ -470,12 +470,12 @@ The `contract_content_hash` of the signature payload contains the signature hash
 1. Convert `contract.content.created_at` to bytes and append the bytes to `contentBytes`.
 1. Create an array of bytes arrays called `grantByteArrays`
 1. For each Grant in `contract.content.grants`
-   1. Create a Grant Hash for the Grant as documented below.
+   1. Create a Grant Hash for the Grant as documented in the [Grant Hash section](#grant_hash).
    1. Convert the Grant Hash from string to bytes and store them in a byte array named `grantBytes`.
-   1. Append `grantBytes` to `grantByteArrays`
-1. Sort the byte arrays in `grantByteArrays` in ascending order
+   1. Append `grantBytes` to `grantByteArrays`.
+1. Sort the byte arrays in `grantByteArrays` in ascending order.
 1. Append the bytes of `grantByteArrays` to `contentBytes`.
-1. Hash the `contentBytes` using the hash algorithm described in `contract.content.algorithm`
+1. Hash the `contentBytes` using the hash algorithm described in `contract.content.algorithm`.
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and surround it with dollar signs (`$`). When using the `SHA3-512` algorithm this would result in `$1$`. 
    To convert the hash algorithm to an integer look up the enum value in the field `.components.schemas.HashAlgorithm` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) and interpret the position in the list. E.g. The enum `HASH_ALGORITHM_SHA3_512` is the first item in the list so its integer is 1.
