@@ -109,8 +109,8 @@ To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant
 
 FSC Core specifies the basics for setting up and managing connections in a Group. It is **RECOMMENDED** to use FSC Core with the following extensions, each specified in a dedicated RFC:
 
-- [FSC Delegation](delegation/README.md), to delegate the right to connect to a service.
-- [FSC Logging](logging/README.md), keep a log of requests to Services.
+- [FSC Delegation](../delegation/draft-fsc-delegation-00.html), to delegate the right to connect to a service.
+- [FSC Logging](../logging/draft-fsc-logging-00.html), keep a log of requests to Services.
 
 ### Use cases
 
