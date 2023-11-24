@@ -738,7 +738,7 @@ Access tokens **MUST** be obtained by calling the `/token` endpoint defined in t
 
 Which component obtains an access token for a Service is an implementation detail and out of scope for this document.
 
-#### Error response
+### Error response
 
 If the Error has occurred in the Inway or Service the Outway **MUST** return the error without altering the response. 
 
@@ -787,7 +787,7 @@ The Inway **MUST** not delete the HTTP Header `Fsc-Authorization` from the HTTP 
 
 The HTTP endpoint `/` **MUST** be implemented.
 
-#### Error response
+### Error response
 
 The Inway **MUST** return the error response of a Service to the Outway without altering the response.
 
