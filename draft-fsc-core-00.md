@@ -340,7 +340,7 @@ The content of a Contract is defined in the object `.components/schemas/contract
 
 ### Contract Validation {#contract_validation}
 
-- A Contract ID is provided as a UUID V7 in the field `contract.id`. 
+- A UUID V7 is provided in the field `contract.id`. 
 - A hash algorithm is provided in the field `contract.content.hash_algorithm`.
 - The date provided in `contract.content.created_at` can not be in the future.
 - The Group ID of the Manager matches the Group ID defined in the field `contract.group_id`.
@@ -349,9 +349,9 @@ The content of a Contract is defined in the object `.components/schemas/contract
 - The date provided in `contract.content.validity.not_after` must be greater than the date provided in the field `contract.validity.not_before`.
 - The date provided in `contract.content.validity.not_after` must be in the future.
 - At least one Grant is set in the field `contract.content.grants`.
-- A `PeerRegistrationGrant` cannot be mixed with other Grants.
-- Only one `PeerRegistrationGrant` is allowed per Contract.
-- A `ServicePublicationGrant` cannot be mixed with other Grants.
+- A `PeerRegistrationGrant` cannot be mixed with other Grants. Mixing Grant types with different use-cases is prohibited to prevent the creation of Contracts that are hard to maintain and validate.  
+- Only one `PeerRegistrationGrant` is allowed per Contract. A Peer can only register himself to the Directory so only one `PeerRegistrationGrant` is allowed. 
+- A `ServicePublicationGrant` cannot be mixed with other Grants. Mixing Grant types with different use-cases is prohibited to prevent the creation of Contracts that are hard to maintain and validate.
 
 Per Grant type different validation rules apply.
 
