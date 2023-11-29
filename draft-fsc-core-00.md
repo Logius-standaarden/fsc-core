@@ -265,7 +265,7 @@ The Inway will validate the access token and proxy the request to the Service.
 
 ## Use cases and required components
 
-Which components a Peer needs depends on the use case.  
+Which components a Peer needs depends on the use case.
 
 A Peer who wants to consume Services needs a Manager and an Outway.  
 
@@ -825,6 +825,8 @@ The HTTP request **MUST** contain the HTTP Header `Fsc-Authorization` which cont
 The Inway **MUST** proxy the HTTP request to the Service specified in the field `svc` of the access token.
 
 The Inway **MUST** not delete the HTTP Header `Fsc-Authorization` from the HTTP Request before forwarding the request to the Service.
+
+The security of the connection between the Inway and the Service is out of scope for this document.        
 
 ### Interfaces
 
