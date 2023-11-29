@@ -312,8 +312,6 @@ Each Peer **MUST** have a human-readable name which can be used to identify a Pe
 
 ### TLS configuration
 
-The TLS version **MUST** be at least 1.2 as specified in [RFC5246].
-
 Connections between Inways, Outways, Managers of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
 
 The certificates must be provided by a TA who **SHOULD** validate a Peers identity, i.e. the TA **MUST** preform Organization Validation. 
@@ -329,7 +327,19 @@ FSC places specific requirements on the subject fields of a certificate. [@!RFC5
 - Subject Alternative Name[@!RFC5280, section 4.2.1.6]: This should contain the Fully Qualified Domain Names (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve externally.
 - Subject Organization: This should contain to the name of the Organization.
 
-The representation and verification of domains specified in the X.509 certificate **MUST** adhere to [@!RFC6125] 
+The representation and verification of domains specified in the X.509 certificate **MUST** adhere to [@!RFC6125]
+
+#### TLS Version
+
+The TLS version **MUST** be v1.2 as specified in [RFC5246] or v1.3 as specified in [RFC8446].
+
+When using TLS v1.2 one of the following Cipher suites supporting perfect forward secrecy **MUST** be used:
+
+- TLS_ECDHE_RSA_WITH_AES128_GCM_SHA256
+- TLS_ECDHE_RSA_WITH_AES256_GCM_SHA384
+- TLS_ECDHE_RSA_WITH_AES256_CBC_SHA384
+
+When using TLS v1.3 any cipher suite can be used as perfect forward secrecy has been made mandatory in v1.3.   
 
 #### Certificate thumbprints {#certificate_thumbprints}
 
