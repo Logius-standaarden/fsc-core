@@ -716,7 +716,7 @@ The Directory **MUST** validate the ServicePublicationGrant in the Contract usin
 
 The Directory **MUST** only accept ServicePublicationGrants of Peers which have a valid Contract with a PeerRegistrationGrant containing the Peer and the Directory.
 
-Although multiple ServicePublicationGrants are allowed in a single Contract it is **RECOMMENDED** to limit this to one per Contract.
+Although multiple ServicePublicationGrants are allowed in a single Contract it is **RECOMMENDED** to limit this to one per Contract. Adding multiple ServicePublicationGrants on a single Contract makes the Contract fragile. If the publication of one Service changes the whole Contract will be invalidated. 
 
 ## Outway
 
