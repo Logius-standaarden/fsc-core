@@ -572,6 +572,7 @@ Example payload:
 
 ## Manager {#manager}
 
+The Manager is an essential component for each Peer in the Group. 
 The Manager is responsible for:
 
 - Receiving Contracts
@@ -692,11 +693,16 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_MANAGE
 
 ## Directory
 
+The Directory is a Manager chosen by the Group to act as the Directory. 
+
+The Directory is used by Peers to:
+
+- Discover Services
+- Discover Peers
+- Publish Services
+- Register themselves
+
 ### Behavior
-
-#### Authentication
-
-The Directory **MUST** only accept connection from clients that use mTLS, the client **MUST** use an X.509 certificate that is signed by the TA of the Group.
 
 #### Peer registration
 
@@ -719,6 +725,15 @@ The Directory **MUST** only accept ServicePublicationGrants of Peers which have 
 Although multiple ServicePublicationGrants are allowed in a single Contract it is **RECOMMENDED** to limit this to one per Contract. Adding multiple ServicePublicationGrants on a single Contract makes the Contract fragile. If the publication of one Service changes the whole Contract will be invalidated. 
 
 ## Outway
+
+The Outway is used by Peers to connect to a Service.      
+The Outway functions as a forwarding proxy that is responsible for setting up the connection to the Inway that is offering a Service.  
+
+The Outway is responsible for:
+
+- setting up mTLS connections with Inways
+- including a valid access token with each request
+- deliver the response from the Service to the client calling the Outway
 
 ### Behavior
 
@@ -765,6 +780,16 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_OUTWAY
 | ERROR_CODE_METHOD_UNSUPPORTED       | 405             | The Outway received a request with an HTTP Method that is not supported. The CONNECT method is not supported. |
 
 ## Inway
+
+The Inway is used by Peers to offer a Service to other Peers.  
+The Inway is a Reverse proxy that handles incoming connections from Outways and routes the request to the correct Service.
+
+The Inway is responsible for:
+
+- validating access tokens.
+- routing requests to the correct Service.
+- forwarding the access token to the Service which is being called
+- returning the response from the Service to the Outway.
 
 ### Behavior
 
