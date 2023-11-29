@@ -358,6 +358,37 @@ The HTTP status codes that **MUST** be used in combination with the HTTP header 
 
 The content of a Contract is defined in the object `.components/schemas/contractContent` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
 
+example Contract with a ServiceConnectionGrant
+```json
+{
+  "content": {
+    "id": "06338364-8305-7b74-8000-de4963503139",
+    "group_id": "example.fsc.com",
+      "validity": {
+        "not_before": 1672527600,
+        "not_after": 1704063600
+    },
+    "grants": [
+      {
+        "data": {
+          "type": "GRANT_TYPE_SERVICE_CONNECTION_GRANT",
+          "service": {
+            "peer_id": "00000000000000000001",
+            "name": "example-service"
+          },
+          "outway": {
+            "peer_id": "00000000000000000002",
+            "certificate_thumbprint": "h_CeVoeJ5vdaFGzNYPqiKWnGtDKB9UvIa_uk5Yvm7gs"
+          }
+        }
+      }
+    ],
+    "hash_algorithm": "HASH_ALGORITHM_SHA3_512",
+    "created_at": 1672527600
+  }
+}
+```
+
 ### Contract Validation {#contract_validation}
 
 - A UUID V7 is provided in the field `contract.id`. 
