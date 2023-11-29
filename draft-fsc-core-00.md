@@ -647,6 +647,10 @@ The Manager **MUST** persist the Peer ID, name and Manager address of each Peer 
 
 The Manager **MUST** persist the Peer ID, name and Manager address of each Peer who called the `announce`  endpoint as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
 
+### Announce
+
+The Manager **SHOULD** call the `announce` endpoint of the Peers with whom the Peer has negotiated Contracts when the address of Manager changes.
+
 ### Interfaces {#manager_interface}
 
 The Manager functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).  
