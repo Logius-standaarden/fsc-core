@@ -143,15 +143,15 @@ Inways of a Peer expose Services to the Group.
 Outways of a Peer connect to the Inway of a Peer providing a Service.
 Contracts define the registration of a Peer to the Group, Service publication to the Group and connections between Peers.
 
-Inways are reverse proxies that route incoming connections from Outways to Services.  
 Outways are forward proxies that route outgoing connections to Inways.  
+Inways are reverse proxies that route incoming connections from Outways to Services.  
 Managers negotiate Contracts between Peers.  
 Managers provide access tokens which contain the authorization to connect a Service. 
-Outways include the access tokens in a requests to Services
+Outways include the access tokens in requests to Services
 The address of an Inway offering a Service is contained in the access token. 
 Inways authorize connection attempts by validating access tokens.
 Services in the Group can be discovered through the Directory.  
-The address of Managers of Peers can be requested from the Directory.  
+The Manager's address of a Peer can be discovered through the Directory.  
 
 To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once an authorization to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the Service is made.
 
@@ -262,6 +262,16 @@ The Inway will validate the access token and proxy the request to the Service.
 ![Consuming a Service](diagrams/seq-consuming-a-service.svg "Consuming a Service")
 ![Consuming a Service](diagrams/seq-consuming-a-service.ascii-art "Consuming a Service")
 !---
+
+## Use cases and required components
+
+Which components a Peer needs depends on the use case.  
+
+A Peer who wants to consume Services needs a Manager and an Outway.  
+
+A Peer who wants to offer Services needs a Manager and an Inway.    
+
+A Peer who wants to both consume and offer Services needs a Manager,an Outway and an Inway.  
 
 # Specifications
 
