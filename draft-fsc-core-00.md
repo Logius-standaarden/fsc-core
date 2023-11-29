@@ -273,7 +273,7 @@ The Manager **MUST** support HTTP/1.1[@!RFC9112].
 
 The Manager **MAY** support HTTP/2[@!RFC9113]. 
 
-The protocol used between the Inway and Outway can be either HTTP/1.1[@!RFC9112] or HTTP/2[@!RFC9113]. The protocol is determined by the `protocol` field of a Service as specified in the object `.components/schemas/serviceListingService` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
+The protocol used between the Inway and Outway can be either HTTP/1.1[@!RFC9112] or HTTP/2[@!RFC9113]. The protocol is determined by the `protocol` field of a Service as specified in the object `.components/schemas/serviceListingService` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
 
 ### Port configuration
 
@@ -302,7 +302,7 @@ Each Peer **MUST** have a human-readable name which can be used to identify a Pe
 
 ### TLS configuration
 
-The TLS version **MUST** be at least 1.2 as specified in [RFC5246]
+The TLS version **MUST** be at least 1.2 as specified in [RFC5246].
 
 Connections between Inways, Outways, Managers of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
 
@@ -330,13 +330,13 @@ Certificate thumbprints used within the scope of FSC are always part of a X.509 
 The Inway and Outway both have a single endpoint which proxies HTTP requests. 
 In case of an error within the scope of FSC these components **MUST** return the HTTP header `Fsc-Error-Code` which **MUST** contain the code specifying the error. 
 
-The response body must contain an object as described in `.components/schemas/error` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).  
+The response body must contain an object as described in `.components/schemas/error` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).  
 
 The HTTP status codes that **MUST** be used in combination with the HTTP header `Fsc-Error-Code` are defined in the sections 3.7.1.4 and 3.8.2.2.
 
 ## Contracts
 
-The content of a Contract is defined in the object `.components/schemas/contractContent` of the [OpenAPI Specification](./manager.yaml)
+The content of a Contract is defined in the object `.components/schemas/contractContent` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
 
 ### Contract Validation {#contract_validation}
 
@@ -357,7 +357,7 @@ Per Grant type different validation rules apply.
 
 #### PeerRegistrationGrant {#peer_registration_grant}
 
-The content of a PeerRegistrationGrant is defined in the object `.components/schemas/grantPeerRegistration` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)
+The content of a PeerRegistrationGrant is defined in the object `.components/schemas/grantPeerRegistration` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
 
 Validation rules:  
 
@@ -372,7 +372,7 @@ Signature requirements:
 
 #### ServicePublicationGrant {#service_publication_grant}
 
-The content of a ServicePublicationGrant is defined in the object `.components/schemas/grantServicePublication` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)
+The content of a ServicePublicationGrant is defined in the object `.components/schemas/grantServicePublication` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
 
 Validation rules:
 
@@ -387,7 +387,7 @@ Signature requirements:
 
 #### ServiceConnectionGrant {#service_connection_grant}
 
-The content of a ServiceConnectionGrant is defined in the object `.components/schemas/grantServiceConnection` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)
+The content of a ServiceConnectionGrant is defined in the object `.components/schemas/grantServiceConnection` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
 
 Validation rules:
 
@@ -481,8 +481,8 @@ The `contract_content_hash` of the signature payload contains the signature hash
 1. Hash the `contentBytes` using the hash algorithm described in `contract.content.algorithm`.
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and surround it with dollar signs (`$`). When using the `SHA3-512` algorithm this would result in `$1$`. 
-   To convert the hash algorithm to an integer look up the enum value in the field `.components.schemas.HashAlgorithm` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) and interpret the position in the list. E.g. The enum `HASH_ALGORITHM_SHA3_512` is the first item in the list so its integer is 1.
-1. Add `1$` as suffix to the string created in step 13. This is the enum `HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml) as int32. If the string created in step 13 is `$1$`, the result should now be `$1$1$`
+   To convert the hash algorithm to an integer look up the enum value in the field `.components.schemas.HashAlgorithm` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml) and interpret the position in the list. E.g. The enum `HASH_ALGORITHM_SHA3_512` is the first item in the list so its integer is 1.
+1. Add `1$` as suffix to the string created in step 13. This is the enum `HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml) as int32. If the string created in step 13 is `$1$`, the result should now be `$1$1$`
 1. Add the Base64 generated in step 12 as suffix to the string generated in step 14.
 
 #### Data types {#data_types}
@@ -498,12 +498,12 @@ The Grant hash can be created by executing the following steps:
 1. Create a byte array named `grantBytes`
 1. Convert `contract.content.group_id` to bytes and append the bytes to `grantBytes`.
 1. Convert `contract.content.id` to bytes and append the bytes to `grantBytes`.
-1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).  
+1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).  
    Except for the field `type`. This field must be omitted.
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
-1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
-1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. To convert the `HashType` to an integer take the position of the `HashType` in the field `.components.schemas.HashType` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)). E.g. The enum `HASH_TYPE_GRANT_PEER_REGISTRATION` becomes `2$`.
+1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
+1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. To convert the `HashType` to an integer take the position of the `HashType` in the field `.components.schemas.HashType` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)). E.g. The enum `HASH_TYPE_GRANT_PEER_REGISTRATION` becomes `2$`.
 1. Combine the strings containing the hash algorithm (step 6) and Hash type (step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_PEER_REGISTRATION` should result in the string `$1$2$`
 1. Prefix the Bas64 string generated in step 5 with the string generated in step 8.
 
@@ -644,11 +644,11 @@ The Manager **MUST** list the Peers with whom the Peer has negotiated Contracts 
 
 The Manager **MUST** persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
 
-The Manager **MUST** persist the Peer ID, name and Manager address of each Peer who called the `announce`  endpoint as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
+The Manager **MUST** persist the Peer ID, name and Manager address of each Peer who called the `announce`  endpoint as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
 
 ### Interfaces {#manager_interface}
 
-The Manager functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).  
+The Manager functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).  
 
 ###  FSC manager address 
 
@@ -664,9 +664,9 @@ The `/token` endpoint **MUST** return an error response as described in [@!RFC67
 
 #### Other endpoints
 
-The Manager **MUST** return the error response object as described in `.components/schemas/error` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
+The Manager **MUST** return the error response object as described in `.components/schemas/error` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
 
-The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.ManagerErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).  
+The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.ManagerErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).  
 
 The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_MANAGER`.  
 
@@ -739,7 +739,7 @@ Clients **MAY** use TLS when communicating with the Outway.
 
 Access tokens are obtained using the Client Credentials flow[@!RFC6749, section 4.4].
 
-Access tokens **MUST** be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml
+Access tokens **MUST** be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml
 
 Which component obtains an access token for a Service is an implementation detail and out of scope for this document.
 
@@ -749,7 +749,7 @@ If the Error has occurred in the Inway or Service the Outway **MUST** return the
 
 The Outway **MUST** return an error response defined in the [Error handling section](#error_handling) when the error is produced by the Outway.
 
-The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.OutwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
+The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.OutwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
 
 The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_OUTWAY`.
 
@@ -798,7 +798,7 @@ The Inway **MUST** return the error response of a Service to the Outway without 
 
 The Inway **MUST** return an error response defined in the [Error handling section](#error_handling) when the error is produced by the Inway.
 
-The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.InwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml).
+The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.InwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
 
 The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_INWAY`.
 
@@ -815,7 +815,7 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_INWAY`
 
 # References
 
-[OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/blob/master/manager.yaml)
+[OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
 
 # Acknowledgements
 
