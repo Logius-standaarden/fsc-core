@@ -88,6 +88,54 @@ The Core part of the FSC specification achieves inter-organizational, technical 
 
 Functionality required to achieve technical interoperability is provided by APIs as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling up-scaling of inter-organizational usage of services.
 
+## Terminology
+
+This specification lists terms and abbreviations as used in this document.
+
+*Peer:*
+
+Actor that provides and/or consumes Services. This is an abstraction of e.g. an organization, a department or a security context.
+
+*Group:*
+
+System of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services.
+
+*Inway:*
+
+Reverse proxy that handles incoming connections to one or more Services.
+
+*Outway:*
+
+Forward proxy that handles outgoing connections to Inways.
+
+*Contract:*
+
+Agreement between Peers defining what interactions between Peers are possible.
+
+*Grant:*
+
+Defines an interaction between Peers. Grants are part of a Contract. In FSC Core three Grants are described.
+
+1. The PeerRegistrationGrant which specifies the authorization of a Peer to participate as a Peer in the Group.
+2. The ServicePublicationGrant which specifies the authorization of a Peer to publish a Service in the Group.
+3. The ServiceConnectionGrant which specifies the authorization of a Peer to connect to a Service provided by a Peer.
+
+*Manager:*
+
+The Manager is an API which manages Contracts and acts as an authorization server which provides access tokens.
+
+*Directory:*
+
+A Manager which acts as a Service and Peer discovery point of the Group.
+
+*Service:*
+
+An HTTP API offered to the Group.
+
+*Trust Anchor:*
+
+The Trust Anchor (TA) is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
+
 ## Overall Operation of FSC Core
 
 Peers in a Group announce their HTTP APIs to the Group by publishing them as a Service to the Directory. A Group uses a single Directory that defines the scope of the Group. Peers use the Directory to discover what Services and Peers are available in the Group.
@@ -124,54 +172,6 @@ An organization can offer the same API in multiple Groups. When doing so, the or
 ## Requirements Language
 
 The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://www.rfc-editor.org/info/bcp14) [@!RFC2119] [@!RFC8174] when, and only when, they appear in all capitals, as shown here.
-
-## Terminology
-
-This specification lists terms and abbreviations as used in this document.
-
-*Peer:*    
-  
-Actor that provides and/or consumes Services. This is an abstraction of e.g. an organization, a department or a security context.
-
-*Group:*   
-  
-System of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services.
-
-*Directory:*      
-  
-A Manager which acts as a Service and Peer discovery point of the Group.  
-
-*Inway:*  
-  
-Reverse proxy that handles incoming connections to one or more Services.
-
-*Outway:*  
-  
-Forward proxy that handles outgoing connections to Inways.
-
-*Contract:*  
-  
-Document between Peers defining what interactions between Peers are possible.
-
-*Grant:*  
-  
-Defines an interaction between Peers. Grants are part of a Contract. In FSC Core three Grants are described.  
-
-1. The PeerRegistrationGrant which specifies the authorization of a Peer to participate as a Peer in the Group.
-2. The ServicePublicationGrant which specifies the authorization of a Peer to publish a Service in the Group.
-3. The ServiceConnectionGrant which specifies the authorization of a Peer to connect to a Service provided by a Peer.
-
-*Manager:*  
-
-The Manager is an API which manages Contracts and acts as an authorization server which provides access tokens.
-
-*Service:*      
-  
-An HTTP API offered to the Group.
-
-*Trust Anchor:*      
-  
-The Trust Anchor (TA) is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
 # Architecture
 
