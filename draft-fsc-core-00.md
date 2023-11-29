@@ -232,6 +232,7 @@ Once the Contract between Peer and Directory is signed by both parties, the Peer
 
 Every Group is defined by one Directory that contains the Services and Peers in the Group.
 Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) to the Directory.
+Peers query the Directory to discover the Services available in the Group 
 
 !---
 ![Providing a Service](diagrams/seq-providing-a-service.svg "Providing a Service")
@@ -300,6 +301,8 @@ The TA(s) issuing the certificates must ensure that PeerID is always the same fo
 Each Peer **MUST** have a human-readable name which can be used to identify a Peer. Unlike the PeerID the name does not have to be unique. The name of Peer is determined by an element in the subject field [@!RFC5280, section 4.1.2.6] of an X.509 certificate. The Group **MUST** define which element of the subject field is used.
 
 ### TLS configuration
+
+The TLS version **MUST** be at least 1.2 as specified in [RFC5246]
 
 Connections between Inways, Outways, Managers of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
 
@@ -576,7 +579,7 @@ The Manager is responsible for:
 - Validating Contract signatures
 - Providing the X.509 certificates of the keypair of which the private key was used by the Peer to create signatures
 - Providing Contracts involving a specific Peer
-- Providing access tokes 
+- Providing access tokens 
 - Listing Peers
 - Listing Services
 
