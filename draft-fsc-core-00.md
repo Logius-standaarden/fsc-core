@@ -448,7 +448,7 @@ JWS Payload example:
 
 #### Payload fields
 
-- `contract_content_hash`, hash of the content of the contract.
+- `contract_content_hash`, hash of the content of the Contract.
 - `type`, type of signature.
 - `signed_at` Unix timestamp of the sign date.
 
@@ -460,8 +460,9 @@ JWS Payload example:
 
 ### The content hash {#content_hash}
 
-A Peer should ensure that a Contract signature is intended for the Contract.
-Validation is done by comparing the hash of the received Contract with the hash in the signature.
+A Peer should ensure that a signature is intended for the Contract.
+This validation is done by comparing the hash of the received Contract with the hash in the signature. 
+The Validation **MUST** be done every time a Peer receives a signature.
 
 The `contract_content_hash` of the signature payload contains the signature hash. The algorithm to create a `contract_content_hash` is described below.
 
