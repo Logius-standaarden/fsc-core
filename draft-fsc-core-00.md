@@ -215,6 +215,18 @@ The content of a Contract is immutable. When the content of a Contract is subjec
 ![State Contract](diagrams/state-contract.ascii-art "State Contract")
 !---
 
+## Creating a Group
+
+A Group is a system of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services. 
+
+In order to create a Group the following steps **MUST** be taken:
+
+1. Select a [Trust Anchor](#trust_anchor)
+2. Select a [Group ID](#group_id)
+3. Select what determines the [Peer ID](#peer_id)
+4. Select what determines the [Peer name](#peer_name)
+5. Select a Peer who acts as the [Directory](#directory) of the Group
+
 ## Registering a Peer {#registering_a_peer}
 
 The Peer registration is required to validate that the Peer meets the requirements set by the Group. In case of FSC Core only an X.509 Certificate signed by the TA is required but extensions on Core might, for example, require the Peer to sign a "Terms of Service" document before allowing a Peer to participate in a Group.
@@ -296,7 +308,7 @@ Port `8443` is **RECOMMENDED** for management traffic i.e. submitting/signing Co
 Data traffic: Inway, Outway  
 Management Traffic: Directory, Manager
 
-### Group ID
+### Group ID {#group_id}
 
 The Group ID is the identifier of the Group. This identifier is chosen by the Group upon creation of the Group.  
 The Group ID **MUST** match the following regular expression `^[a-zA-Z0-9./_-]{1,100}$`
@@ -306,21 +318,25 @@ The Group ID **MUST** match the following regular expression `^[a-zA-Z0-9./_-]{1
 Each Peer **MUST** have a unique identifier within the Group, this identifier is called the PeerID. The PeerID is determined by at least one element from the subject field [@!RFC5280, section 4.1.2.6] of an X.509 certificate. Each Group **MUST** define which element(s) of the subject field of the X.509 certificate act as PeerID.
 The TA(s) issuing the certificates must ensure that PeerID is always the same for a Peer in each issued certificate for said Peer.    
 
-### Peer name
+### Peer name {#peer_name}
 
 Each Peer **MUST** have a human-readable name which can be used to identify a Peer. Unlike the PeerID the name does not have to be unique. The name of Peer is determined by an element in the subject field [@!RFC5280, section 4.1.2.6] of an X.509 certificate. The Group **MUST** define which element of the subject field is used.
 
-### TLS configuration
+### Trust Anchor {#trust_anchor}
 
-Connections between Inways, Outways, Managers of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
-
-The certificates must be provided by a TA who **SHOULD** validate a Peers identity, i.e. the TA **MUST** preform Organization Validation. 
-
-The certificate guarantees the identity of a Peer.
+The Trust Anchor (TA) is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
 Each Group can have multiple TAs.
 
 Every Peer in a Group **MUST** accept the same TA(s).
+
+The TA **SHOULD** validate a Peers identity, i.e. the TA **MUST** preform Organization Validation.
+
+### TLS configuration {#tls_configuration}
+
+Connections between Inways, Outways, Managers of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
+
+The certificate guarantees the identity of a Peer.
 
 FSC places specific requirements on the subject fields of a certificate. [@!RFC5280, section 4.1.2.6] which are listed below
 
@@ -339,7 +355,7 @@ When using TLS v1.2 one of the following cipher suites **MUST** be used:
 - TLS_ECDHE_RSA_WITH_AES256_GCM_SHA384
 - TLS_ECDHE_RSA_WITH_AES256_CBC_SHA384
 
-These cipher suites support forward secretcy which makes them significantly more secure.  
+These cipher suites support forward secrecy which makes them significantly more secure.  
 
 When using TLS v1.3 any cipher suites specified in [RFC8446] can be used.
 
@@ -744,7 +760,7 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_MANAGE
 | ERROR_CODE_UNKNOWN_HASH_ALGORITHM_HASH              | 422              | The Hash Algorithm in the Contract Content hash or Grant Hash is not supported                                                                      |
 | ERROR_CODE_UNKNOWN_ALGORITHM_SIGNATURE              | 422              | The Algorithm in the Signature is not supported                                                                                                     |
 
-## Directory
+## Directory {#directory}
 
 The Directory is a Manager chosen by the Group to act as the Directory. 
 
