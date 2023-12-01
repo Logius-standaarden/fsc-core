@@ -918,6 +918,4 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_INWAY`
 
 [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
 
-# Acknowledgements
-
 {backmatter}
