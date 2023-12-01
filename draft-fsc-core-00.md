@@ -147,7 +147,7 @@ Outways are forward proxies that route outgoing connections to Inways.
 Inways are reverse proxies that route incoming connections from Outways to Services.  
 Managers negotiate Contracts between Peers.  
 Managers provide access tokens which contain the authorization to connect a Service. 
-Outways include the access tokens in requests to Services
+Outways include the access tokens in requests to Inways
 The address of an Inway offering a Service is contained in the access token. 
 Inways authorize connection attempts by validating access tokens.
 Services in the Group can be discovered through the Directory.  
@@ -355,7 +355,7 @@ When using TLS v1.2 one of the following cipher suites **MUST** be used:
 - TLS_ECDHE_RSA_WITH_AES256_GCM_SHA384
 - TLS_ECDHE_RSA_WITH_AES256_CBC_SHA384
 
-These cipher suites support forward secrecy which makes them significantly more secure.  
+These cipher suites support perfect forward secrecy which makes them significantly more secure.  
 
 When using TLS v1.3 any cipher suites specified in [RFC8446] can be used.
 
@@ -381,7 +381,7 @@ example Contract with a ServiceConnectionGrant
 {
   "content": {
     "id": "06338364-8305-7b74-8000-de4963503139",
-    "group_id": "example.fsc.com",
+    "group_id": "fsc-example-group",
       "validity": {
         "not_before": 1672527600,
         "not_after": 1704063600
@@ -409,7 +409,7 @@ example Contract with a ServiceConnectionGrant
 
 ### Contract Validation {#contract_validation}
 
-- A UUID V7 is provided in the field `contract.id`. 
+- A UUID V7 **MUST** be provided in the field `contract.id`. 
 - A hash algorithm is provided in the field `contract.content.hash_algorithm`.
 - The date provided in `contract.content.created_at` can not be in the future.
 - The Group ID of the Manager matches the Group ID defined in the field `contract.group_id`.
