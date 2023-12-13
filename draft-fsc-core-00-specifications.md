@@ -1,301 +1,14 @@
-%%%
-title = "FSC - core"
-abbrev = "FSC - core"
-ipr = "trust200902"
-submissionType = "IETF"
-area = "Internet"
-workgroup = ""
-keyword = ["Internet-Draft"]
-
-[seriesInfo]
-name = "Internet-Draft"
-value = "draft-fsc-core-00"
-stream = "IETF"
-status = "informational"
-# date = 2022-11-01T00:00:00Z
-
-[[author]]
-initials = "E."
-surname = "Hotting"
-fullname = "Eelco Hotting"
-organization = "Hotting IT"
-  [author.address]
-   email = "rfc@hotting.it"
-
-[[author]]
-initials = "R."
-surname = "Koster"
-fullname = "Ronald Koster"
-organization = "PhillyShell"
-  [author.address]
-   email = "rfc@phillyshell.nl"
-
-[[author]]
-initials = "H."
-surname = "van Maanen"
-fullname = "Henk van Maanen"
-organization = "AceWorks"
-  [author.address]
-   email = "henk.van.maanen@aceworks.nl"
-
-[[author]]
-initials = "N."
-surname = "Dequeker"
-fullname = "Niels Dequeker"
-organization = "ND Software"
-  [author.address]
-   email = "niels@nd-software.be"
-
-[[author]]
-initials = "E."
-surname = "van Gelderen"
-fullname = "Edward van Gelderen"
-organization = "vanG IT"
-  [author.address]
-   email = "e.van.gelderen@vang.nl"
-
-[[author]]
-initials = "P.M."
-surname = "Gaemers"
-fullname = "Pim Marcel Gaemers"
-organization = "apily"
-[author.address]
-email = "pim.gaemers@apily.dev"
-
-%%%
-
-.# Abstract
-
-TODO
-
-{mainmatter}
-
-# Introduction
-
-This section gives an introduction to this RFC.
-Section 2 describes the architecture of a system that follows the FSC specification.
-Section 3 describes the interfaces and behavior of FSC components in detail.
-
-## Purpose
-
-The Federated Service Connectivity (FSC) specifications describe a way to implement technically interoperable API gateway functionality, covering federated authentication and secure connecting in a large-scale dynamic API landscape. 
-
-The Core part of the FSC specification achieves inter-organizational, technical interoperability:
-
-- to discover Services.
-- to route requests to Services in other contexts (e.g. from within organization A to organization B).
-- to request and manage authorizations needed to connect to said Services.
-
-Functionality required to achieve technical interoperability is provided by APIs as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling up-scaling of inter-organizational usage of services.
-
-## Terminology
-
-This specification lists terms and abbreviations as used in this document.
-
-*Peer:*
-
-Actor that provides and/or consumes Services. This is an abstraction of e.g. an organization, a department or a security context.
-
-*Group:*
-
-System of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services.
-
-*Inway:*
-
-Reverse proxy that handles incoming connections to one or more Services.
-
-*Outway:*
-
-Forward proxy that handles outgoing connections to Inways.
-
-*Contract:*
-
-Agreement between Peers defining what interactions between Peers are possible.
-
-*Grant:*
-
-Defines an interaction between Peers. Grants are part of a Contract. In FSC Core three Grants are described.
-
-1. The PeerRegistrationGrant which specifies the authorization of a Peer to participate as a Peer in the Group.
-2. The ServicePublicationGrant which specifies the authorization of a Peer to publish a Service in the Group.
-3. The ServiceConnectionGrant which specifies the authorization of a Peer to connect to a Service provided by a Peer.
-
-*Manager:*
-
-The Manager is an API which manages Contracts and acts as an authorization server which provides access tokens.
-
-*Directory:*
-
-A Manager which acts as a Service and Peer discovery point of the Group.
-
-*Service:*
-
-An HTTP API offered to the Group.
-
-*Trust Anchor:*
-
-The Trust Anchor (TA) is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
-
-## Overall Operation of FSC Core
-
-Peers in a Group announce their HTTP APIs to the Group by publishing them as a Service to the Directory. A Group uses a single Directory that defines the scope of the Group. Peers use the Directory to discover what Services and Peers are available in the Group.
-Inways of a Peer expose Services to the Group. 
-Outways of a Peer connect to the Inway of a Peer providing a Service.
-Contracts define the registration of a Peer to the Group, Service publication to the Group and connections between Peers.
-
-Outways are forward proxies that route outgoing connections to Inways.  
-Inways are reverse proxies that route incoming connections from Outways to Services.  
-Managers negotiate Contracts between Peers.  
-Managers provide access tokens which contain the authorization to connect a Service. 
-Outways include the access tokens in requests to Inways
-The address of an Inway offering a Service is contained in the access token. 
-Inways authorize connection attempts by validating access tokens.
-Services in the Group can be discovered through the Directory.  
-The Manager's address of a Peer can be discovered through the Directory.  
-
-To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once an authorization to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the Service is made.
-
-FSC Core specifies the basics for setting up and managing connections in a Group. It is **RECOMMENDED** to use FSC Core with the following extensions, each specified in a dedicated RFC:
-
-- [FSC Delegation](../delegation/draft-fsc-delegation-00.html), to delegate the right to connect to a service.
-- [FSC Logging](../logging/draft-fsc-logging-00.html), keep a log of requests to Services.
-
-### Use cases
-
-A typical use case is a cooperation of many organizations that use APIs to exchange data or provide other business services to each other.
-
-Organizations can participate in multiple Groups at the same time. 
-Reasons for participating in multiple Groups could be the use of different environments for production and test deployments or when participating in different ecosystems like health industry and government industry.
-
-An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a Service in the Directory of each Group using a different Inway for each Group.
-
-## Requirements Language
-
-The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://www.rfc-editor.org/info/bcp14) [@!RFC2119] [@!RFC8174] when, and only when, they appear in all capitals, as shown here.
-
-# Architecture
-
-This chapter describes the basic architecture of an FSC system.
-
-## Identity and Trust  {#trustanchor}
-
-Connections between Managers, Inways, Outways use Mutual Transport Layer Security (mTLS) with X.509 certificates. 
-Components in the Group are configured to accept the same (Sub-) Certificate Authorities (CA) as Trust Anchors (TA). Each TA is a Trusted Third Party that ensures the identity of the Peers by verifying a set of fields of the subject field [@!RFC5280, section 4.1.2.6] that act as [PeerID](#peer_id) in each X.509 certificate.
-When multiple TAs are used the TAs must ensure that the elements of the subject field used to identify a Peer are the same across the TAs. 
-
-!---
-![mTLS Connections](diagrams/seq-mtls-connections.svg "mTLS Connections")
-![mTLS Connections](diagrams/seq-mtls-connections.ascii-art "mTLS Connections")
-!---
-
-## Contract Management
-
-Contracts are negotiated between the Managers of Peers. The Directory provides the address of each Manager.
-Connections to Services are authorized by Contracts with ServiceConnectionGrants. To create a new contract, the Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Management functionality, see [Registering a Peer](#registering_a_peer)). For each desired connection, a ServiceConnectionGrant is formulated that contains identifying information about both the Outway from the requesting Peer and the Service of the Providing Peer. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
-
-!---
-![Contract Management](diagrams/seq-contract-management.svg "Contract Management")
-![Contract Management](diagrams/seq-contract-management.ascii-art "Contract Management")
-!---
-
-### Contract states
-
-Any Peer can submit a Contract to other Peers. This Contract becomes valid when the Peers mentioned in the Contract accept the Contract by placing an accept signature. 
-
-A Contract becomes invalid when at least one Peer mentioned in the Contract revokes the Contract.
-
-A Contract becomes invalid when at least one Peer mentioned in the Contract rejects the Contract.
-
-Accepting, rejecting and revoking is done by adding a digital signature.
-
-The content of a Contract is immutable. When the content of a Contract is subject to change, the Contract is invalidated and replaced by a new one.
-
-!---
-![State Contract](diagrams/state-contract.svg "State Contract")
-![State Contract](diagrams/state-contract.ascii-art "State Contract")
-!---
-
-## Creating a Group
-
-A Group is a system of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services. 
-
-In order to create a Group the following steps **MUST** be taken:
-
-1. Select a [Trust Anchor](#trust_anchor)
-2. Select a [Group ID](#group_id)
-3. Select what determines the [Peer ID](#peer_id)
-4. Select what determines the [Peer name](#peer_name)
-5. Select a Peer who acts as the [Directory](#directory) of the Group
-
-## Registering a Peer {#registering_a_peer}
-
-The Peer registration is required to validate that the Peer meets the requirements set by the Group. In case of FSC Core only an X.509 Certificate signed by the TA is required but extensions on Core might, for example, require the Peer to sign a "Terms of Service" document before allowing a Peer to participate in a Group.
-
-To register, the Peer needs to create a Contract with a [PeerRegistrationGrant](#peer_registration_grant). The PeerRegistrationGrant contains information about the Peer, the address of the Manager of the Peer and the Directory that should accept the registration.
-
-Once the Contract between Peer and Directory is signed by both parties, the Peer is considered a Peer of the Group.
-
-!---
-![Registering a Peer](diagrams/seq-registering-a-peer.svg "Registering a Peer")
-![Registering a Peer](diagrams/seq-registering-a-peer.ascii-art "Registering a Peer")
-!---
-
-## Service discovery
-
-Every Group is defined by one Directory that contains the Services and Peers in the Group.
-Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) to the Directory.
-Peers query the Directory to discover the Services available in the Group 
-
-!---
-![Providing a Service](diagrams/seq-providing-a-service.svg "Providing a Service")
-![Providing a Service](diagrams/seq-providing-a-service.ascii-art "Providing a Service")
-!---
-
-## Create an authorization to connect to a Service
-
-A connection can only be established if the Peer connecting to the Service has a valid Contract containing a [ServiceConnectionGrant](#service_connection_grant) with the Peer providing the Service.
-The ServiceConnectionGrant contains information about the Service and the certificate of the Outway that is authorized to connect to the Service.
-
-Once the Contract between providing Peer and consuming Peer is signed by both parties, the connection between Inway and Outway can be established.
-
-!---
-![Create an authorization to connect](diagrams/seq-create-an-authorization-to-connect.svg "Connecting to a Service")
-![Create an authorization to connect](diagrams/seq-create-an-authorization-to-connect.ascii-art "Connecting to a Service")
-!---
-
-## Consuming a Service
-
-A Peer can consume a Service by sending request for said Service to an Outway. 
-The Peer obtains an access token from the Manager of the Peer providing the Service. 
-The Outway proxies the request including the access token to the Inway.
-The Inway will validate the access token and proxy the request to the Service.
-
-!---
-![Consuming a Service](diagrams/seq-consuming-a-service.svg "Consuming a Service")
-![Consuming a Service](diagrams/seq-consuming-a-service.ascii-art "Consuming a Service")
-!---
-
-## Use cases and required components
-
-Which components a Peer needs depends on the use case.
-
-A Peer who wants to consume Services needs a Manager and an Outway.  
-
-A Peer who wants to offer Services needs a Manager and an Inway.    
-
-A Peer who wants to both consume and offer Services needs a Manager,an Outway and an Inway.  
-
 # Specifications
 
 ## General
 
 ## Protocols
 
-The Manager **MUST** support HTTP/1.1[@!RFC9112].
+The Manager **MUST** support HTTP/1.1[[RFC9112]].
 
-The Manager **MAY** support HTTP/2[@!RFC9113]. 
+The Manager **MAY** support HTTP/2[[RFC9113]]. 
 
-The protocol used between the Inway and Outway can be either HTTP/1.1[@!RFC9112] or HTTP/2[@!RFC9113]. The protocol is determined by the `protocol` field of a Service as specified in the object `.components/schemas/serviceListingService` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
+The protocol used between the Inway and Outway can be either HTTP/1.1[[RFC9112]] or HTTP/2[[RFC9113]]. The protocol is determined by the `protocol` field of a Service as specified in the object `.components/schemas/serviceListingService` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
 
 ### Port configuration
 
@@ -315,12 +28,12 @@ The Group ID **MUST** match the following regular expression `^[a-zA-Z0-9./_-]{1
 
 ### Peer ID {#peer_id}
 
-Each Peer **MUST** have a unique identifier within the Group, this identifier is called the PeerID. The PeerID is determined by at least one element from the subject field [@!RFC5280, section 4.1.2.6] of an X.509 certificate. Each Group **MUST** define which element(s) of the subject field of the X.509 certificate act as PeerID.
+Each Peer **MUST** have a unique identifier within the Group, this identifier is called the PeerID. The PeerID is determined by at least one element from the subject field [section 4.1.2.6](https://rfc-editor.org/rfc/rfc5280) of [[RFC5280]] of an X.509 certificate. Each Group **MUST** define which element(s) of the subject field of the X.509 certificate act as PeerID.
 The TA(s) issuing the certificates must ensure that PeerID is always the same for a Peer in each issued certificate for said Peer.    
 
 ### Peer name {#peer_name}
 
-Each Peer **MUST** have a human-readable name which can be used to identify a Peer. Unlike the PeerID the name does not have to be unique. The name of Peer is determined by an element in the subject field [@!RFC5280, section 4.1.2.6] of an X.509 certificate. The Group **MUST** define which element of the subject field is used.
+Each Peer **MUST** have a human-readable name which can be used to identify a Peer. Unlike the PeerID the name does not have to be unique. The name of Peer is determined by an element in the subject field [section 4.1.2.6](https://rfc-editor.org/rfc/rfc5280) of [[RFC5280]] of an X.509 certificate. The Group **MUST** define which element of the subject field is used.
 
 ### Trust Anchor {#trust_anchor}
 
@@ -334,20 +47,20 @@ The TA **SHOULD** validate a Peers identity, i.e. the TA **MUST** preform Organi
 
 ### TLS configuration {#tls_configuration}
 
-Connections between Inways, Outways, Managers of a Group are mTLS connections based on X.509 certificates as defined in [@!RFC5280].
+Connections between Inways, Outways, Managers of a Group are mTLS connections based on X.509 certificates as defined in [[RFC5280]].
 
 The certificate guarantees the identity of a Peer.
 
-FSC places specific requirements on the subject fields of a certificate. [@!RFC5280, section 4.1.2.6] which are listed below
+FSC places specific requirements on the subject fields of a certificate. [section 4.1.2.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.6) of[[RFC5280]] which are listed below
 
-- Subject Alternative Name[@!RFC5280, section 4.2.1.6]: This should contain the Fully Qualified Domain Names (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve externally.
+- Subject Alternative Name [section 4.1.2.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.6) of[[RFC5280]]: This should contain the Fully Qualified Domain Names (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve externally.
 - Subject Organization: This should contain to the name of the Organization.
 
-The representation and verification of domains specified in the X.509 certificate **MUST** adhere to [@!RFC6125]
+The representation and verification of domains specified in the X.509 certificate **MUST** adhere to [[RFC6125]]
 
 #### TLS Version
 
-The TLS version **MUST** be v1.2 as specified in [RFC5246] or v1.3 as specified in [RFC8446].  
+The TLS version **MUST** be v1.2 as specified in [[RFC5246]] or v1.3 as specified in [[RFC8446]].  
 
 When using TLS v1.2 one of the following cipher suites **MUST** be used:  
 
@@ -357,11 +70,11 @@ When using TLS v1.2 one of the following cipher suites **MUST** be used:
 
 These cipher suites support perfect forward secrecy which makes them significantly more secure.  
 
-When using TLS v1.3 any cipher suites specified in [RFC8446] can be used.
+When using TLS v1.3 any cipher suites specified in [[RFC8446]] can be used.
 
 #### Certificate thumbprints {#certificate_thumbprints}
 
-Certificate thumbprints used within the scope of FSC are always part of a X.509 certificate. Certificate thumbprints **MUST** be created as described in [@!RFC7515, section 4.1.8].
+Certificate thumbprints used within the scope of FSC are always part of a X.509 certificate. Certificate thumbprints **MUST** be created as described in [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]].
 
 ###  Error Handling {#error_handling}
 
@@ -472,7 +185,7 @@ Signature requirements:
 
 ### Signatures {#signatures}
 
-A signature **MUST** follow the JSON Web Signature (JWS) format specified in [@!RFC7515]
+A signature **MUST** follow the JSON Web Signature (JWS) format specified in [[RFC7515]]
 
 A signature on a Contract **SHOULD** only be accepted if the Peer is present in one of the Grants as:
 
@@ -491,9 +204,9 @@ A signature on a Contract **SHOULD** only be accepted if the Peer is present in 
 - `grant.data.directory.peer_id`
 - `grant.data.service.peer_id`
 
-The JWS **MUST** specify the certificate thumbprint of the keypair used to create the digital signature using the `x5t#S256`[@!RFC7515, section 4.1.8] field of the `JOSE Header` [@!RFC7515, section 4].
+The JWS **MUST** specify the certificate thumbprint of the keypair used to create the digital signature using the `x5t#S256`[section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]] field of the `JOSE Header` [section 4](https://www.rfc-editor.org/rfc/rfc7515#section-4) of [[RFC7515]].
 
-The JWS **MUST** use the JWS Compact Serialization described in [@!RFC7515, section 7.1]
+The JWS **MUST** use the JWS Compact Serialization described in [section 7.1](https://www.rfc-editor.org/rfc/rfc7515#section-7.1) of [[RFC7515]]
 
 The JWS **MUST** be created using one of the following digital signature algorithms:
 
@@ -504,7 +217,7 @@ The JWS **MUST** be created using one of the following digital signature algorit
 * ES384
 * ES512
 
-The JWS Payload as defined in [@!RFC7515, section 2], **MUST** contain a hash of the `contract.content` as described in the section [Content Hash](#content_hash), one of the signature types described in the [signature type section](#signature_types) and a Unix timestamp of the sign date.
+The JWS Payload as defined in [section 2](https://www.rfc-editor.org/rfc/rfc7515#section-2) of [[RFC7515]], **MUST** contain a hash of the `contract.content` as described in the section [Content Hash](#content_hash), one of the signature types described in the [signature type section](#signature_types) and a Unix timestamp of the sign date.
 
 JWS Payload example:
 ```JSON
@@ -579,9 +292,9 @@ The Grant hash can be created by executing the following steps:
 
 ## Access token {#access_token}
 
-The access token is a JSON Web Token (JWT) as specified in [@!RFC7519]
+The access token is a JSON Web Token (JWT) as specified in [[RFC7519]]
 
-The JWT **MUST** specify the thumbprint of the X.509 certificate used to sign the JWT using the `x5t#S256`[@!RFC7515, section 4.1.8] field of the `JOSE Header` [@!RFC7515, section 4].
+The JWT **MUST** specify the thumbprint of the X.509 certificate used to sign the JWT using the `x5t#S256` [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]] field of the `JOSE Header`  [section 4](https://www.rfc-editor.org/rfc/rfc7515#section-4) of [[RFC7515]].
 
 The JWT **MUST** be created using one of the following digital signature algorithms:
 
@@ -592,7 +305,7 @@ The JWT **MUST** be created using one of the following digital signature algorit
 * ES384
 * ES512
 
-The access token is a certificate-bound access token as specified in [@!RFC8705, section 3]
+The access token is a certificate-bound access token as specified in [section 3](https://www.rfc-editor.org/rfc/rfc8705#section-3) of [[RFC8705]]
 
 ### JWT Payload
 
@@ -603,17 +316,17 @@ The payload of the JWT **MUST** contain the field specified below:
 * *gid(string):*
   The ID of the Group
 * *sub(string):*
-  The subject [@!RFC7519, section 4.1.2]. This should be the ID of the Peer for whom the token is intended 
+  The subject [section 4.1.2](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.2) of [[RFC7519]]. This should be the ID of the Peer for whom the token is intended 
 * *iss(string):*
-  The issuer [@!RFC7519, section 4.1.1]. The ID of the Peer who issued the token. I.e. the Peer who is offering the Service
+  The issuer [section 4.1.1](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.1) of [[RFC7519]]. The ID of the Peer who issued the token. I.e. the Peer who is offering the Service
 * *svc(string):*
   Name of the Service
 * *aud(string):*
-  The audience [@!RFC7519, section 4.1.3]. This should be URI[@!RFC3986] of the Inway providing the Service. The URI is a URL that **MUST** contain the scheme and port number used by the Inway
+  The audience [section 4.1.3](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.3) of [[RFC7519]]. This should be URI[[RFC3986]] of the Inway providing the Service. The URI is a URL that **MUST** contain the scheme and port number used by the Inway
 * *exp(int):*
-  Expiration time [@!RFC7519, section 4.1.4]
+  Expiration time [section 4.1.4](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.4) of [[RFC7519]]
 * *nbf(int):*
-  Not before [@!RFC7519, section 4.1.5]
+  Not before  [section 4.1.5](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.5) of [[RFC7519]]
 * *cnf(object):*
     * *x5t#S256(string):*
     The thumbprint of the certificate that is allowed ot use the access token
@@ -871,7 +584,7 @@ The Inway **MUST** validate the access token provided in the HTTP `Fsc-Authoriza
 The request **MUST** be authorized if the access token meets the following conditions:  
 
 - The access token is signed by the same Peer that owns Inway.
-- The access token is used by an Outway that uses the X.509 certificate to which the access token is bound. This is verified by applying the JWT Certificate Thumbprint Confirmation Method specified in [@!RFC8705,section 3.1].
+- The access token is used by an Outway that uses the X.509 certificate to which the access token is bound. This is verified by applying the JWT Certificate Thumbprint Confirmation Method specified in [section 3.1](https://datatracker.ietf.org/doc/html/rfc8705#section-3.1) of [[RFC8705]].
 - The Service specified in the access token is known to the Inway.
 - The Group ID specified in the claim `gid` of the access token matches the Group ID of the Inway.
 
@@ -915,5 +628,3 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_INWAY`
 # References
 
 [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
-
-{backmatter}
