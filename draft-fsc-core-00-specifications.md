@@ -1,7 +1,5 @@
 # Specifications
 
-## General
-
 ## Protocols
 
 The Manager **MUST** support HTTP/1.1[[RFC9112]].
@@ -234,7 +232,7 @@ JWS Payload example:
 - `type`, type of signature.
 - `signed_at` Unix timestamp of the sign date.
 
-##### Signature types {#signature_types}
+#### Signature types {#signature_types}
 
 - `accept`, Peer has accepted the contract
 - `reject`, Peer has rejected the contract
@@ -448,7 +446,7 @@ The Manager implements two error formats
 
 #### OAuth 2.0 error response
 
-The `/token` endpoint **MUST** return an error response as described in [@!RFC6749, section 5.2].
+The `/token` endpoint **MUST** return an error response as described in [section 5,2](https://www.rfc-editor.org/rfc/rfc6749#section-5.2) of [[RFC6749]].
 
 #### Other endpoints
 
@@ -537,9 +535,9 @@ Clients **MAY** use TLS when communicating with the Outway.
 
 #### Obtaining access tokens
 
-Access tokens are obtained using the Client Credentials flow[@!RFC6749, section 4.4].
+Access tokens are obtained using the Client Credentials flow [section 4,4](https://www.rfc-editor.org/rfc/rfc6749#section-4.4) of [[RFC6749]].
 
-Access tokens **MUST** be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml
+Access tokens **MUST** be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
 
 Which component obtains an access token for a Service is an implementation detail and out of scope for this document.
 
