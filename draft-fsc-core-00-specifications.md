@@ -202,7 +202,7 @@ A signature on a Contract **SHOULD** only be accepted if the Peer is present in 
 - `grant.data.directory.peer_id`
 - `grant.data.service.peer_id`
 
-The JWS **MUST** specify the certificate thumbprint of the keypair used to create the digital signature using the `x5t#S256`[section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]] field of the `JOSE Header` [section 4](https://www.rfc-editor.org/rfc/rfc7515#section-4) of [[RFC7515]].
+The JWS **MUST** specify the certificate thumbprint of the keypair used to create the digital signature using the `x5t#S256` [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]] field of the `JOSE Header` [section 4](https://www.rfc-editor.org/rfc/rfc7515#section-4) of [[RFC7515]].
 
 The JWS **MUST** use the JWS Compact Serialization described in [section 7.1](https://www.rfc-editor.org/rfc/rfc7515#section-7.1) of [[RFC7515]]
 
@@ -320,7 +320,7 @@ The payload of the JWT **MUST** contain the field specified below:
 * *svc(string):*
   Name of the Service
 * *aud(string):*
-  The audience [section 4.1.3](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.3) of [[RFC7519]]. This should be URI[[RFC3986]] of the Inway providing the Service. The URI is a URL that **MUST** contain the scheme and port number used by the Inway
+  The audience [section 4.1.3](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.3) of [[RFC7519]]. This should be URI [[RFC3986]] of the Inway providing the Service. The URI is a URL that **MUST** contain the scheme and port number used by the Inway
 * *exp(int):*
   Expiration time [section 4.1.4](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.4) of [[RFC7519]]
 * *nbf(int):*
@@ -385,7 +385,7 @@ It is **RECOMMENDED** to implement a retry and backoff mechanism in case the con
 
 #### Signatures
 
-The Manager **MUST** validate the signature according to the rules described in the [signature section](#signature).
+The Manager **MUST** validate the signature according to the rules described in the [signature section](#signatures).
 
 The Manager **MUST** generate an error response if a signature is invalid.
 
@@ -498,7 +498,7 @@ Service publication is accomplished by offering a Contract to the Directory whic
 
 The Directory **MUST** be able to sign Contracts with Grants of the type ServicePublicationGrant.
 
-The Directory **MUST** validate the ServicePublicationGrant in the Contract using the rules described in [ServicePublicationGrant section](#peer_service_publication)
+The Directory **MUST** validate the ServicePublicationGrant in the Contract using the rules described in [ServicePublicationGrant section](#service_publication_grant)
 
 Although multiple ServicePublicationGrants are allowed in a single Contract it is **RECOMMENDED** to limit this to one per Contract. Adding multiple ServicePublicationGrants on a single Contract makes the Contract fragile. If the publication of one Service changes the whole Contract will be invalidated. 
 
