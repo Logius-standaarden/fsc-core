@@ -13,7 +13,7 @@ When multiple TAs are used the TAs must ensure that the elements of the subject 
 ## Contract Management
 
 Contracts are negotiated between the Managers of Peers. The Directory provides the address of each Manager.
-Connections to Services are authorized by Contracts with ServiceConnectionGrants. To create a new contract, the Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Management functionality, see [Registering a Peer](#registering_a_peer)). For each desired connection, a ServiceConnectionGrant is formulated that contains identifying information about both the Outway from the requesting Peer and the Service of the Providing Peer. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
+Connections to Services are authorized by Contracts with ServiceConnectionGrants. To create a new contract, the Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Management functionality). For each desired connection, a ServiceConnectionGrant is formulated that contains identifying information about both the Outway from the requesting Peer and the Service of the Providing Peer. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
 
 ![Contract Management](diagrams/seq-contract-management.svg "Contract Management")
 
@@ -42,16 +42,6 @@ In order to create a Group the following steps **MUST** be taken:
 3. Select what determines the [Peer ID](#peer_id)
 4. Select what determines the [Peer name](#peer_name)
 5. Select a Peer who acts as the [Directory](#directory) of the Group
-
-## Registering a Peer {#registering_a_peer}
-
-The Peer registration is required to validate that the Peer meets the requirements set by the Group. In case of FSC Core only an X.509 Certificate signed by the TA is required but extensions on Core might, for example, require the Peer to sign a "Terms of Service" document before allowing a Peer to participate in a Group.
-
-To register, the Peer needs to create a Contract with a [PeerRegistrationGrant](#peer_registration_grant). The PeerRegistrationGrant contains information about the Peer, the address of the Manager of the Peer and the Directory that should accept the registration.
-
-Once the Contract between Peer and Directory is signed by both parties, the Peer is considered a Peer of the Group.
-
-![Registering a Peer](diagrams/seq-registering-a-peer.svg "Registering a Peer")
 
 ## Service discovery
 

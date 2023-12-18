@@ -129,26 +129,9 @@ example Contract with a ServiceConnectionGrant
 - The date provided in `contract.content.validity.not_after` must be greater than the date provided in the field `contract.validity.not_before`.
 - The date provided in `contract.content.validity.not_after` must be in the future.
 - At least one Grant is set in the field `contract.content.grants`.
-- A `PeerRegistrationGrant` cannot be mixed with other Grants. Mixing Grant types with different use-cases is prohibited to prevent the creation of Contracts that are hard to maintain and validate.  
-- Only one `PeerRegistrationGrant` is allowed per Contract. A Peer can only register himself to the Directory so only one `PeerRegistrationGrant` is allowed. 
 - A `ServicePublicationGrant` cannot be mixed with other Grants. Mixing Grant types with different use-cases is prohibited to prevent the creation of Contracts that are hard to maintain and validate.
 
 Per Grant type different validation rules apply.
-
-#### PeerRegistrationGrant {#peer_registration_grant}
-
-The content of a PeerRegistrationGrant is defined in the object `.components/schemas/grantPeerRegistration` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
-
-Validation rules:  
-
-- The Peer ID provided by the X.509 certificate used by the Manager of the Directory matches the value of the field `grant.data.directory.peer_id`
-- The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `grant.data.peer.id`
-- The subject organization of the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `grant.data.peer.name`
-
-Signature requirements:  
-
-- A signature is present with the Peer ID of the Peer defined in the field `grant.data.directory.peer_id`
-- A signature is present with the Peer ID of the Peer defined in the field `grant.data.peer.id`
 
 #### ServicePublicationGrant {#service_publication_grant}
 
@@ -186,11 +169,6 @@ Signature requirements:
 A signature **MUST** follow the JSON Web Signature (JWS) format specified in [[RFC7515]]
 
 A signature on a Contract **SHOULD** only be accepted if the Peer is present in one of the Grants as:
-
-*PeerRegistrationGrant*
-
-- `grant.data.directory.peer_id`
-- `grant.data.peer.id`
 
 *ServiceConnectionGrant*
 
@@ -284,8 +262,8 @@ The Grant hash can be created by executing the following steps:
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
-1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. To convert the `HashType` to an integer take the position of the `HashType` in the field `.components.schemas.HashType` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)). E.g. The enum `HASH_TYPE_GRANT_PEER_REGISTRATION` becomes `2$`.
-1. Combine the strings containing the hash algorithm (step 6) and Hash type (step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_PEER_REGISTRATION` should result in the string `$1$2$`
+1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. To convert the `HashType` to an integer take the position of the `HashType` in the field `.components.schemas.HashType` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)). E.g. The enum `HASH_TYPE_SERVICE_PUBLICATION_GRANT` becomes `2$`.
+1. Combine the strings containing the hash algorithm (step 6) and Hash type (step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_SERVICE_CONNECTION` should result in the string `$1$2$`
 1. Prefix the Bas64 string generated in step 5 with the string generated in step 8.
 
 ## Access token {#access_token}
@@ -375,7 +353,7 @@ The Manager **MUST** only accept mTLS connections from other external Managers w
 
 #### Contracts
 
-The Manager **MUST** support Contracts containing Grants of the type PeerRegistrationGrant, ServicePublicationGrant and ServiceConnectionGrant.
+The Manager **MUST** support Contracts containing Grants of the type ServicePublicationGrant and ServiceConnectionGrant.
 
 The Manager **MUST** validate Contracts using the rules described in [Contract validation section](#contract_validation)
 
@@ -483,14 +461,6 @@ The Directory is used by Peers to:
 - Register themselves
 
 ### Behavior
-
-#### Peer registration
-
-Peer registration is accomplished by offering a Contract to the Directory which contains a PeerRegistrationGrant.
-
-The Directory **MUST** be able to sign Contracts with Grants of the type PeerRegistrationGrant.
-
-The Directory **MUST** validate the PeerRegistrationGrants in the Contract using the rules described in [PeerRegistrationGrant section](#peer_registration_grant)
 
 #### Service publication
 

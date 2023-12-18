@@ -42,9 +42,8 @@ Agreement between Peers defining what interactions between Peers are possible.
 
 *Grant:*
 
-Defines an interaction between Peers. Grants are part of a Contract. In FSC Core three Grants are described.
+Defines an interaction between Peers. Grants are part of a Contract. In FSC Core two Grants are described.
 
-1. The PeerRegistrationGrant which specifies the authorization of a Peer to participate as a Peer in the Group.
 2. The ServicePublicationGrant which specifies the authorization of a Peer to publish a Service in the Group.
 3. The ServiceConnectionGrant which specifies the authorization of a Peer to connect to a Service provided by a Peer.
 
@@ -69,7 +68,7 @@ The Trust Anchor (TA) is an authoritative entity for which trust is assumed and 
 Peers in a Group announce their HTTP APIs to the Group by publishing them as a Service to the Directory. A Group uses a single Directory that defines the scope of the Group. Peers use the Directory to discover what Services and Peers are available in the Group.
 Inways of a Peer expose Services to the Group. 
 Outways of a Peer connect to the Inway of a Peer providing a Service.
-Contracts define the registration of a Peer to the Group, Service publication to the Group and connections between Peers.
+Contracts define the Service publication to the Group and connections between Peers.
 
 Outways are forward proxies that route outgoing connections to Inways.  
 Inways are reverse proxies that route incoming connections from Outways to Services.  
