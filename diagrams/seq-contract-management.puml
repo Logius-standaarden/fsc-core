@@ -4,22 +4,27 @@ autonumber
 header: Core
 title: Contract Management
 
-box "Peer A"
+box "Initiating Peer"
   participant "Manager" as m1
 end box
 box "Directory"
   participant "Directory" as directory
 end box
-box "Peer B"
+box "Receiving Peer"
   participant "Manager" as m2
 end box
 
-m1 -> directory ++ : Get Manager address of Peer B
-return Manager address of Peer B
+loop For each Peer on the Contract
+m1 -> directory ++ : Get Manager address of Peer
+return Manager address of Peer
 m1 -> m2 ++ : Contract proposal
-note over directory: Signed by Peer A
+note over directory: Signed by initiating Peer
 
-return Valid Contract
+loop For each Peer on the Contract
+return Accept signature
+note over directory: Signed by receiving Peer
+end loop
+end loop
 note over directory: Signed by all Peers
 
 skinparam sequenceBoxBorderColor #transparent
