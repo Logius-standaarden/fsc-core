@@ -13,9 +13,15 @@ When multiple TAs are used the TAs must ensure that the elements of the subject 
 ## Contract Management
 
 Contracts are negotiated between the Managers of Peers. The Directory provides the address of each Manager.
-Connections to Services are authorized by Contracts with ServiceConnectionGrants. To create a new contract, the Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Management functionality). For each desired connection, a ServiceConnectionGrant is formulated that contains identifying information about both the Outway from the requesting Peer and the Service of the Providing Peer. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
+Connections to Services are authorized by Contracts with ServiceConnectionGrants. To create a new contract, the Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Management functionality). For each desired connection, a ServiceConnectionGrant is formulated that contains identifying information about both the Outway from the Service consumer and the Service of the Service provider. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
+Contracts can contain multiple Peers. E.g. if a Peer wants a single Contract for an application, this Contract can contain all the connections required for that application.
 
 ![Contract Management](diagrams/seq-contract-management.svg "Contract Management")
+
+1. The initiating Peer gets the address of the Manager from the Directory.
+2. The Directory return the Manager address to the Peer.
+3. The initiating Peer sends the Contract proposal with its accept signature to the receiving Peer.
+4. The receiving Peer sends back its own accept signature to the initiating Peer.
 
 ### Contract states
 
@@ -24,6 +30,8 @@ Any Peer can submit a Contract to other Peers. This Contract becomes valid when 
 A Contract becomes invalid when at least one Peer mentioned in the Contract revokes the Contract.
 
 A Contract becomes invalid when at least one Peer mentioned in the Contract rejects the Contract.
+
+A Contract becomes invalid when the validity period of the Contract expires.
 
 Accepting, rejecting and revoking is done by adding a digital signature.
 
@@ -51,6 +59,12 @@ Peers query the Directory to discover the Services available in the Group
 
 ![Providing a Service](diagrams/seq-providing-a-service.svg "Providing a Service")
 
+1. The Peer creates a Contract with a Service Publication Grant which contains the details of the Service.
+2. The Peer adds its own accept signature to the Contract. 
+3. The Peer sends the Contract and accept signature to the Directory.
+4. The Directory adds its own accept signature.
+5. The Directory sends the accept signature to the Peer. 
+
 ## Create an authorization to connect to a Service
 
 A connection can only be established if the Peer connecting to the Service has a valid Contract containing a [ServiceConnectionGrant](#service_connection_grant) with the Peer providing the Service.
@@ -60,6 +74,12 @@ Once the Contract between providing Peer and consuming Peer is signed by both pa
 
 ![Create an authorization to connect](diagrams/seq-create-an-authorization-to-connect.svg "Connecting to a Service")
 
+1. The Service consumer creates a Contract with a Service Connection Grant which contains the details of the Service.
+2. The Service consumer adds an accept signature to the Contract.
+3. The Service consumer sends the Contract and the accept signature to the Service Provider.
+4. The Service provider adds its own accept signature.
+5. The Service provider sends the accept signature to the Service consumer.
+
 ## Consuming a Service
 
 A Peer can consume a Service by sending request for said Service to an Outway. 
@@ -68,6 +88,14 @@ The Outway proxies the request including the access token to the Inway.
 The Inway will validate the access token and proxy the request to the Service.
 
 ![Consuming a Service](diagrams/seq-consuming-a-service.svg "Consuming a Service")
+
+1. The client application sends a request to the Outway.
+2. The Outway creates an connection with the Inway and proxies the request. In this diagram it is assumed that the Outway already has an access token. 
+3. The Inway validates the provided access token before proxying the request to the Service.
+4. The Inway proxies the request to the Service.
+5. The Service returns the response to the Inway.
+6. The Inway returns the response to the Outway.
+7. The Outway returns the response to the client.
 
 ## Use cases and required components
 
