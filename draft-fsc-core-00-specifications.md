@@ -218,11 +218,12 @@ JWS Payload example:
 
 ### The content hash {#content_hash}
 
-A Peer should ensure that a signature is intended for the Contract.
-This validation is done by comparing the hash of the received Contract with the hash in the signature. 
-The Validation **MUST** be done every time a Peer receives a signature.
+A Peer should ensure that a signature is intended for the Contract.  
+This validation is done by comparing the hash of the received Contract with the hash in the signature.  
+The Validation **MUST** be done every time a Peer receives a signature.  
 
-The `contract_content_hash` of the signature payload contains the signature hash. The algorithm to create a `contract_content_hash` is described below.
+The `contract_content_hash` of the signature payload contains the signature hash. The algorithm to create a `contract_content_hash` is described below. 
+The algorithm ensures that the content hash is unique for a specific Contract content. Because a signature contains the content hash it becomes possible to guarantee that a signature is intended for a specific Contract.
 
 1. Create a byte array called `contentBytes`.
 1. Convert `contract.content.group_id` to bytes and append the bytes to `contentBytes`.
