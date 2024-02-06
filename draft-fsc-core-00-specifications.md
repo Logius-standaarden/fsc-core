@@ -91,7 +91,7 @@ example Contract with a ServiceConnectionGrant
 ```json
 {
   "content": {
-    "id": "06338364-8305-7b74-8000-de4963503139",
+    "iv": "06338364-8305-7b74-8000-de4963503139",
     "group_id": "fsc-example-group",
       "validity": {
         "not_before": 1672527600,
@@ -120,7 +120,7 @@ example Contract with a ServiceConnectionGrant
 
 ### Contract Validation {#contract_validation}
 
-- A UUID V7 **MUST** be provided in the field `contract.id`. 
+- A UUID **MUST** be provided in the field `contract.iv`. The value must be unique. Each Peer is responsible for ensuring that only one Contract can exist with a given `iv`. 
 - A hash algorithm is provided in the field `contract.content.hash_algorithm`.
 - The date provided in `contract.content.created_at` can not be in the future.
 - The Group ID of the Manager matches the Group ID defined in the field `contract.group_id`.
@@ -253,11 +253,13 @@ The algorithm ensures that the content hash is unique for a specific Contract co
 
 ### Grant hash {#grant_hash}
 
+The Grant hash is used in the access token request to identify the Contract and Grant which contain the authorization for the connection to the Service. 
+The `iv` (Initialization vector) field is included in the Grant hash to create a Grant hash that references to a single Contract. 
 The Grant hash can be created by executing the following steps:
 
 1. Create a byte array named `grantBytes`
 1. Convert `contract.content.group_id` to bytes and append the bytes to `grantBytes`.
-1. Convert `contract.content.id` to bytes and append the bytes to `grantBytes`.
+1. Convert `contract.content.iv` to bytes and append the bytes to `grantBytes`.
 1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).  
    Except for the field `type`. This field must be omitted.
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
