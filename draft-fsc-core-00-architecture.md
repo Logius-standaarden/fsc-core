@@ -51,6 +51,8 @@ In order to create a Group the following steps **MUST** be taken:
 4. Select what determines the [Peer name](#peer_name)
 5. Select a Peer who acts as the [Directory](#directory) of the Group
 
+Additionally further steps **COULD** be taken whilst creating a Group. Particularly the creation of [profile(s)](#profiles) used within the Group mandating extensions and or providing additional restrictions within the group. 
+
 ## Service discovery
 
 Every Group is defined by one Directory that contains the Services and Peers in the Group.

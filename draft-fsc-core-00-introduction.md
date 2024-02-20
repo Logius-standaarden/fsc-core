@@ -82,10 +82,24 @@ The Manager's address of a Peer can be discovered through the Directory.
 
 To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once an authorization to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the Service is made.
 
-FSC Core specifies the basics for setting up and managing connections in a Group. It is **RECOMMENDED** to use FSC Core with the following extensions, each specified in a dedicated RFC:
+### Extensions
+FSC Core specifies the basics for setting up and managing connections in a Group.
+Auxiliary functionality for either an FSC Peer or an entire FSC Group can be realized with `extensions`. An Extension performs a well scoped feature enhancing the overall working of FSC. 
+
+It is **RECOMMENDED** to use FSC Core with the following extensions, each specified in a dedicated RFC:
 
 - [FSC Delegation](../delegation/draft-fsc-delegation-00.html), to delegate the right to connect to a service.
 - [FSC Logging](../logging/draft-fsc-logging-00.html), keep a log of requests to Services.
+
+### Profiles
+
+FSC Core provides as a foundation for cooperation between organizations (Peers). However, it may be needed for a FSC Group to have additional restrictions or agreements within the FSC Group. Examples of these additional restrictions are:
+- Limitations on the CA's used as Trust Anchor
+- Any extensions required by Peers within the FSC Group
+- Agreements on data retention
+- The specifics of the retry mechanism used for Contract synchronization
+
+Profiles can be either public or private within the FSC Group. One example of a public profile is the [NL-Profile](https://gitdocumentatie.logius.nl/publicatie/dk/restapi/) which is mandatory for usages of FSC within the Dutch government.
 
 ### Use cases
 
