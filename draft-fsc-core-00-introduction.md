@@ -63,6 +63,10 @@ An HTTP API offered to the Group.
 
 The Trust Anchor (TA) is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
+*Profile:* 
+
+A set of rules providing further restrictions and governance of the FSC Group. A Profile aligns on certain required parameters needed for the practical workings of an FSC Group. 
+
 ## Overall Operation of FSC Core
 
 Peers in a Group announce their HTTP APIs to the Group by publishing them as a Service to the Directory. A Group uses a single Directory that defines the scope of the Group. Peers use the Directory to discover what Services and Peers are available in the Group.
@@ -92,12 +96,25 @@ It is **RECOMMENDED** to use FSC Core with the following extensions, each specif
 - [FSC Logging](../logging/draft-fsc-logging-00.html), keep a log of requests to Services.
 
 ### Profiles
+FSC Core provides the foundation for cooperation between organizations (Peers). However, in practice additional decisions have to be made to guarantee a functioning Group within a broader context.
+For example, it may be needed for an Group to have additional restrictions or agreements within the Group. This set of agreements is called the `Profile`. Every Group **MUST** have at least one Profile in order te operate.
+An Group **MAY** use multiple Profiles to further enhance the rules and restrictions within the Group. It is the responsibility of the Group to prevent conflicts between the Profiles used by the Group.
 
-FSC Core provides as a foundation for cooperation between organizations (Peers). However, it may be needed for a FSC Group to have additional restrictions or agreements within the FSC Group. Examples of these additional restrictions are:
-- Limitations on the CA's used as Trust Anchor
-- Any extensions required by Peers within the FSC Group
-- Agreements on data retention
-- The specifics of the retry mechanism used for Contract synchronization
+The following decisions **MUST** be part of the Profile:
+1. Select a [Trust Anchor](#trust_anchor)
+2. Select a [Group ID](#group_id)
+3. Select what determines the [Peer ID](#peer_id)
+4. Select what determines the [Peer name](#peer_name)
+5. Select a Peer who acts as the [Directory](#directory) of the Group
+6. Decide what ports are used for management traffic
+7. Determine requirements for allowed TLS versions and Cipher Suites (note, remove from core)
+
+In addition to the mandatory decisions, a Profile **MAY** also contain additional agreements or restrictions. These are not technically required for the operation of FSC Core, but can become mandatory within a Group. An example would be a set of additional rules in order to comply with local legislation.
+Below are a few examples listed of these additional decisions for inspirational purposes:
+1. Any extensions required by Peers within the Group
+2. Agreements on data retention
+3. The specifics of the retry mechanism used for Contract synchronization
+4. Additional restrictions on Certificate revocation by mandating OCSP or CRL checks
 
 Profiles can be either public or private within the FSC Group. One example of a public profile is the [NL-Profile](https://gitdocumentatie.logius.nl/publicatie/dk/restapi/) which is mandatory for usages of FSC within the Dutch government.
 

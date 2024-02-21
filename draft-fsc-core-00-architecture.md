@@ -43,15 +43,9 @@ The content of a Contract is immutable. When the content of a Contract is subjec
 
 A Group is a system of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services. 
 
-In order to create a Group the following steps **MUST** be taken:
+In order to create a Group a [Profile](#profiles) containing at least the mandatory decisions **MUST** be created.
 
-1. Select a [Trust Anchor](#trust_anchor)
-2. Select a [Group ID](#group_id)
-3. Select what determines the [Peer ID](#peer_id)
-4. Select what determines the [Peer name](#peer_name)
-5. Select a Peer who acts as the [Directory](#directory) of the Group
-
-Additionally further steps **COULD** be taken whilst creating a Group. Particularly the creation of [profile(s)](#profiles) used within the Group mandating extensions and or providing additional restrictions within the group. 
+Additionally optional decisions **COULD** be added to the profile whilst creating an FSC Group providing additional restrictions placed on the FSC Group.
 
 ## Service discovery
 
