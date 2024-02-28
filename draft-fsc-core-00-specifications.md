@@ -58,17 +58,7 @@ The representation and verification of domains specified in the X.509 certificat
 
 #### TLS Version
 
-The TLS version **MUST** be v1.2 as specified in [[RFC5246]] or v1.3 as specified in [[RFC8446]].  
-
-When using TLS v1.2 one of the following cipher suites **MUST** be used:  
-
-- TLS_ECDHE_RSA_WITH_AES128_GCM_SHA256
-- TLS_ECDHE_RSA_WITH_AES256_GCM_SHA384
-- TLS_ECDHE_RSA_WITH_AES256_CBC_SHA384
-
-These cipher suites support perfect forward secrecy which makes them significantly more secure.  
-
-When using TLS v1.3 any cipher suites specified in [[RFC8446]] can be used.
+The TLS versions used between Peers in an Group **MUST** be defined in the [Profile](#profiles) of the Group.
 
 #### Certificate thumbprints {#certificate_thumbprints}
 
