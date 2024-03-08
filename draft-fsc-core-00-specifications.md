@@ -60,9 +60,14 @@ The representation and verification of domains specified in the X.509 certificat
 
 The TLS versions used between Peers in an Group **MUST** be defined in the [Profile](#profiles) of the Group.
 
-#### Certificate thumbprints {#certificate_thumbprints}
+#### Certificate & Public key thumbprints {#certificate_thumbprints}
 
-Certificate thumbprints used within the scope of FSC are always part of a X.509 certificate. Certificate thumbprints **MUST** be created as described in [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]].
+FSC differentiates between two different types of thumbprints, often also called fingerprints. *Certificate* thumbprints and *Public Key* thumbprints.
+
+Public Key thumbprints are used in FSC contracts, this enables the renewal of the certificate without invalidating the contract, since the Public Key thumbprint remains the same between Certificate renewals.
+Certificate thumbprints are used in the certificate-bound access tokens [section 3](https://www.rfc-editor.org/rfc/rfc8705#section-3) of [[RFC8705]]. FSC uses certificate-bound access tokens to authorize a connection to a Service. Certificate thumbprints are always part of a X.509 certificate and **MUST** be created as described in [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]].
+
+Within FSC both *Certificate thumbprints* and *Public Key* thumbprints uses the `sha256` thumbprint. 
 
 ###  Error Handling {#error_handling}
 
@@ -97,7 +102,7 @@ example Contract with a ServiceConnectionGrant
           },
           "outway": {
             "peer_id": "00000000000000000002",
-            "certificate_thumbprint": "h_CeVoeJ5vdaFGzNYPqiKWnGtDKB9UvIa_uk5Yvm7gs"
+            "public_key_thumbprint": "3a56f2e9269ac63f0d4394c46b96539da1625b6a985d38029ff89f34e490960c"
           }
         }
       }
@@ -147,7 +152,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager of the Peer providing the Service matches the value of the field `grant.data.service.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Service providing Peer matches the value of the field `grant.data.outway.peer_id`
 - The Service provided in the field `grant.data.service.name` is offered by the Peer provided in the field `grant.data.service.peer_id`
-- A Certificate thumbprint is provided in the field `grant.data.outway.certificate_thumbprint`
+- A Public key fingerprint also called thumbprint is provided in the field `grant.data.outway.public_key_thumbprint`
 
 Signature requirements:
 
@@ -384,6 +389,7 @@ Before issuing an access token the Manager **MUST** validate that:
 1. The Manager is provided by a Peer with the same PeerID as specified in `grant.data.service.peer_id`.
 1. The Manager is provided by a Peer who has an Inway which is offering the Service specified in `grant.data.service.name`. 
 1. The Peer ID provided by the X.509 certificate used by the component requesting the access token matches the value of the field `grant.data.outway.peer_id`.
+1. The certificate provided as client_id contains the same public key as specified in `grant.data.outway.public_key_fingerprint`
 
 The Manager **MUST** include the address of the Inway in the field `aud` of the access token.
 
