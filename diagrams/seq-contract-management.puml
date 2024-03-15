@@ -19,12 +19,13 @@ m1 -> directory ++ : Get Manager address of Peer
 return Manager address of Peer
 m1 -> m2 ++ : Contract proposal
 note over directory: Signed by initiating Peer
+end loop
 
 loop For each Peer on the Contract
-return Accept signature
-note over directory: Signed by receiving Peer
+m2 -> m1: Accept signature
+note over directory: Signed by receiving Peer(s)
 end loop
-end loop
+
 note over directory: Signed by all Peers
 
 skinparam sequenceBoxBorderColor #transparent
