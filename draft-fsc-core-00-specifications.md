@@ -217,7 +217,7 @@ The algorithm ensures that the content hash is unique for a specific Contract co
 
 1. Create a byte array called `contentBytes`.
 1. Convert `contract.content.group_id` to bytes and append the bytes to `contentBytes`.
-1. Append `contract.content.id` to `contentBytes`.
+1. Append `contract.content.iv` to `contentBytes`.
 1. Convert `contract.content.validity.not_before` to bytes and append the bytes to `contentBytes`.
 1. Convert `contract.content.validity.not_after` to bytes and append the bytes to `contentBytes`.
 1. Convert `contract.content.created_at` to bytes and append the bytes to `contentBytes`.
