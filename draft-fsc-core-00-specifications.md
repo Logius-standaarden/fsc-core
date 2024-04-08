@@ -124,7 +124,7 @@ example Contract with a ServiceConnectionGrant
 - The date provided in `contract.content.validity.not_after` must be greater than the date provided in the field `contract.validity.not_before`.
 - The date provided in `contract.content.validity.not_after` must be in the future.
 - At least one Grant is set in the field `contract.content.grants`.
-- A `ServicePublicationGrant` cannot be mixed with other Grants. Mixing Grant types with different use-cases is prohibited to prevent the creation of Contracts that are hard to maintain and validate.
+- A `ServicePublicationGrant` or `DelegatedServicePublicationGrant` cannot be mixed with other Grants. Mixing Grant types with different use-cases is prohibited to prevent the creation of Contracts that are hard to maintain and validate.
 
 Per Grant type different validation rules apply.
 
@@ -143,6 +143,24 @@ Signature requirements:
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.directory.peer_id`
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.service.peer_id`
 
+### DelegatedServicePublicationGrant  {#grant_delegated_service_publication}
+
+*The Delegatee is the Peer specified in `grant.data.service.peer_id`*
+*The Delegator is the Peer specified in `grant.data.delegator.peer_id`*
+
+Validation rules:
+
+- The Peer ID provided by the X.509 certificate used by the Manager creating the delegation matches the value of the field `grant.data.delegator.peer_id`
+- The Peer ID provided by the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `grant.data.directory.peer_id`
+- The Peer ID provided by the X.509 certificate used by the Manager providing the Service matches the value of the field `grant.data.service.peer_id`
+- The validation rules of the field `Service` of the ServicePublicationGrant described in Core must be applied to the field `grant.data.service` of the DelegatedServicePublicationGrant
+
+Signature requirements:
+
+- A signature is present with the subject serial number of the Peer defined the field `grant.data.service.peer_id`
+- A signature is present with the subject serial number of the Peer defined the field `grant.data.directory.peer_id`
+- A signature is present with the subject serial number of the Peer defined the field `grant.data.delegator.peer_id`
+
 #### ServiceConnectionGrant {#service_connection_grant}
 
 The content of a ServiceConnectionGrant is defined in the object `.components/schemas/grantServiceConnection` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
@@ -159,21 +177,55 @@ Signature requirements:
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.outway.peer_id`
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.service.peer_id`
 
+### DelegatedServiceConnectionGrant {#grant_delegated_service_connection}
+
+*The Delegatee is the Peer specified in `grant.data.outway.peer_id`*
+*The Delegator is the Peer specified in `grant.data.delegator.peer_id`*
+
+Validation rules:
+
+- The Peer ID provided by the X.509 certificate used by the Manager of the Peer creating the delegation matches the value of the field `grant.delegator.peer_id`
+- The Peer ID provided by the X.509 certificate used by the Manager consuming the DelegatedServiceConnectionGrant matches with the value of the field `grant.outway.peer_id`
+- The Peer ID provided by the X.509 certificate used by the Manager of the Peer providing the Service matches with the value of the field `grant.data.service.peer_id`
+- The validation rules of the fields `Outway` and `Service` of the ServiceConnectionGrant described in Core must be applied to corresponding fields `grant.data.outway` and `grant.data.service` of the DelegatedServiceConnectionGrant
+- In case of a Service that is published on behalf of another Peer, The Peer ID provided by the X.509 certificate used by the Manager of the Peer delegating the publication of Service matches with the value of the field `grant.data.service.delegator.peer_id`
+
+Signature requirements:
+
+- A signature is present with the subject serial number of the Peer defined the field `grant.data.outway.peer_id`
+- A signature is present with the subject serial number of the Peer defined the field `grant.data.delegator.peer_id`
+- A signature is present with the subject serial number of the Peer defined the field `grant.data.service.peer_id`
+- In case of a Service that is published on behalf of another Peer, a signature is present with the subject serial number of the Peer defined the field `grant.data.service.delegator.peer_id`
+
 ### Signatures {#signatures}
 
 A signature **MUST** follow the JSON Web Signature (JWS) format specified in [[RFC7515]]
 
 A signature on a Contract **SHOULD** only be accepted if the Peer is present in one of the Grants as:
 
-*ServiceConnectionGrant*
-
-- `grant.data.outway.peer_id`
-- `grant.data.service.peer_id`
-
 *ServicePublicationGrant*
 
 - `grant.data.directory.peer_id`
 - `grant.data.service.peer_id`
+
+*DelegatedServicePublicationGrant*
+
+- `grant.data.directory.peer_id`
+- `grant.data.service.peer_id`
+- `grant.data.delegator.peer_id`
+
+*ServiceConnectionGrant*
+
+- `grant.data.outway.peer_id`
+- `grant.data.service.peer_id`
+- `grant.data.service.delegator.peer_id`
+
+*DelegatedServiceConnectionGrant*
+
+- `grant.data.outway.peer_id`
+- `grant.data.service.peer_id`
+- `grant.data.delegator.peer_id`
+- `grant.data.service.delegator.peer_id`
 
 The JWS **MUST** specify the certificate thumbprint of the keypair used to create the digital signature using the `x5t#S256` [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]] field of the `JOSE Header` [section 4](https://www.rfc-editor.org/rfc/rfc7515#section-4) of [[RFC7515]].
 
@@ -283,7 +335,7 @@ The access token is a certificate-bound access token as specified in [section 3]
 
 ### JWT Payload
 
-The payload of the JWT **MUST** contain the field specified below:
+The payload of the JWT:
 
 * *gth(string):*  
   The hash of the Grant that serves as basis for the authorization
@@ -304,10 +356,15 @@ The payload of the JWT **MUST** contain the field specified below:
 * *cnf(object):*
     * *x5t#S256(string):*
     The thumbprint of the certificate that is allowed ot use the access token
+* *act(object):*
+    * *sub(string):*
+      The ID of the Peer connecting to the Service on behalf of another Peer. The field `grant.data.delegator.peer_ID` of the DelegatedServiceConnectionGrant. 
+* *pdi(string):*
+  The ID of the Peer delegating the publication of the Service to another Peer. The field `grant.data.service.delegator.peer_ID` of the ServiceConnectionGrant or DelegatedServiceConnectionGrant.
 * *add(object):*
   An object which can be used to provide additional data 
 
-Example payload:
+Example payload of a JWT for a Peer (`sub: 1234567890`) connecting to a Service (`svc: serviceName`) offered by a Peer(`iss: 1234567891`):
 
 ```json
 {
@@ -319,6 +376,48 @@ Example payload:
     "aud": "https://inway.com",
     "exp": 1493726400,
     "nbf": 1493722800,
+    "cnf": {
+      "x5t#S256": "DpAyDYakmVAQ4oOJC3UYLRk/ONRCqMj00TeGJemMiLA"
+    },
+    "add": {}
+}
+```
+
+Example payload of a connection of a Peer (`sub: 1234567890`) to a Service (`svc: serviceName`) offered by a Peer (`iss: 1234567891`) on behalf of another Peer(`pdi: 1234567892`):
+
+```json
+{
+    "gth": "$1$4$+PQI7we01qIfEwq4O5UioLKzjGBgRva6F5+bUfDlKxUjcY5yX1MRsn6NKquDbL8VcklhYO9sk18rHD6La3w/mg",
+    "gid": "fsc.group.example.id",
+    "sub": "1234567890",
+    "iss": "1234567891",
+    "pdi": "1234567892",
+    "svc": "serviceName", 
+    "aud": "https://inway.com",
+    "exp": 1493726400,
+    "nbf": 1493722800,
+    "cnf": {
+      "x5t#S256": "DpAyDYakmVAQ4oOJC3UYLRk/ONRCqMj00TeGJemMiLA"
+    },
+    "add": {}
+}
+```
+
+Example payload for a JWT of a Peer (`act.sub: 1234567892`) who is connecting on behalf of Peer (`sub: 1234567890`) to a Service (`svc: serviceName`) offered by a Peer (`iss: 1234567891`):
+
+```json
+{
+    "gth": "$1$4$+PQI7we01qIfEwq4O5UioLKzjGBgRva6F5+bUfDlKxUjcY5yX1MRsn6NKquDbL8VcklhYO9sk18rHD6La3w/mg",
+    "gid": "fsc.group.example.id",
+    "sub": "1234567890",
+    "iss": "1234567891",
+    "svc": "serviceName", 
+    "aud": "https://inway.com",
+    "exp": 1493726400,
+    "nbf": 1493722800,
+    "act": {
+      "sub": "1234567892"
+    },
     "cnf": {
       "x5t#S256": "DpAyDYakmVAQ4oOJC3UYLRk/ONRCqMj00TeGJemMiLA"
     },
@@ -385,17 +484,20 @@ The Manager **MUST** be able to provide an [access token](#access_token) to Peer
 
 Before issuing an access token the Manager **MUST** validate that:
 
-1. A valid Contract exists with a ServiceConnectionGrant matching the Grant hash in the access token request.
+1. A valid Contract exists with a ServiceConnectionGrant or DelegatedServiceConnectionGrant matching the Grant hash in the access token request.
 1. The Manager is provided by a Peer with the same PeerID as specified in `grant.data.service.peer_id`.
 1. The Manager is provided by a Peer who has an Inway which is offering the Service specified in `grant.data.service.name`. 
 1. The Peer ID provided by the X.509 certificate used by the component requesting the access token matches the value of the field `grant.data.outway.peer_id`.
 1. The certificate provided as client_id contains the same public key as specified in `grant.data.outway.public_key_fingerprint`
 
+The `act` claim **MUST** be set when an access token is generated for a Peer who is connecting to the Service on behalf of another Peer. I.e. the authorization to connect has been granted using a DelegatedServiceConnectionGrant.
+The `pdi` claim **MUST** be set when an access token is generated for a Service which is being offered on behalf of another Peer. 
+
 The Manager **MUST** include the address of the Inway in the field `aud` of the access token.
 
 #### Service listing
 
-The Manager **MUST** list a Service when a valid Contract containing a ServicePublicationGrant for the Service exists.
+The Manager **MUST** list a Service when a valid Contract containing a ServicePublicationGrant or DelegatedServicePublicationGrant for the Service exists.
 
 #### Peer listing
 
@@ -535,7 +637,7 @@ The Inway is responsible for:
 
 - validating access tokens.
 - routing requests to the correct Service.
-- forwarding the access token to the Service which is being called
+- forwarding the access token to the Service which is being called.
 - returning the response from the Service to the Outway.
 
 ### Behavior

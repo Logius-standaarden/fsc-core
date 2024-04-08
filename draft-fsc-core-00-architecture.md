@@ -50,7 +50,8 @@ Additionally optional decisions **COULD** be added to the profile whilst creatin
 ## Service discovery
 
 Every Group is defined by one Directory that contains the Services and Peers in the Group.
-Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) to the Directory.
+Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) or [DelegatedServicePublicationGrant](#delegated_service_publication_grant) to the Directory.
+
 Peers query the Directory to discover the Services available in the Group 
 
 ![Providing a Service](diagrams/seq-providing-a-service.svg "Providing a Service")
@@ -63,10 +64,10 @@ Peers query the Directory to discover the Services available in the Group
 
 ## Create an authorization to connect to a Service
 
-A connection can only be established if the Peer connecting to the Service has a valid Contract containing a [ServiceConnectionGrant](#service_connection_grant) with the Peer providing the Service.
-The ServiceConnectionGrant contains information about the Service and the certificate of the Outway that is authorized to connect to the Service.
+A connection can be established if the Peer connecting to the Service has a valid Contract containing a [ServiceConnectionGrant](#service_connection_grant) with the Peer providing the Service.
+The connection Grants contains information about the Service and the public key of the Outway that is authorized to connect to the Service.
 
-Once the Contract between providing Peer and consuming Peer is signed by both parties, the connection between Inway and Outway can be established.
+The Contract is distributed among the two Peers. Once the Contract is signed by all Peers, the Outway can connect to the Inway offering the Service.
 
 ![Create an authorization to connect](diagrams/seq-create-an-authorization-to-connect.svg "Connecting to a Service")
 
@@ -75,6 +76,69 @@ Once the Contract between providing Peer and consuming Peer is signed by both pa
 3. The Service consumer sends the Contract and the accept signature to the Service Provider.
 4. The Service provider adds its own accept signature.
 5. The Service provider sends the accept signature to the Service consumer.
+
+When the Service is being offered on behalf of another Peer the Contract is distributed among three Peers. The Peer acting as Delegator in the Service publication will also receive the Contract.
+Once the Contract is signed by all the Peers, the Outway can connect to the Inway offering the Service on behalf the Delegator. 
+
+![Create an authorization to connect](diagrams/seq-create-an-authorization-to-connect-delegated-publication.svg "Connecting to a Service that is offered on behalf of another Peer")
+
+1. The Service consumer creates a Contract with a Service Connection Grant which contains the details of the Service.
+2. The Service consumer adds an accept signature to the Contract.
+3. The Service consumer sends the Contract and the accept signature to the Service provider.
+4. The Service consumer sends the Contract and the accept signature to the Delegator of Service Publication.
+5. The Service provider adds its own accept signature.
+6. The Service provider sends the accept signature to the Service consumer.
+7. The Service provider sends the accept signature to the Delegator.
+8. The Delegator adds its own accept signature.
+9. The Delegator sends the accept signature to the Service provider.
+10. The Delegator sends the accept signature to the Service consumer.
+
+## Delegate the authorization to connect to a Service
+
+### A delegated service connection
+
+A connection on behalf of another Peer (delegation) can only be established if the Peer connecting to the Service has a valid Contract containing a [DelegatedServiceConnectionGrant](#delegated_service_connection_grant) with the Peer providing the Service.
+The connection Grants contains information about the Service, the public key of the Outway that is authorized to connect to the Service and the Peer acting as Delegator.
+
+The Contract is distributed among the three Peers. Once the Contract is signed by all the Peers, the Outway of the Delegatee can connect to the Inway offering the Service on behalf the Delegator.
+
+![Delegate connection](diagrams/seq-delegate-connection.svg "Delegate a connection to a Service")
+
+1. The Delegator creates a Contract with a Delegated Service Connection Grant which contains the details of the Service and the Peer who will be acting as Delegatee (who will consume the Service).
+2. The Delegator adds its own accept signature to the Contract.
+3. The Delegator sends the Contract and accept signature to the Delegatee.
+4. The Delegatee adds its own accept signature.
+5. The Delegatee sends the accept signature to the Delegator.
+6. The Delegatee sends the accept signature to the Service Provider.
+7. The Delegator sends the Contract and accept signature to the Service Provider.
+8. The Service Provider adds its own accept signature.
+9. The Service Provider sends the accept signature to the Delegatee.
+10. The Service Provider sends the accept signature to the Delegator.
+
+### Combining a delegated service publication with a delegated service connection
+
+When the Service is being offered on behalf of another Peer the Contract is distributed among four Peers. The Peer acting as Delegator in the Service publication will also receive the Contract.
+Once the Contract is signed by all the Peers, the Outway of the Delegatee can connect to the Inway offering the Service on behalf the Delegator.
+
+![Delegate connection](diagrams/seq-delegate-connection-delegated-publication.svg "Delegate a connection to a Service that is offered on behalf of another Peer")
+
+1. The Delegator creates a Contract with a Delegated Service Connection Grant which contains the details of the Service and the Peer who will be acting as Delegatee (who will consume the Service).
+2. The Delegator adds its own accept signature to the Contract.
+3. The Delegator sends the Contract and accept signature to the Delegatee.
+4. The Delegator sends the Contract and accept signature to the Service provider.
+5. The Delegator sends the Contract and accept signature to the Delegator of the Service publication.
+6. The Delegatee adds its own accept signature.
+7. The Delegatee sends the accept signature to the Delegator.
+8. The Delegatee sends the accept signature to the Service provider.
+9. The Delegatee sends the accept signature to the Delegator of the Service publication.
+10. The Service provider adds its own accept signature.
+11. The Service provider sends the accept signature to the Delegatee.
+12. The Service provider sends the accept signature to the Delegator.
+13. The Service provider sends the accept signature to the Delegator of the Service publication.
+14. The Delegator of the Service publication adds its own accept signature.
+15. The Delegator of the Service publication sends the accept signature to the Delegatee.
+16. The Delegator of the Service publication sends the accept signature to the Delegator.
+17. The Delegator of the Service publication sends the accept signature to the Service provider.
 
 ## Consuming a Service
 
