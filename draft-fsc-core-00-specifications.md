@@ -263,6 +263,8 @@ JWS Payload example:
 - `reject`, Peer has rejected the contract
 - `revoke`, Peer has revoked the contract
 
+
+
 ### The content hash {#content_hash}
 
 A Peer should ensure that a signature is intended for the Contract.  
@@ -288,7 +290,7 @@ The algorithm ensures that the content hash is unique for a specific Contract co
 1. Hash the `contentBytes` using the hash algorithm described in `contract.content.algorithm`.
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and surround it with dollar signs (`$`). When using the `SHA3-512` algorithm this would result in `$1$`. 
-   To convert the hash algorithm to an integer look up the enum value in the field `.components.schemas.HashAlgorithm` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml) and interpret the position in the list. E.g. The enum `HASH_ALGORITHM_SHA3_512` is the first item in the list so its integer is 1.
+   To convert the hash algorithm to an integer see the [type mapping](#type_mapping_hash_algorithm)
 1. Add `1$` as suffix to the string created in step 13. This is the enum `HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml) as int32. If the string created in step 13 is `$1$`, the result should now be `$1$1$`
 1. Add the Base64 generated in step 12 as suffix to the string generated in step 14.
 
@@ -307,14 +309,49 @@ The Grant hash can be created by executing the following steps:
 1. Create a byte array named `grantBytes`
 1. Convert `contract.content.group_id` to bytes and append the bytes to `grantBytes`.
 1. Convert `contract.content.iv` to bytes and append the bytes to `grantBytes`.
-1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).  
-   Except for the field `type`. This field must be omitted.
+1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
+   To convert the Grant type to an integer see the [type mapping](#type_mapping_grant) 
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
-1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. To convert the hash algorithm to an integer take the enum value of `HashAlgorithm` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
-1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. To convert the `HashType` to an integer take the position of the `HashType` in the field `.components.schemas.HashType` defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)). E.g. The enum `HASH_TYPE_SERVICE_PUBLICATION_GRANT` becomes `2$`.
+1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. The int32 value per hash algorithm type is defined in the [type mapping](#type_mapping_hash_algorithm).. E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
+1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. The int32 value per hash type is defined in the [type mapping](#type_mapping_hash). E.g. The enum `HASH_TYPE_SERVICE_PUBLICATION_GRANT` becomes `2$`.
 1. Combine the strings containing the hash algorithm (step 6) and Hash type (step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_SERVICE_CONNECTION` should result in the string `$1$2$`
-1. Prefix the Bas64 string generated in step 5 with the string generated in step 8.
+1. Prefix the Base64 string generated in step 5 with the string generated in step 8.
+
+### Type mappings
+
+#### Hash types {#type_mapping_hash}
+
+| Hash type                                     | int32 value |
+|-----------------------------------------------|-------------|
+| HASH_TYPE_CONTRACT                            | 1           |
+| HASH_TYPE_SERVICE_PUBLICATION_GRANT           | 2           |
+| HASH_TYPE_SERVICE_CONNECTION_GRANT            | 3           |
+| HASH_TYPE_DELEGATED_SERVICE_CONNECTION_GRANT  | 4           |
+| HASH_TYPE_DELEGATED_SERVICE_PUBLICATION_GRANT | 5           |
+
+#### Grant types {#type_mapping_grant}
+
+| Hash type                                | int32 value |
+|------------------------------------------|-------------|
+| GRANT_TYPE_SERVICE_PUBLICATION           | 1           |
+| GRANT_TYPE_SERVICE_CONNECTION            | 2           |
+| GRANT_TYPE_DELEGATED_SERVICE_CONNECTION  | 3           |
+| GRANT_TYPE_DELEGATED_SERVICE_PUBLICATION | 4           |
+
+#### Hash algorithms {#type_mapping_hash_algorithm}
+
+| Hash Algorithm          | int32 value |
+|-------------------------|-------------|
+| HASH_ALGORITHM_SHA3_512 | 1           |
+
+#### Service types {#type_mapping_service}
+
+| Service Type                   | int32 values |
+|--------------------------------|--------------|
+| SERVICE_TYPE_SERVICE           | 1            |
+| SERVICE_TYPE_DELEGATED_SERVICE | 2            |
+
 
 ## Access token {#access_token}
 
