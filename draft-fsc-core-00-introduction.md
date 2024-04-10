@@ -116,7 +116,6 @@ Below are a few examples listed of these additional decisions for inspirational 
 3. The specifics of the retry mechanism used for Contract synchronization
 4. Additional restrictions on Certificate revocation by mandating OCSP or CRL checks
 
-Profiles can be either public or private within the FSC Group. One example of a public profile is the [NL-Profile](https://gitdocumentatie.logius.nl/publicatie/dk/restapi/) which is mandatory for usages of FSC within the Dutch government.
 
 ### Use cases
 
