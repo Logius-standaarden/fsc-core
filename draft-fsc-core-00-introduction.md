@@ -13,6 +13,7 @@ The Core part of the FSC specification achieves inter-organizational, technical 
 - to discover Services.
 - to route requests to Services in other contexts (e.g. from within organization A to organization B).
 - to request and manage authorizations needed to connect to said Services.
+- to delegate the authorization to connect or publish Services on behalf of another organization
 
 Functionality required to achieve technical interoperability is provided by APIs as specified in this RFC. This allows for automation of most management tasks, greatly reducing the administrative load and enabling up-scaling of inter-organizational usage of services.
 
@@ -40,12 +41,22 @@ Forward proxy that handles outgoing connections to Inways.
 
 Agreement between Peers defining what interactions between Peers are possible.
 
+*Delegator:*
+
+A Peer who delegates a connection authorization to a Service or the authorization to publish a Service to another Peer.
+
+*Delegatee:*
+
+A Peer who acts on behalf of another Peer.
+
 *Grant:*
 
-Defines an interaction between Peers. Grants are part of a Contract. In FSC Core two Grants are described.
+Defines an interaction between Peers. Grants are part of a Contract. In FSC Core four Grants are described.
 
-2. The ServicePublicationGrant which specifies the authorization of a Peer to publish a Service in the Group.
-3. The ServiceConnectionGrant which specifies the authorization of a Peer to connect to a Service provided by a Peer.
+1. The ServicePublicationGrant which specifies the authorization of a Peer to publish a Service in the Group.
+2. The ServiceConnectionGrant which specifies the authorization of a Peer to connect to a Service provided by a Peer.
+3. The DelegatedServicePublicationGrant which specifies the authorization of one peer to publish a Service to the Group on behalf of another Peer.
+4. The DelegatedServiceConnectionGrant which specifies the authorization of one Peer to connect to a Service on behalf of another Peer.
 
 *Manager:*
 
@@ -73,6 +84,8 @@ Peers in a Group announce their HTTP APIs to the Group by publishing them as a S
 Inways of a Peer expose Services to the Group. 
 Outways of a Peer connect to the Inway of a Peer providing a Service.
 Contracts define the Service publication to the Group and connections between Peers.
+Peers can delegate the authorization to connect a Service to other Peers using specific Grants on a Contract.
+Peers can delegate the authorization to publish a Service to other Peers using specific Grants on a Contracts.
 
 Outways are forward proxies that route outgoing connections to Inways.  
 Inways are reverse proxies that route incoming connections from Outways to Services.  
@@ -82,9 +95,9 @@ Outways include the access tokens in requests to Inways
 The address of an Inway offering a Service is contained in the access token. 
 Inways authorize connection attempts by validating access tokens.
 Services in the Group can be discovered through the Directory.  
-The Manager's address of a Peer can be discovered through the Directory.  
+The Manager's address of a Peer can be discovered through the Directory. 
 
-To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once an authorization to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the Service is made.
+To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant or DelegatedServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once an authorization to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the Service is made.
 
 ### Extensions
 FSC Core specifies the basics for setting up and managing connections in a Group.
@@ -92,13 +105,12 @@ Auxiliary functionality for either an FSC Peer or an entire FSC Group can be rea
 
 It is **RECOMMENDED** to use FSC Core with the following extensions, each specified in a dedicated RFC:
 
-- [FSC Delegation](../delegation/draft-fsc-delegation-00.html), to delegate the right to connect to a service.
 - [FSC Logging](../logging/draft-fsc-logging-00.html), keep a log of requests to Services.
 
 ### Profiles
 FSC Core provides the foundation for cooperation between organizations (Peers). However, in practice additional decisions have to be made to guarantee a functioning Group within a broader context.
 For example, it may be needed for an Group to have additional restrictions or agreements within the Group. This set of agreements is called the `Profile`. Every Group **MUST** have at least one Profile in order te operate.
-An Group **MAY** use multiple Profiles to further enhance the rules and restrictions within the Group. It is the responsibility of the Group to prevent conflicts between the Profiles used by the Group.
+A Group **MAY** use multiple Profiles to further enhance the rules and restrictions within the Group. It is the responsibility of the Group to prevent conflicts between the Profiles used by the Group.
 
 The following decisions **MUST** be part of the Profile:
 1. Select a [Trust Anchor](#trust_anchor)

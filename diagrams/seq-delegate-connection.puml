@@ -1,0 +1,33 @@
+@startuml
+
+autonumber
+title: Delegate the authorization to connect to a Service
+header: Delegation
+
+box "Delegator"
+  participant "Manager" as managerDelegator
+end box
+
+box "Delegatee"
+  participant "Manager" as managerDelegatee
+end box
+
+box "Service Provider"
+  participant "Manager" as managerServiceProvider
+end box
+
+managerDelegator -> managerDelegator: Create Contract with a \n__DelegateServiceConnectionGrant__
+managerDelegator -> managerDelegator: Sign Contract
+managerDelegator -> managerDelegatee: Submit Contract
+managerDelegatee -> managerDelegatee: Sign Contract
+managerDelegatee -> managerDelegator: Accept Contract
+managerDelegatee -> managerServiceProvider: Accept Contract
+managerDelegator -> managerServiceProvider: Submit Contract
+managerServiceProvider -> managerServiceProvider: Sign Contract
+managerServiceProvider -> managerDelegatee: Accept Contract
+managerServiceProvider -> managerDelegator: Accept Contract
+
+skinparam sequenceBoxBorderColor #transparent
+skinparam boxPadding 50
+hide footbox
+@enduml
