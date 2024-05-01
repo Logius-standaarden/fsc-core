@@ -645,9 +645,13 @@ Clients **MAY** use TLS when communicating with the Outway.
 
 Access tokens are obtained using the Client Credentials flow [section 4,4](https://www.rfc-editor.org/rfc/rfc6749#section-4.4) of [[RFC6749]].
 
-Access tokens **MUST** be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
+Access tokens **MUST** be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
 
 Which component obtains an access token for a Service is an implementation detail and out of scope for this document.
+
+The component retrieving the access token **MUST** use mTLS to authenticate with the Authorization server (Manager) as defined in [section 2.1](https://datatracker.ietf.org/doc/html/rfc8705#section-2.1) of [[RFC8705]].
+
+The component retrieving the access token **MUST** use an X.509 certificate signed by the chosen TA of the Group.
 
 #### Error response
 
