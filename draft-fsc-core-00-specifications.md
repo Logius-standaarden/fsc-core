@@ -493,7 +493,7 @@ The Manager **MUST** validate Contracts using the rules described in [Contract v
 
 The Manager **MUST** persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
 
-It is **RECOMMENDED** to implement a retry and backoff mechanism in case the contract propagation fails.
+It is **RECOMMENDED** to implement a retry and backoff mechanism in case the Contract propagation fails.
 
 #### Signatures
 
@@ -532,6 +532,12 @@ The `pdi` claim **MUST** be set when an access token is generated for a Service 
 
 The Manager **MUST** include the address of the Inway in the field `aud` of the access token.
 
+#### Services
+ 
+The name of a Service **MUST** be unique within the scope of a Peer.
+
+The Peer is responsible for checking the uniqueness of a Service name.
+
 #### Service listing
 
 The Manager **MUST** list a Service when a valid Contract containing a ServicePublicationGrant or DelegatedServicePublicationGrant for the Service exists.
@@ -542,7 +548,7 @@ The Manager **MUST** list the Peers with whom the Peer has negotiated Contracts 
 
 The Manager **MUST** persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
 
-The Manager **MUST** persist the Peer ID, name and Manager address of each Peer who called the `announce`  endpoint as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
+The Manager **MUST** persist the Peer ID, name and Manager address of each Peer who called the `announce` endpoint as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
 
 ### Announce
 
