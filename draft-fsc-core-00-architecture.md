@@ -50,7 +50,10 @@ Additionally optional decisions **COULD** be added to the profile whilst creatin
 ## Service discovery
 
 Every Group is defined by one Directory that contains the Services and Peers in the Group.
-Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) or [DelegatedServicePublicationGrant](#delegated_service_publication_grant) to the Directory.
+All Peers in the Group make themselves known to the Directory by having their Manager call the [Announce](#Announce) endpoint of the Directory. 
+This way the Directory contains a list of all Peers in the Group with their corresponding Manager address.
+
+When publishing services, Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) or [DelegatedServicePublicationGrant](#delegated_service_publication_grant) to the Directory.
 
 Peers query the Directory to discover the Services available in the Group 
 
