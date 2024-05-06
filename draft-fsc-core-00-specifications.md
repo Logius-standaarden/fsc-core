@@ -552,7 +552,10 @@ The Manager **MUST** persist the Peer ID, name and Manager address of each Peer 
 
 ### Announce
 
-The Manager **SHOULD** call the `announce` endpoint of the Peers with whom the Peer has negotiated Contracts when the address of Manager changes.
+The `announce` is used to share the `Manager` address and `Peer` information among Peers. The `announce` is also used by the `Directory` to obtain the `Manager` addresses of all `Peers` in the `Group`. 
+Each `Peer` **MUST** call the `announce` endpoint of the Directory to register themselves as participant of the `Group`. 
+
+In addition to announcing to the `Directory` a Manager **SHOULD** call the `announce` endpoint of the Peers with whom the Peer has negotiated Contracts when the address of Manager changes.
 
 ### Interfaces {#manager_interface}
 
