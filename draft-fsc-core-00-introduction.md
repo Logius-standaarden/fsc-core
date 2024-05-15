@@ -1,6 +1,6 @@
 # Introduction
 
-This section gives an introduction to this RFC.
+This section gives an introduction to FSC.
 Section 2 describes the architecture of a system that follows the FSC specification.
 Section 3 describes the interfaces and behavior of FSC components in detail.
 
