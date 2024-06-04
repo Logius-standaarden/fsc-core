@@ -119,7 +119,7 @@ The following decisions **MUST** be part of the Profile:
 4. Select what determines the [Peer name](#peer_name)
 5. Select a Peer who acts as the [Directory](#directory) of the Group
 6. Decide what ports are used for management traffic
-7. Determine requirements for allowed TLS versions and Cipher Suites (note, remove from core)
+7. Determine requirements for allowed TLS versions and Cipher Suites 
 
 In addition to the mandatory decisions, a Profile **MAY** also contain additional agreements or restrictions. These are not technically required for the operation of FSC Core, but can become mandatory within a Group. An example would be a set of additional rules in order to comply with local legislation.
 Below are a few examples listed of these additional decisions for inspirational purposes:
