@@ -19,6 +19,7 @@ managerConsumingPeer <-[bold,#green]l-> managerProvidingPeer
 managerProvidingPeer -[bold,#green]u-> directory
 managerConsumingPeer -[bold,#green]u-> directory
 outway -[bold,#green]l-> inway
+outway -[bold,#green]l-> managerProvidingPeer
 outway -[hidden]u-> managerConsumingPeer
 inway -[hidden]u-> managerProvidingPeer
 

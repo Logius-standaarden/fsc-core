@@ -515,7 +515,7 @@ The Manager **MUST** provide the complete certificate chain excluding the root C
 
 The Manager **MUST** provide existing Contracts for a specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.
 
-#### Tokens
+#### Tokens{manager_tokens}
 
 The Manager **MUST** be able to provide an [access token](#access_token) to Peers that have a valid Contract containing a ServiceConnectionGrant.
 
@@ -653,14 +653,23 @@ Clients **MAY** use TLS when communicating with the Outway.
 #### Obtaining access tokens
 
 Access tokens are obtained using the Client Credentials flow [section 4,4](https://www.rfc-editor.org/rfc/rfc6749#section-4.4) of [[RFC6749]].
-
 Access tokens **MUST** be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
 
-Which component obtains an access token for a Service is an implementation detail and out of scope for this document.
+To request a token via the Client Credentials flow the following information must be sent to the Manager which acts as an Authorization Server:
+- GrantHash of a `Service Connection grant` or `Delegated Service Connection grant` provided in the `scope` field.
+- PeerID of the `Peer` making the request in the `client_id` field
+- `client_credentials` in the `grant_type` field.
+
+The `GrantHash` provided in the request to the Manager acts a a reference to a `Grant` on a `Contract`. 
+The Manager (Authorization Server) will perform the verification steps defined in the [token section](#manager_tokens) before providing an access token.
 
 The component retrieving the access token **MUST** use mTLS to authenticate with the Authorization server (Manager) as defined in [section 2.1](https://datatracker.ietf.org/doc/html/rfc8705#section-2.1) of [[RFC8705]].
-
 The component retrieving the access token **MUST** use an X.509 certificate signed by the chosen TA of the Group.
+The Manager **MUST** verify this client certificate and issue a token bound to this client certificate according to [section 3](https://www.rfc-editor.org/rfc/rfc8705#section-3).
+
+![Obtaining access token](diagrams/seq-obtaining-an-access-token.svg "Obtaining an Access Token")
+
+Which component obtains an access token for a Service is an implementation detail and out of scope for this document.
 
 #### Error response
 
