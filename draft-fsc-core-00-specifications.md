@@ -392,7 +392,7 @@ The payload of the JWT:
   Not before  [section 4.1.5](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.5) of [[RFC7519]]
 * *cnf(object):*
     * *x5t#S256(string):*
-    The thumbprint of the certificate that is allowed ot use the access token
+    The thumbprint of the certificate that is allowed ot use the access token. [section 3.1] of [[RFC8705]]
 * *act(object):*
     * *sub(string):*
       The ID of the Peer connecting to the Service on behalf of another Peer. The field `grant.data.delegator.peer_ID` of the DelegatedServiceConnectionGrant. 
@@ -517,16 +517,18 @@ The Manager **MUST** provide existing Contracts for a specific Peer. A Contract 
 
 #### Tokens
 
-The Manager **MUST** be able to provide an [access token](#access_token) to Peers that have a valid Contract containing a ServiceConnectionGrant.
+The Manager **MUST** be able to provide an [access token](#access_token) to Peers that have a valid Contract containing a ServiceConnectionGrant or DelegatedServiceConnectionGrant.
 
 Before issuing an access token the Manager **MUST** validate that:
 
-1. A valid Contract exists with a ServiceConnectionGrant or DelegatedServiceConnectionGrant matching the Grant hash in the access token request.
+1. The `scope` provided in the token request contains a Grant hash that matches with a ServiceConnectionGrant or DelegatedServiceConnectionGrant of a valid Contract. 
+1. The `client_id` provided in the token request contains a PeerID that matches with the PeerID specified in the X.509 certificate of the client requesting the access token and later using the access token to make an API request.
 1. The Manager is provided by a Peer with the same PeerID as specified in `grant.data.service.peer_id`.
 1. The Manager is provided by a Peer who has an Inway which is offering the Service specified in `grant.data.service.name`. 
-1. The Peer ID provided by the X.509 certificate used by the component requesting the access token matches the value of the field `grant.data.outway.peer_id`.
-1. The certificate provided as client_id contains the same public key as specified in `grant.data.outway.public_key_fingerprint`
+1. The Peer ID specified by the X.509 certificate of the client requesting the access token matches the value of the field `grant.data.outway.peer_id`.
+1. The X.509 certificate provided by the client contains the same public key as specified in `grant.data.outway.public_key_fingerprint`
 
+The `cnf.x5t#S256` claim **MUST** contain the certificate thumbprint of the X.509 certificate provided by the client requesting the token according to [section 3.1] of [[RFC8705]].
 The `act` claim **MUST** be set when an access token is generated for a Peer who is connecting to the Service on behalf of another Peer. I.e. the authorization to connect has been granted using a DelegatedServiceConnectionGrant.
 The `pdi` claim **MUST** be set when an access token is generated for a Service which is being offered on behalf of another Peer. 
 
