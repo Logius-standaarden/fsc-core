@@ -662,7 +662,7 @@ To request a token via the Client Credentials flow the following information mus
 - PeerID of the `Peer` making the request in the `client_id` field
 - `client_credentials` in the `grant_type` field.
 
-The `GrantHash` provided in the request to the Manager acts a a reference to a `Grant` on a `Contract`. 
+The `GrantHash` provided in the request to the Manager acts as a reference to a `Grant` on a `Contract`. 
 The Manager (Authorization Server) will perform the verification steps defined in the [token section](#manager_tokens) before providing an access token.
 
 The component retrieving the access token **MUST** use mTLS to authenticate with the Authorization server (Manager) as defined in [section 2.1](https://datatracker.ietf.org/doc/html/rfc8705#section-2.1) of [[RFC8705]].
