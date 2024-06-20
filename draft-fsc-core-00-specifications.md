@@ -95,7 +95,7 @@ example Contract with a ServiceConnectionGrant
     "grants": [
       {
         "data": {
-          "type": "GRANT_TYPE_SERVICE_CONNECTION_GRANT",
+          "type": "GRANT_TYPE_SERVICE_CONNECTION",
           "service": {
             "peer_id": "00000000000000000001",
             "name": "example-service"
