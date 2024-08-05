@@ -143,7 +143,7 @@ Signature requirements:
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.directory.peer_id`
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.service.peer_id`
 
-### DelegatedServicePublicationGrant  {#grant_delegated_service_publication}
+#### DelegatedServicePublicationGrant  {#grant_delegated_service_publication}
 
 *The Delegatee is the Peer specified in `grant.data.service.peer_id`*
 *The Delegator is the Peer specified in `grant.data.delegator.peer_id`*
@@ -177,7 +177,7 @@ Signature requirements:
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.outway.peer_id`
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.service.peer_id`
 
-### DelegatedServiceConnectionGrant {#grant_delegated_service_connection}
+#### DelegatedServiceConnectionGrant {#grant_delegated_service_connection}
 
 *The Delegatee is the Peer specified in `grant.data.outway.peer_id`*
 *The Delegator is the Peer specified in `grant.data.delegator.peer_id`*
@@ -262,7 +262,6 @@ JWS Payload example:
 - `accept`, Peer has accepted the contract
 - `reject`, Peer has rejected the contract
 - `revoke`, Peer has revoked the contract
-
 
 
 ### The content hash {#content_hash}
@@ -515,7 +514,7 @@ The Manager **MUST** provide the complete certificate chain excluding the root C
 
 The Manager **MUST** provide existing Contracts for a specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.
 
-#### Tokens{manager_tokens}
+#### Tokens {#manager_tokens}
 
 The Manager **MUST** be able to provide an [access token](#access_token) to Peers that have a valid Contract containing a ServiceConnectionGrant or DelegatedServiceConnectionGrant.
 
