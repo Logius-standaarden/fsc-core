@@ -514,7 +514,7 @@ The Manager **MUST** provide the complete certificate chain excluding the root C
 
 The Manager **MUST** provide existing Contracts for a specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.
 
-#### Tokens{manager_tokens}
+#### Tokens {#manager_tokens}
 
 The Manager **MUST** be able to provide an [access token](#access_token) to Peers that have a valid Contract containing a ServiceConnectionGrant or DelegatedServiceConnectionGrant.
 
