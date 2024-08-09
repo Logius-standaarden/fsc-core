@@ -37,9 +37,9 @@ Each Peer **MUST** have a human-readable name which can be used to identify a Pe
 
 The Trust Anchor (TA) is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
-Each Group can have multiple TAs.
+Each Group can have multiple TAs. That are defined in a Trust Anchor List.
 
-Every Peer in a Group **MUST** accept the same TA(s).
+Every Peer in a Group **MUST** accept the same TA(s) that are defined in the Trust Anchor List defined by the Group.
 
 The TA **SHOULD** validate a Peers identity, i.e. the TA **MUST** preform Organization Validation.
 
