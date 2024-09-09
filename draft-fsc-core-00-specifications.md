@@ -508,7 +508,7 @@ It is **RECOMMENDED** to implement a retry and backoff mechanism in case the sig
 
 The Manager **MUST** provide X.509 certificates of the keypairs used to sign Contracts and access tokens.
 
-The Manager **MUST** provide the complete certificate chain excluding the root CA certificate used by the Group as Thrust Anchor.
+The Manager **MUST** provide the complete certificate chain excluding the root CA certificate used by the Group as Trust Anchor.
 
 #### Providing contracts
 
@@ -589,7 +589,7 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_MANAGE
 | ERROR_CODE_INCORRECT_GROUP_ID                       | 422              | The Group ID in the Contract does not match the GroupID of the receiving Manager                                                                    |
 | ERROR_CODE_PEER_NOT_PART_OF_CONTRACT                | 422              | The Peer tried to submit or sign a Contract without being a Peer on the Contract                                                                    |
 | ERROR_CODE_SIGNATURE_CONTRACT_CONTENT_HASH_MISMATCH | 422              | The Peer tried to submit a signature with a Contract content hash that does not match the Contract                                                  |
-| ERROR_CODE_PEER_CERTIFICATE_VERIFICATION_FAILED     | 400              | The Peer provided a x.509 certificate signed by the thrust anchor of the Group but the content is invalid. E.g the Peer ID is in a incorrect format |
+| ERROR_CODE_PEER_CERTIFICATE_VERIFICATION_FAILED     | 400              | The Peer provided a x.509 certificate signed by the trust anchor of the Group but the content is invalid. E.g the Peer ID is in a incorrect format |
 | ERROR_CODE_PEER_ID_SIGNATURE_MISMATCH               | 422              | The Peer submitted a signature that includes a Peer ID that does not match the ID of the submitting Peer                                            |
 | ERROR_CODE_SIGNATURE_VERIFICATION_FAILED            | 422              | The Peer submitted a signature that could not be verified                                                                                           |
 | ERROR_CODE_GRANT_COMBINATION_NOT_ALLOWED            | 422              | The Peer submitted a Contract with a combination of Grants that is not allowed                                                                      |
