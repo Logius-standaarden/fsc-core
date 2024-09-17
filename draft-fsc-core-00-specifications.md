@@ -172,6 +172,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Service providing Peer matches the value of the field `grant.data.outway.peer_id`
 - The Service provided in the field `grant.data.service.name` is offered by the Peer provided in the field `grant.data.service.peer_id`
 - A Public key fingerprint also called thumbprint is provided in the field `grant.data.outway.public_key_thumbprint`
+- In case of a Service that is published on behalf of another Peer, The Peer ID provided by the X.509 certificate used by the Manager of the Peer delegating the publication of Service matches with the value of the field `grant.data.service.delegator.peer_id` 
 
 Signature requirements:
 
