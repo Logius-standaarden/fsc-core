@@ -177,7 +177,7 @@ Signature requirements:
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.outway.peer_id`
 - A signature is present with the Peer ID of the Peer defined in the field `grant.data.service.peer_id`
 
-#### DelegatedServiceConnectionGrant {#grant_delegated_service_connection}
+#### DelegatedServiceConnectionGrant {#delegated_service_connection_grant}
 
 *The Delegatee is the Peer specified in `grant.data.outway.peer_id`*
 *The Delegator is the Peer specified in `grant.data.delegator.peer_id`*
