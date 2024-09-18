@@ -82,7 +82,8 @@ The HTTP status codes that **MUST** be used in combination with the HTTP header 
 
 The content of a Contract is defined in the object `.components/schemas/contractContent` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
 
-example Contract with a ServiceConnectionGrant
+Example Contract with a [ServiceConnectionGrant](#service_connection_grant):
+
 ```json
 {
   "content": {
