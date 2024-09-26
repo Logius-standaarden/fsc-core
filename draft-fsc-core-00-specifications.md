@@ -312,7 +312,7 @@ The Grant hash can be created by executing the following steps:
    To convert the Grant type to an integer see the [type mapping](#type_mapping_grant) 
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
-1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. The int32 value per hash algorithm type is defined in the [type mapping](#type_mapping_hash_algorithm).. E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
+1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. The int32 value per hash algorithm type is defined in the [type mapping](#type_mapping_hash_algorithm). E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
 1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. The int32 value per hash type is defined in the [type mapping](#type_mapping_hash). E.g. The enum `HASH_TYPE_SERVICE_PUBLICATION_GRANT` becomes `2$`.
 1. Combine the strings containing the hash algorithm (step 6) and Hash type (step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_SERVICE_CONNECTION` should result in the string `$1$2$`
 1. Prefix the Base64 string generated in step 5 with the string generated in step 8.
@@ -328,15 +328,6 @@ The Grant hash can be created by executing the following steps:
 | HASH_TYPE_SERVICE_CONNECTION_GRANT            | 3           |
 | HASH_TYPE_DELEGATED_SERVICE_CONNECTION_GRANT  | 4           |
 | HASH_TYPE_DELEGATED_SERVICE_PUBLICATION_GRANT | 5           |
-
-#### Grant types {#type_mapping_grant}
-
-| Hash type                                | int32 value |
-|------------------------------------------|-------------|
-| GRANT_TYPE_SERVICE_PUBLICATION           | 1           |
-| GRANT_TYPE_SERVICE_CONNECTION            | 2           |
-| GRANT_TYPE_DELEGATED_SERVICE_CONNECTION  | 3           |
-| GRANT_TYPE_DELEGATED_SERVICE_PUBLICATION | 4           |
 
 #### Hash algorithms {#type_mapping_hash_algorithm}
 
