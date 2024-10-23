@@ -11,7 +11,7 @@ let respecConfig = {
 
     previousMaturity: "VV",
     title: "FSC - Core",
-    content: {"draft-fsc-core-00-introduction": "", "draft-fsc-core-00-architecture": "", "draft-fsc-core-00-specifications": ""},
+    content: {"draft-fsc-core-00-introduction": "", "draft-fsc-core-00-guidelines":"informative", "draft-fsc-core-00-architecture": "", "draft-fsc-core-00-specifications": ""},
     editors:
         [
             {
