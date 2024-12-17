@@ -2,16 +2,14 @@ let respecConfig = {
     useLogo: true,
     useLabel: true,
     license: "cc-by",
-    specStatus: "VV",
+    specStatus: "DEF",
     specType: "ST",
-    pubDomain: "vv",
+    pubDomain: "fsc",
     shortName: "core",
-    publishDate: "2023-12-08",
-    publishVersion: "0.0.1",
+    publishDate: "2024-12-12",
+    publishVersion: "1.0.0",
 
     previousMaturity: "VV",
-    title: "FSC - Core",
-    content: {"draft-fsc-core-00-introduction": "", "draft-fsc-core-00-architecture": "", "draft-fsc-core-00-specifications": ""},
     editors:
         [
             {
