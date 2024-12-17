@@ -9,7 +9,7 @@ let respecConfig = {
     publishDate: "2024-12-12",
     publishVersion: "1.0.0",
 
-    previousMaturity: "VV",
+    previousMaturity: "DEF",
     editors:
         [
             {
@@ -81,4 +81,5 @@ let respecConfig = {
                 ]
             },
         ],
+    github: "https://github.com/Logius-standaarden/fsc-core",
 };

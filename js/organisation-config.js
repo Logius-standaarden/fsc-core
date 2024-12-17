@@ -2,7 +2,7 @@
 var organisationConfig = {
     nl_organisationName: "Vereniging van Nederlandse Gemeenten",
     nl_organisationStylesURL: "https://gitdocumentatie.logius.nl/publicatie/respec/style/",
-    nl_organisationPublishURL: "https://commonground.gitlab.io/standards/fsc/",
+    nl_organisationPublishURL: "https://gitdocumentatie.logius.nl/publicatie/",
     logos: [{
         src: "https://vng.nl/themes/custom/vng/logo.svg",
         alt: "VNG",
