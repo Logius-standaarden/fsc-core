@@ -50,10 +50,10 @@ Additionally optional decisions **COULD** be added to the profile whilst creatin
 ## Service discovery
 
 Every Group is defined by one Directory that contains the Services and Peers in the Group.
-All Peers in the Group make themselves known to the Directory by having their Manager call the [Announce](#Announce) endpoint of the Directory. 
+All Peers in the Group make themselves known to the Directory by having their Manager call the [Announce](#announce) endpoint of the Directory. 
 This way the Directory contains a list of all Peers in the Group with their corresponding Manager address.
 
-When publishing services, Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) or [DelegatedServicePublicationGrant](#delegated_service_publication_grant) to the Directory.
+When publishing services, Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) or [DelegatedServicePublicationGrant](#grant_delegated_service_publication) to the Directory.
 
 Peers query the Directory to discover the Services available in the Group 
 
@@ -100,7 +100,7 @@ Once the Contract is signed by all the Peers, the Outway can connect to the Inwa
 
 ### A delegated service connection
 
-A connection on behalf of another Peer (delegation) can only be established if the Peer connecting to the Service has a valid Contract containing a [DelegatedServiceConnectionGrant](#delegated_service_connection_grant) with the Peer providing the Service.
+A connection on behalf of another Peer (delegation) can only be established if the Peer connecting to the Service has a valid Contract containing a [DelegatedServiceConnectionGrant](#grant_delegated_service_connection) with the Peer providing the Service.
 The connection Grants contains information about the Service, the public key of the Outway that is authorized to connect to the Service and the Peer acting as Delegator.
 
 The Contract is distributed among the three Peers. Once the Contract is signed by all the Peers, the Outway of the Delegatee can connect to the Inway offering the Service on behalf the Delegator.

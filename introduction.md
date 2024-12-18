@@ -105,7 +105,7 @@ Auxiliary functionality for either an FSC Peer or an entire FSC Group can be rea
 
 It is **RECOMMENDED** to use FSC Core with the following extensions, each specified in a dedicated RFC:
 
-- [FSC Logging](../logging/draft-fsc-logging-00.html), keep a log of requests to Services.
+- [FSC Logging](https://gitdocumentatie.logius.nl/publicatie/fsc/logging/), keep a log of requests to Services.
 
 ### Profiles
 FSC Core provides the foundation for cooperation between organizations (Peers). However, in practice additional decisions have to be made to guarantee a functioning Group within a broader context.
