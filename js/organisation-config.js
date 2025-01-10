@@ -1,15 +1,15 @@
 // Plaats dit bestand op een centrale locatie voor hergebruik in meerdere documenten.
 var organisationConfig = {
-    nl_organisationName: "Vereniging van Nederlandse Gemeenten",
+    nl_organisationName: "Logius",
     nl_organisationStylesURL: "https://gitdocumentatie.logius.nl/publicatie/respec/style/",
     nl_organisationPublishURL: "https://gitdocumentatie.logius.nl/publicatie/",
     logos: [{
-        src: "https://vng.nl/themes/custom/vng/logo.svg",
-        alt: "VNG",
-        id: "VNG",
+        src: "https://www.logius.nl/themes/custom/logius/logo.svg",
+        alt: "Logius",
+        id: "Logius",
         height: 77,
         width: 44,
-        url: "https://vng.nl/rubrieken/onderwerpen/standaarden",
+        url: "https://github.com/Logius-standaarden",
     }],
 
     useLogo: true,
