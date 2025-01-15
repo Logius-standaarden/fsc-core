@@ -28,6 +28,7 @@ Actor that provides and/or consumes Services. This is an abstraction of e.g. an 
 *Group:*
 
 System of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services.
+Governed by a set of rules and restrictions aligning on required parameters needed for the practical workings of an FSC Group.
 
 *Inway:*
 
@@ -74,10 +75,6 @@ An HTTP API offered to the Group.
 
 The Trust Anchor (TA) is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
-*Profile:* 
-
-A set of rules providing further restrictions and governance of the FSC Group. A Profile aligns on certain required parameters needed for the practical workings of an FSC Group. 
-
 ## Overall Operation of FSC Core
 
 Peers in a Group announce their HTTP APIs to the Group by publishing them as a Service to the Directory. A Group uses a single Directory that defines the scope of the Group. Peers use the Directory to discover what Services and Peers are available in the Group.
@@ -107,21 +104,20 @@ It is **RECOMMENDED** to use FSC Core with the following extensions, each specif
 
 - [FSC Logging](https://gitdocumentatie.logius.nl/publicatie/fsc/logging/), keep a log of requests to Services.
 
-### Profiles
+### Group rules & restrictions {#group_rules}
 FSC Core provides the foundation for cooperation between organizations (Peers). However, in practice additional decisions have to be made to guarantee a functioning Group within a broader context.
-For example, it may be needed for an Group to have additional restrictions or agreements within the Group. This set of agreements is called the `Profile`. Every Group **MUST** have at least one Profile in order te operate.
-A Group **MAY** use multiple Profiles to further enhance the rules and restrictions within the Group. It is the responsibility of the Group to prevent conflicts between the Profiles used by the Group.
+For example, it may be needed for a Group to have additional restrictions or agreements within the Group. Certain Group rules and restrictions are required for the operation of the Group, others provide optional agreements to enhance collaboration.
 
-The following decisions **MUST** be part of the Profile:
+The following decisions **MUST** be part of the Group:
 1. Select a [Trust Anchor](#trust_anchor)
 2. Select a [Group ID](#group_id)
 3. Select what determines the [Peer ID](#peer_id)
 4. Select what determines the [Peer name](#peer_name)
-5. Select a Peer who acts as the [Directory](#directory) of the Group
+5. Select at least one Peer who acts as a [Directory](#directory) of the Group
 6. Decide what ports are used for management traffic
 7. Determine requirements for allowed TLS versions and Cipher Suites 
 
-In addition to the mandatory decisions, a Profile **MAY** also contain additional agreements or restrictions. These are not technically required for the operation of FSC Core, but can become mandatory within a Group. An example would be a set of additional rules in order to comply with local legislation.
+In addition to the mandatory decisions, a Group **MAY** also contain additional agreements or restrictions. These are not technically required for the operation of FSC Core, but can become mandatory within a Group. An example would be a set of additional rules in order to comply with local legislation.
 Below are a few examples listed of these additional decisions for inspirational purposes:
 1. Any extensions required by Peers within the Group
 2. Agreements on data retention
