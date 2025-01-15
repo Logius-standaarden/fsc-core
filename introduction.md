@@ -74,6 +74,11 @@ An HTTP API offered to the Group.
 
 The Trust Anchor (TA) is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
+*Trust Anchor List:*
+
+A list of one or more Trust Anchors. In the case of FSC, which uses an X.509 architecture, it is a list of all root certificates that are used as Trust Anchor. In practice this would be a list of one or more [Certificate Authorities](https://en.wikipedia.org/wiki/Certificate_authority) (CA's).
+Certificates issued by a CA that acts as a Trust Anchor are trusted within FSC Group.
+
 *Profile:* 
 
 A set of rules providing further restrictions and governance of the FSC Group. A Profile aligns on certain required parameters needed for the practical workings of an FSC Group. 
@@ -113,7 +118,7 @@ For example, it may be needed for an Group to have additional restrictions or ag
 A Group **MAY** use multiple Profiles to further enhance the rules and restrictions within the Group. It is the responsibility of the Group to prevent conflicts between the Profiles used by the Group.
 
 The following decisions **MUST** be part of the Profile:
-1. Select a [Trust Anchor](#trust_anchor)
+1. Select one or more [Trust Anchors](#trust_anchor) to include in the Trust Anchor list
 2. Select a [Group ID](#group_id)
 3. Select what determines the [Peer ID](#peer_id)
 4. Select what determines the [Peer name](#peer_name)
