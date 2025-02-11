@@ -554,7 +554,7 @@ The Manager **MUST** persist the Peer ID, name and Manager address of each Peer 
 ### Announce
 
 The `announce` is used to share the `Manager` address and `Peer` information among Peers. The `announce` is also used by the `Directory` to obtain the `Manager` addresses of all `Peers` in the `Group`. 
-Each `Peer` **MUST** call the `announce` endpoint of the Directory to register themselves as participant of the `Group`. 
+Each `Peer` **MUST** call the `announce` endpoint of a Directory to register themselves as participant of the `Group`. 
 
 In addition to announcing to the `Directory` a Manager **SHOULD** call the `announce` endpoint of the Peers with whom the Peer has negotiated Contracts when the address of Manager changes.
 
@@ -599,7 +599,7 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_MANAGE
 
 ## Directory {#directory}
 
-The Directory is a Manager chosen by the Group to act as the Directory. 
+The Directory is a Manager chosen by the Group to act as a Directory. 
 
 The Directory is used by Peers to:
 
