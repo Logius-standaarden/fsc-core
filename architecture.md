@@ -43,7 +43,7 @@ The content of a Contract is immutable. When the content of a Contract is subjec
 
 A Group is a system of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services. 
 
-In order to create a Group additional [Group Rules & Restrictions](#group_rules) containing at least the mandatory decisions **MUST** be created.
+In order to create a Group, additional [Group Rules & Restrictions](#group_rules) containing at least the mandatory decisions **MUST** be created.
 
 ## Service discovery
 
