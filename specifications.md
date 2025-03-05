@@ -41,7 +41,7 @@ Each Group can have multiple TAs.
 
 Every Peer in a Group **MUST** accept the same TA(s).
 
-The TA **SHOULD** validate a Peers identity, i.e. the TA **MUST** preform Organization Validation.
+The TA **SHOULD** validate a Peers identity, i.e. the TA **MUST** perform Organization Validation.
 
 ### TLS configuration {#tls_configuration}
 
@@ -391,7 +391,7 @@ The payload of the JWT:
   Not before  [section 4.1.5](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.5) of [[RFC7519]]
 * *cnf(object):*
     * *x5t#S256(string):*
-    The thumbprint of the certificate that is allowed ot use the access token. [section 3.1] of [[RFC8705]]
+    The thumbprint of the certificate that is allowed to use the access token. [section 3.1] of [[RFC8705]]
 * *act(object):*
     * *sub(string):*
       The ID of the Peer connecting to the Service on behalf of another Peer. The field `grant.data.delegator.peer_ID` of the DelegatedServiceConnectionGrant. 
