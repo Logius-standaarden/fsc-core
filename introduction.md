@@ -85,7 +85,7 @@ A set of rules providing further restrictions and governance of the FSC Group. A
 
 ## Overall Operation of FSC Core
 
-Peers in a Group announce their HTTP APIs to the Group by publishing them as a Service to the Directory. A Group uses a single Directory that defines the scope of the Group. Peers use the Directory to discover what Services and Peers are available in the Group.
+Peers in a Group announce their HTTP APIs to the Group by publishing them as a Service to a Directory. A Group can use multiple Directories which define the scope of the Group. Peers use the Directories to discover what Services and Peers are available in the Group.
 Inways of a Peer expose Services to the Group. 
 Outways of a Peer connect to the Inway of a Peer providing a Service.
 Contracts define the Service publication to the Group and connections between Peers.
@@ -99,8 +99,8 @@ Managers provide access tokens which contain the authorization to connect a Serv
 Outways include the access tokens in requests to Inways
 The address of an Inway offering a Service is contained in the access token. 
 Inways authorize connection attempts by validating access tokens.
-Services in the Group can be discovered through the Directory.  
-The Manager's address of a Peer can be discovered through the Directory. 
+Services in the Group can be discovered through a Directory.  
+The Manager's address of a Peer can be discovered through a Directory. 
 
 To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant or DelegatedServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once an authorization to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the Service is made.
 
@@ -122,7 +122,7 @@ The following decisions **MUST** be part of the Profile:
 2. Select a [Group ID](#group_id)
 3. Select what determines the [Peer ID](#peer_id)
 4. Select what determines the [Peer name](#peer_name)
-5. Select a Peer who acts as the [Directory](#directory) of the Group
+5. Select at least one Peer who acts as the [Directory](#directory) of the Group
 6. Decide what ports are used for management traffic
 7. Determine requirements for allowed TLS versions and Cipher Suites 
 
@@ -141,4 +141,4 @@ A typical use case is a cooperation of many organizations that use APIs to excha
 Organizations can participate in multiple Groups at the same time. 
 Reasons for participating in multiple Groups could be the use of different environments for production and test deployments or when participating in different ecosystems like health industry and government industry.
 
-An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a Service in the Directory of each Group using a different Inway for each Group.
+An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a Service in one of the Directories of each Group using a different Inway for each Group.
