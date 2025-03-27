@@ -58,7 +58,7 @@ The representation and verification of domains specified in the X.509 certificat
 
 #### TLS Version
 
-The TLS versions used between Peers in an Group **MUST** be defined in the [Profile](#profiles) of the Group.
+The TLS versions used between Peers in a Group **MUST** be defined in the additional [Group Rules & Restrictions](#group_rules).
 
 #### Certificate & Public key thumbprints {#certificate_thumbprints}
 
