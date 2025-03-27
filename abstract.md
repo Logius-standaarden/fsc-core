@@ -1,4 +1,4 @@
-This Federated Service Connectivity (FSC) standard describes how different parties (within FSC know as Peers) should interact when exchanging data in a uniform, secure and automated manner.
+This Federated Service Connectivity (FSC) standard describes how different parties (within FSC known as Peers) should interact when exchanging data in a uniform, secure and automated manner.
 The goal of FSC is to achieve technically interoperable API gateway functionality, covering federated authentication and secure connections in a large-scale dynamic API landscape.
 
 The core of FSC is to manage (service) connections between FSC Peers via mutually agreed and signed contracts. These contracts are the technical prerequisite for connecting to services. 

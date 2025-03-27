@@ -6,7 +6,7 @@ The Manager **MUST** support HTTP/1.1[[RFC9112]].
 
 The Manager **MAY** support HTTP/2[[RFC9113]]. 
 
-The protocol used between the Inway and Outway can be either HTTP/1.1[[RFC9112]] or HTTP/2[[RFC9113]]. The protocol is determined by the `protocol` field of a Service as specified in the object `.components/schemas/serviceListingService` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
+The protocol used between the Inway and Outway can be either HTTP/1.1[[RFC9112]] or HTTP/2[[RFC9113]]. The protocol is determined by the `protocol` field of a Service as specified in the object `.components/schemas/serviceListingService` of the [OpenAPI Specification](manager.yaml).
 
 ### Port configuration
 
@@ -37,11 +37,11 @@ Each Peer **MUST** have a human-readable name which can be used to identify a Pe
 
 The Trust Anchor (TA) is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
-Each Group can have multiple TAs.
+Each Group can have multiple TAs that are defined in a Trust Anchor List.
 
-Every Peer in a Group **MUST** accept the same TA(s).
+Every Peer in a Group **MUST** accept the same TA(s) that are defined in the Trust Anchor List defined by the Group.
 
-The TA **SHOULD** validate a Peers identity, i.e. the TA **MUST** preform Organization Validation.
+The TA **SHOULD** validate a Peers identity, i.e. the TA **MUST** perform Organization Validation.
 
 ### TLS configuration {#tls_configuration}
 
@@ -74,13 +74,13 @@ Within FSC both *Certificate thumbprints* and *Public Key* thumbprints uses the 
 The Inway and Outway both have a single endpoint which proxies HTTP requests. 
 In case of an error within the scope of FSC these components **MUST** return the HTTP header `Fsc-Error-Code` which **MUST** contain the code specifying the error. 
 
-The response body must contain an object as described in `.components/schemas/error` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).  
+The response body must contain an object as described in `.components/schemas/error` of the [OpenAPI Specification](manager.yaml).  
 
 The HTTP status codes that **MUST** be used in combination with the HTTP header `Fsc-Error-Code` are defined in the sections 3.7.1.4 and 3.8.2.2.
 
 ## Contracts
 
-The content of a Contract is defined in the object `.components/schemas/contractContent` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
+The content of a Contract is defined in the object `.components/schemas/contractContent` of the [OpenAPI Specification](manager.yaml)
 
 example Contract with a ServiceConnectionGrant
 ```json
@@ -130,7 +130,7 @@ Per Grant type different validation rules apply.
 
 #### ServicePublicationGrant {#service_publication_grant}
 
-The content of a ServicePublicationGrant is defined in the object `.components/schemas/grantServicePublication` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
+The content of a ServicePublicationGrant is defined in the object `.components/schemas/grantServicePublication` of the [OpenAPI Specification](manager.yaml)
 
 Validation rules:
 
@@ -163,7 +163,7 @@ Signature requirements:
 
 #### ServiceConnectionGrant {#service_connection_grant}
 
-The content of a ServiceConnectionGrant is defined in the object `.components/schemas/grantServiceConnection` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
+The content of a ServiceConnectionGrant is defined in the object `.components/schemas/grantServiceConnection` of the [OpenAPI Specification](manager.yaml)
 
 Validation rules:
 
@@ -290,7 +290,7 @@ The algorithm ensures that the content hash is unique for a specific Contract co
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and surround it with dollar signs (`$`). When using the `SHA3-512` algorithm this would result in `$1$`. 
    To convert the hash algorithm to an integer see the [type mapping](#type_mapping_hash_algorithm)
-1. Add `1$` as suffix to the string created in step 13. This is the enum `HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml) as int32. If the string created in step 13 is `$1$`, the result should now be `$1$1$`
+1. Add `1$` as suffix to the string created in step 13. This is the enum `HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of the [OpenAPI Specification](manager.yaml) as int32. If the string created in step 13 is `$1$`, the result should now be `$1$1$`
 1. Add the Base64 generated in step 12 as suffix to the string generated in step 14.
 
 #### Data types {#data_types}
@@ -308,7 +308,7 @@ The Grant hash can be created by executing the following steps:
 1. Create a byte array named `grantBytes`
 1. Convert `contract.content.group_id` to bytes and append the bytes to `grantBytes`.
 1. Convert `contract.content.iv` to bytes and append the bytes to `grantBytes`.
-1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in [the OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
+1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the [OpenAPI Specification](manager.yaml)
    To convert the Grant type to an integer see the [type mapping](#type_mapping_grant) 
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
@@ -391,7 +391,7 @@ The payload of the JWT:
   Not before  [section 4.1.5](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.5) of [[RFC7519]]
 * *cnf(object):*
     * *x5t#S256(string):*
-    The thumbprint of the certificate that is allowed ot use the access token. [section 3.1] of [[RFC8705]]
+    The thumbprint of the certificate that is allowed to use the access token. [section 3.1] of [[RFC8705]]
 * *act(object):*
     * *sub(string):*
       The ID of the Peer connecting to the Service on behalf of another Peer. The field `grant.data.delegator.peer_ID` of the DelegatedServiceConnectionGrant. 
@@ -549,18 +549,18 @@ The Manager **MUST** list the Peers with whom the Peer has negotiated Contracts 
 
 The Manager **MUST** persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
 
-The Manager **MUST** persist the Peer ID, name and Manager address of each Peer who called the `announce` endpoint as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
+The Manager **MUST** persist the Peer ID, name and Manager address of each Peer who called the `announce` endpoint as specified in the [OpenAPI Specification](manager.yaml).
 
 ### Announce
 
 The `announce` is used to share the `Manager` address and `Peer` information among Peers. The `announce` is also used by the `Directory` to obtain the `Manager` addresses of all `Peers` in the `Group`. 
-Each `Peer` **MUST** call the `announce` endpoint of the Directory to register themselves as participant of the `Group`. 
+Each `Peer` **MUST** call the `announce` endpoint of a Directory to register themselves as participant of the `Group`. 
 
 In addition to announcing to the `Directory` a Manager **SHOULD** call the `announce` endpoint of the Peers with whom the Peer has negotiated Contracts when the address of Manager changes.
 
 ### Interfaces {#manager_interface}
 
-The Manager functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).  
+The Manager functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](manager.yaml).  
 
 ###  FSC manager address 
 
@@ -576,9 +576,9 @@ The `/token` endpoint **MUST** return an error response as described in [section
 
 #### Other endpoints
 
-The Manager **MUST** return the error response object as described in `.components/schemas/error` of the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
+The Manager **MUST** return the error response object as described in `.components/schemas/error` of the [OpenAPI Specification](manager.yaml).
 
-The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.ManagerErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).  
+The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.ManagerErrorCode` in the [OpenAPI Specification](manager.yaml).  
 
 The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_MANAGER`.  
 
@@ -599,7 +599,7 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_MANAGE
 
 ## Directory {#directory}
 
-The Directory is a Manager chosen by the Group to act as the Directory. 
+The Directory is a Manager chosen by the Group to act as a Directory. 
 
 The Directory is used by Peers to:
 
@@ -654,7 +654,7 @@ Clients **MAY** use TLS when communicating with the Outway.
 #### Obtaining access tokens
 
 Access tokens are obtained using the Client Credentials flow [section 4,4](https://www.rfc-editor.org/rfc/rfc6749#section-4.4) of [[RFC6749]].
-Access tokens **MUST** be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
+Access tokens **MUST** be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](manager.yaml).
 
 To request a token via the Client Credentials flow the following information must be sent to the Manager which acts as an Authorization Server:
 - GrantHash of a `Service Connection grant` or `Delegated Service Connection grant` provided in the `scope` field.
@@ -678,7 +678,7 @@ If the Error has occurred in the Inway or Service the Outway **MUST** return the
 
 The Outway **MUST** return an error response defined in the [Error handling section](#error_handling) when the error is produced by the Outway.
 
-The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.OutwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
+The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.OutwayErrorCode` in the [OpenAPI Specification](manager.yaml).
 
 The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_OUTWAY`.
 
@@ -739,7 +739,7 @@ The Inway **MUST** return the error response of a Service to the Outway without 
 
 The Inway **MUST** return an error response defined in the [Error handling section](#error_handling) when the error is produced by the Inway.
 
-The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.InwayErrorCode` in the [OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml).
+The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.InwayErrorCode` in the [OpenAPI Specification](manager.yaml).
 
 The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_INWAY`.
 
@@ -756,4 +756,4 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_INWAY`
 
 # References
 
-[OpenAPI Specification](https://gitlab.com/commonground/standards/fsc/-/raw/master/manager.yaml)
+[OpenAPI Specification](manager.yaml)

@@ -75,9 +75,19 @@ An HTTP API offered to the Group.
 
 The Trust Anchor (TA) is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
+
+*Trust Anchor List:*
+
+A list of one or more Trust Anchors. In the case of FSC, which uses an X.509 architecture, it is a list of all root certificates that are used as Trust Anchor. In practice this would be a list of one or more [Certificate Authorities](https://en.wikipedia.org/wiki/Certificate_authority) (CA's).
+Certificates issued by a CA that acts as a Trust Anchor are trusted within FSC Group.
+
+*Profile:* 
+
+A set of rules providing further restrictions and governance of the FSC Group. A Profile aligns on certain required parameters needed for the practical workings of an FSC Group. 
+
 ## Overall Operation of FSC Core
 
-Peers in a Group announce their HTTP APIs to the Group by publishing them as a Service to the Directory. A Group uses a single Directory that defines the scope of the Group. Peers use the Directory to discover what Services and Peers are available in the Group.
+Peers in a Group announce their HTTP APIs to the Group by publishing them as a Service to a Directory. A Group can use multiple Directories which define the scope of the Group. Peers use the Directories to discover what Services and Peers are available in the Group.
 Inways of a Peer expose Services to the Group. 
 Outways of a Peer connect to the Inway of a Peer providing a Service.
 Contracts define the Service publication to the Group and connections between Peers.
@@ -91,8 +101,8 @@ Managers provide access tokens which contain the authorization to connect a Serv
 Outways include the access tokens in requests to Inways
 The address of an Inway offering a Service is contained in the access token. 
 Inways authorize connection attempts by validating access tokens.
-Services in the Group can be discovered through the Directory.  
-The Manager's address of a Peer can be discovered through the Directory. 
+Services in the Group can be discovered through a Directory.  
+The Manager's address of a Peer can be discovered through a Directory. 
 
 To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant or DelegatedServiceConnectionGrant that specifies the connection. The FSC Core specification describes how Contracts are created, accepted, rejected and revoked. Once an authorization to connect is granted through a Contract, a connection from HTTP Client to HTTP Service will be authorized everytime an HTTP request to the Service is made.
 
@@ -108,12 +118,13 @@ It is **RECOMMENDED** to use FSC Core with the following extensions, each specif
 FSC Core provides the foundation for cooperation between organizations (Peers). However, in practice additional decisions have to be made to guarantee a functioning Group within a broader context.
 For example, it may be needed for a Group to have additional restrictions or agreements within the Group. Certain Group rules and restrictions are required for the operation of the Group, others provide optional agreements to enhance collaboration.
 
-The following decisions **MUST** be part of the Group:
-1. Select a [Trust Anchor](#trust_anchor)
+The following decisions **MUST** be part of the Profile:
+1. Select one or more [Trust Anchors](#trust_anchor) to include in the Trust Anchor list
 2. Select a [Group ID](#group_id)
 3. Select what determines the [Peer ID](#peer_id)
 4. Select what determines the [Peer name](#peer_name)
-5. Select at least one Peer who acts as a [Directory](#directory) of the Group
+5. Select at least one Peer who acts as the [Directory](#directory) of the Group
+
 6. Decide what ports are used for management traffic
 7. Determine requirements for allowed TLS versions and Cipher Suites 
 
@@ -132,4 +143,4 @@ A typical use case is a cooperation of many organizations that use APIs to excha
 Organizations can participate in multiple Groups at the same time. 
 Reasons for participating in multiple Groups could be the use of different environments for production and test deployments or when participating in different ecosystems like health industry and government industry.
 
-An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a Service in the Directory of each Group using a different Inway for each Group.
+An organization can offer the same API in multiple Groups. When doing so, the organization will be a Peer in every Group, and define the API as a Service in one of the Directories of each Group using a different Inway for each Group.

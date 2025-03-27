@@ -5,20 +5,20 @@ This chapter describes the basic architecture of an FSC system.
 ## Identity and Trust  {#trustanchor}
 
 Connections between Managers, Inways, Outways use Mutual Transport Layer Security (mTLS) with X.509 certificates. 
-Components in the Group are configured to accept the same (Sub-) Certificate Authorities (CA) as Trust Anchors (TA). Each TA is a Trusted Third Party that ensures the identity of the Peers by verifying a set of fields of the subject field , [section 4.1.2.6](https://rfc-editor.org/rfc/rfc5280) of [[RFC5279]] that act as [PeerID](#peer_id) in each X.509 certificate.
+Components in the Group are configured to accept the same (Sub-) Certificate Authorities (CA) as defined in the Trust Anchors list (TA). Each TA is a Trusted Third Party that ensures the identity of the Peers by verifying a set of fields of the subject field , [section 4.1.2.6](https://rfc-editor.org/rfc/rfc5280) of [[RFC5279]] that act as [PeerID](#peer_id) in each X.509 certificate.
 When multiple TAs are used the TAs must ensure that the elements of the subject field used to identify a Peer are the same across the TAs. 
 
 ![mTLS Connections](diagrams/seq-mtls-connections.svg "mTLS Connections")
 
 ## Contract Management
 
-Contracts are negotiated between the Managers of Peers. The Directory provides the address of each Manager.
+Contracts are negotiated between the Managers of Peers. A Directory provides the address of each Manager.
 Connections to Services are authorized by Contracts with ServiceConnectionGrants. To create a new contract, the Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Management functionality). For each desired connection, a ServiceConnectionGrant is formulated that contains identifying information about both the Outway from the Service consumer and the Service of the Service provider. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
 Contracts can contain multiple Peers. E.g. if a Peer wants a single Contract for an application, this Contract can contain all the connections required for that application.
 
 ![Contract Management](diagrams/seq-contract-management.svg "Contract Management")
 
-1. The initiating Peer gets the address of the Manager from the Directory.
+1. The initiating Peer gets the address of the Manager from a Directory.
 2. The Directory return the Manager address to the Peer.
 3. The initiating Peer sends the Contract proposal with its accept signature to the receiving Peer.
 4. The receiving Peer sends back its own accept signature to the initiating Peer.
@@ -47,13 +47,12 @@ In order to create a Group, additional [Group Rules & Restrictions](#group_rules
 
 ## Service discovery
 
-Every Group is defined by one Directory that contains the Services and Peers in the Group.
-All Peers in the Group make themselves known to the Directory by having their Manager call the [Announce](#announce) endpoint of the Directory. 
-This way the Directory contains a list of all Peers in the Group with their corresponding Manager address.
+Every Group is defined by at least one Directory, which contains the Services and Peers in the Group.
+Peers can make themselves known to a Directory by having their Manager call the [Announce](#announce) endpoint of the Directory. 
 
 When publishing services, Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) or [DelegatedServicePublicationGrant](#grant_delegated_service_publication) to the Directory.
 
-Peers query the Directory to discover the Services available in the Group 
+Peers query the Directories to discover the Services available in the Group 
 
 ![Providing a Service](diagrams/seq-providing-a-service.svg "Providing a Service")
 
