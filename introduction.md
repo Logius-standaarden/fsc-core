@@ -127,6 +127,7 @@ The following decisions **MUST** be part of the Profile:
 
 6. Decide what ports are used for management traffic
 7. Determine requirements for allowed TLS versions and Cipher Suites 
+8. Determine which network will be used
 
 In addition to the mandatory decisions, a Group **MAY** also contain additional agreements or restrictions. These are not technically required for the operation of FSC Core, but can become mandatory within a Group. An example would be a set of additional rules in order to comply with local legislation.
 Below are a few examples listed of these additional decisions for inspirational purposes:
