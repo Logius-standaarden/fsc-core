@@ -310,6 +310,9 @@ The Grant hash can be created by executing the following steps:
 1. Convert `contract.content.iv` to bytes and append the bytes to `grantBytes`.
 1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the [OpenAPI Specification](manager.yaml)
    To convert the Grant type to an integer see the [type mapping](#type_mapping_grant) 
+1. For each extension field, create a hash according to the hashing algorithm specified in the corresponding extension.
+1. Sort the extension hashes in ascending order.
+1. Append the extension hashes to the `grantBytes.` 
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. The int32 value per hash algorithm type is defined in the [type mapping](#type_mapping_hash_algorithm).. E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
