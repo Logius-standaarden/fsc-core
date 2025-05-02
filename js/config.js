@@ -9,7 +9,6 @@ let respecConfig = {
     publishDate: "2024-12-12",
     publishVersion: "1.0.0",
 
-    previousMaturity: "DEF",
     editors:
         [
             {
