@@ -426,7 +426,7 @@ components:
     headerFscManagerAddress:
       in: header
       name: fsc-manager-address
-      description: The URL of the Manager. The scheme must be https and the URL must contain the port.
+      description: The URL of the Manager. The scheme must be https and the URL must contain the port. Or, in case of a Distribute-Only-Peer, the value `-` is allowed.
       schema:
         type: string
         example: https://manager.com:8443

@@ -10,7 +10,7 @@ The protocol used between the Inway and Outway can be either HTTP/1.1[[RFC9112]]
 
 ### Port configuration
 
-In order to provide a predictable network configuration FSC limits the selection of network ports to be used by components. 
+In order to provide a predictable network configuration, FSC limits the selection of network ports to be used by components. 
 The ports used by FSC components **MUST** be `443` or `8443`. 
 
 Port `443` is **RECOMMENDED** for data traffic i.e. HTTP requests to a Service.  
@@ -228,6 +228,8 @@ A signature on a Contract **SHOULD** only be accepted if the Peer is present in 
 - `grant.data.service.delegator.peer_id`
 
 The JWS **MUST** specify the certificate thumbprint of the keypair used to create the digital signature using the `x5t#S256` [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]] field of the `JOSE Header` [section 4](https://www.rfc-editor.org/rfc/rfc7515#section-4) of [[RFC7515]].
+
+The JWS **MUST** specify the certificate (chain) used to create the digital signature using the `x5c` [section 4.1.6](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]] field of the `JOSE Header` [section 4](https://www.rfc-editor.org/rfc/rfc7515#section-4) of [[RFC7515]].
 
 The JWS **MUST** use the JWS Compact Serialization described in [section 7.1](https://www.rfc-editor.org/rfc/rfc7515#section-7.1) of [[RFC7515]]
 
@@ -492,6 +494,8 @@ The Manager **MUST** validate Contracts using the rules described in [Contract v
 
 The Manager **MUST** persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
 
+The Manager **MUST** propagate the Contract to each of the Peers in the Contract after creating it. Except for Peers who announced themselves as Distribute-Only-Peers.
+
 It is **RECOMMENDED** to implement a retry and backoff mechanism in case the Contract propagation fails.
 
 #### Signatures
@@ -500,7 +504,7 @@ The Manager **MUST** validate the signature according to the rules described in 
 
 The Manager **MUST** generate an error response if a signature is invalid.
 
-The Manager **MUST** propagate the signature to each of the Peers in the Contract when the Peer signs the Contract.
+The Manager **MUST** propagate the signature to each of the Peers in the Contract when the Peer signs the Contract. Except for Peers who announced themselves as Distribute-Only-Peers. 
 
 It is **RECOMMENDED** to implement a retry and backoff mechanism in case the signature propagation fails.
 
@@ -557,6 +561,8 @@ The `announce` is used to share the `Manager` address and `Peer` information amo
 Each `Peer` **MUST** call the `announce` endpoint of a Directory to register themselves as participant of the `Group`. 
 
 In addition to announcing to the `Directory` a Manager **SHOULD** call the `announce` endpoint of the Peers with whom the Peer has negotiated Contracts when the address of Manager changes.
+
+Distribute-Only-Peers `announce` themselves with the Manager address `-`.   
 
 ### Interfaces {#manager_interface}
 
