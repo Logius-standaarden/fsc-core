@@ -4,6 +4,7 @@
 - https://github.com/Logius-standaarden/fsc-core
 - https://github.com/Logius-standaarden/fsc-logging
 - https://github.com/Logius-standaarden/fsc-properties
+- https://github.com/Logius-standaarden/fsc-regulated-area
 - https://github.com/Logius-standaarden/fsc-test-suite
 
 ### Publicaties
