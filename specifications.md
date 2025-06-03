@@ -126,7 +126,7 @@ example Contract with a ServiceConnectionGrant
 - At least one Grant is set in the field `contract.content.grants`.
 - A `ServicePublicationGrant` or `DelegatedServicePublicationGrant` cannot be mixed with other Grants. Mixing Grant types with different use-cases is prohibited to prevent the creation of Contracts that are hard to maintain and validate.
 
-Per Grant type different validation rules apply.
+Per Grant type, different validation rules apply.
 
 #### ServicePublicationGrant {#service_publication_grant}
 
@@ -137,6 +137,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `grant.data.directory.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `grant.data.service.peer_id`
 - A Service name which matches the regular expression `^[a-zA-Z0-9-._]{1,100}$` is provided in the field  `grant.data.service.name` 
+- If `grant.data.properties` is provided, it **MUST** be a valid JSON Object.
 
 Signature requirements:  
 
@@ -154,6 +155,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `grant.data.directory.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager providing the Service matches the value of the field `grant.data.service.peer_id`
 - The validation rules of the field `Service` of the ServicePublicationGrant described in Core must be applied to the field `grant.data.service` of the DelegatedServicePublicationGrant
+- If `grant.data.properties` is provided, it **MUST** be a valid JSON Object.
 
 Signature requirements:
 
@@ -171,6 +173,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Service providing Peer matches the value of the field `grant.data.outway.peer_id`
 - The Service provided in the field `grant.data.service.name` is offered by the Peer provided in the field `grant.data.service.peer_id`
 - A Public key fingerprint also called thumbprint is provided in the field `grant.data.outway.public_key_thumbprint`
+- If `grant.data.properties` is provided, it **MUST** be a valid JSON Object.
 
 Signature requirements:
 
@@ -189,6 +192,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager of the Peer providing the Service matches with the value of the field `grant.data.service.peer_id`
 - The validation rules of the fields `Outway` and `Service` of the ServiceConnectionGrant described in Core must be applied to corresponding fields `grant.data.outway` and `grant.data.service` of the DelegatedServiceConnectionGrant
 - In case of a Service that is published on behalf of another Peer, The Peer ID provided by the X.509 certificate used by the Manager of the Peer delegating the publication of Service matches with the value of the field `grant.data.service.delegator.peer_id`
+- If `grant.data.properties` is provided, it **MUST** be a valid JSON Object.
 
 Signature requirements:
 
@@ -196,6 +200,30 @@ Signature requirements:
 - A signature is present with the subject serial number of the Peer defined the field `grant.data.delegator.peer_id`
 - A signature is present with the subject serial number of the Peer defined the field `grant.data.service.peer_id`
 - In case of a Service that is published on behalf of another Peer, a signature is present with the subject serial number of the Peer defined the field `grant.data.service.delegator.peer_id`
+
+### Properties
+
+Contracts contain the minimum amount of information needed to ensure a secure Service connection or publication. 
+Some use cases might require additional information to ensure correct authentication/authorization or to provide additional functionality. 
+
+Usecase specific information can be provided using the `properties` field of a Grant. This field can contain any type of data as long as the data is valid JSON, making it flexible and suitable for a broad range of use cases.
+
+The data in Contracts is hashed and signed. To ensure hash consistency, the FSC specification defines the exact order in which fields should be hashed. However, the `properties` object can contain arbitrary data types, making it impossible to predetermine a fixed field ordering as is done for Grants.
+To address this issue, the `properties` object must be converted to a canonical JSON representation as specified in [[RFC8785]]. This canonicalization ensures deterministic hashing regardless of the original field ordering or data structure variations.
+
+#### requirements
+
+- Each Grant **MAY** contain a `properties` object. 
+- The `properties` object **MUST** be added to Grants using the key `properties`.
+- The `properties` object **MUST** be a valid JSON object that can contain any number of key-value pairs.
+- When provided, the fields of the `properties` object **MUST** be included in the access token as specified in the [access token section].(#access_token)
+- When provided, the fields of the `properties` object **MUST** be included in the Grant Hash as specified in the [Grant hash section].(#grant-hash)
+
+#### Security Considerations
+
+- It is **RECOMMENDED** to implement a size limit of 1 MB for the serialized properties object. This limit should prevent excessive data transfer and storage. 
+- Sensitive information like secrets or other private information should not be stored in the `properties` object, as it may be visible to Services and potentially logged or stored in various systems.
+- Implementers should be aware that the content of the `properties` object is unsanitized. For example, they should consider sanitizing the data before showing it in user interfaces to prevent XSS injections or other security vulnerabilities.
 
 ### Signatures {#signatures}
 
@@ -279,7 +307,7 @@ The algorithm ensures that the content hash is unique for a specific Contract co
 1. Convert `contract.content.validity.not_before` to bytes and append the bytes to `contentBytes`.
 1. Convert `contract.content.validity.not_after` to bytes and append the bytes to `contentBytes`.
 1. Convert `contract.content.created_at` to bytes and append the bytes to `contentBytes`.
-1. Create an array of bytes arrays called `grantByteArrays`
+1. Create an array of byte arrays called `grantByteArrays`
 1. For each Grant in `contract.content.grants`
    1. Create a Grant Hash for the Grant as documented in the [Grant Hash section](#grant_hash).
    1. Convert the Grant Hash from string to bytes and store them in a byte array named `grantBytes`.
@@ -289,7 +317,7 @@ The algorithm ensures that the content hash is unique for a specific Contract co
 1. Hash the `contentBytes` using the hash algorithm described in `contract.content.algorithm`.
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and surround it with dollar signs (`$`). When using the `SHA3-512` algorithm this would result in `$1$`. 
-   To convert the hash algorithm to an integer see the [type mapping](#type_mapping_hash_algorithm)
+   To convert the hash algorithm to an integer, see the [type mapping](#type_mapping_hash_algorithm)
 1. Add `1$` as suffix to the string created in step 13. This is the enum `HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of the [OpenAPI Specification](manager.yaml) as int32. If the string created in step 13 is `$1$`, the result should now be `$1$1$`
 1. Add the Base64 generated in step 12 as suffix to the string generated in step 14.
 
@@ -301,7 +329,7 @@ The algorithm ensures that the content hash is unique for a specific Contract co
 
 ### Grant hash {#grant_hash}
 
-The Grant hash is used in the access token request to identify the Contract and Grant which contain the authorization for the connection to the Service. 
+The Grant hash is used in the access token request to identify the Contract and Grant which contains the authorization for the connection to the Service. 
 The `iv` (Initialization vector) field is included in the Grant hash to create a Grant hash that references to a single Contract. 
 The Grant hash can be created by executing the following steps:
 
@@ -309,7 +337,7 @@ The Grant hash can be created by executing the following steps:
 1. Convert `contract.content.group_id` to bytes and append the bytes to `grantBytes`.
 1. Convert `contract.content.iv` to bytes and append the bytes to `grantBytes`.
 1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the [OpenAPI Specification](manager.yaml)
-   To convert the Grant type to an integer see the [type mapping](#type_mapping_grant) 
+   To convert the Grant type to an integer see the [type mapping](#type_mapping_grant). If `grant.data.properties` is set, canonicalize the `properties` object as described in [[RFC8785]]. Hash the canonicalized JSON string using the hash algorithm described in `contract.content.algorithm` and add the bytes to `grantBytes`. 
 1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. The int32 value per hash algorithm type is defined in the [type mapping](#type_mapping_hash_algorithm).. E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
@@ -374,7 +402,7 @@ The access token is a certificate-bound access token as specified in [section 3]
 The payload of the JWT:
 
 * *gth(string):*  
-  The hash of the Grant that serves as basis for the authorization
+  The hash of the Grant that serves as the basis for the authorization
 * *gid(string):*
   The ID of the Group
 * *sub(string):*
@@ -388,7 +416,7 @@ The payload of the JWT:
 * *exp(int):*
   Expiration time [section 4.1.4](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.4) of [[RFC7519]]
 * *nbf(int):*
-  Not before  [section 4.1.5](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.5) of [[RFC7519]]
+  Not before [section 4.1.5](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.5) of [[RFC7519]]
 * *cnf(object):*
     * *x5t#S256(string):*
     The thumbprint of the certificate that is allowed to use the access token. [section 3.1] of [[RFC8705]]
@@ -397,10 +425,12 @@ The payload of the JWT:
       The ID of the Peer connecting to the Service on behalf of another Peer. The field `grant.data.delegator.peer_ID` of the DelegatedServiceConnectionGrant. 
 * *pdi(string):*
   The ID of the Peer delegating the publication of the Service to another Peer. The field `grant.data.service.delegator.peer_ID` of the ServiceConnectionGrant or DelegatedServiceConnectionGrant.
+* *prp(object):*
+  If the Grant contains a `properties` object, its content should be included in the claim `prp`   
 * *add(object):*
   An object which can be used to provide additional data 
 
-Example payload of a JWT for a Peer (`sub: 1234567890`) connecting to a Service (`svc: serviceName`) offered by a Peer(`iss: 1234567891`):
+Example payload of a JWT for a Peer (`sub: 1234567890`) connecting to a Service (`svc: serviceName`) offered by a Peer(`iss: 1234567891`) with the `properties` object provided in the Grant :
 
 ```json
 {
@@ -414,6 +444,9 @@ Example payload of a JWT for a Peer (`sub: 1234567890`) connecting to a Service 
     "nbf": 1493722800,
     "cnf": {
       "x5t#S256": "DpAyDYakmVAQ4oOJC3UYLRk/ONRCqMj00TeGJemMiLA"
+    },
+    "prp": {
+      "properties_key": "properties_value"
     },
     "add": {}
 }
@@ -530,6 +563,7 @@ Before issuing an access token the Manager **MUST** validate that:
 The `cnf.x5t#S256` claim **MUST** contain the certificate thumbprint of the X.509 certificate provided by the client requesting the token according to [section 3.1] of [[RFC8705]].
 The `act` claim **MUST** be set when an access token is generated for a Peer who is connecting to the Service on behalf of another Peer. I.e. the authorization to connect has been granted using a DelegatedServiceConnectionGrant.
 The `pdi` claim **MUST** be set when an access token is generated for a Service which is being offered on behalf of another Peer. 
+The `prp` claim **MUST** be set when the Grant contains the `properties` object in the `grant.data.properties` field. 
 
 The Manager **MUST** include the address of the Inway in the field `aud` of the access token.
 
