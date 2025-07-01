@@ -299,46 +299,26 @@ This validation is done by comparing the hash of the received Contract with the 
 The Validation **MUST** be done every time a Peer receives a signature.  
 
 The `contract_content_hash` of the signature payload contains the signature hash. The algorithm to create a `contract_content_hash` is described below. 
-The algorithm ensures that the content hash is unique for a specific Contract content. Because a signature contains the content hash it becomes possible to guarantee that a signature is intended for a specific Contract.
+The algorithm ensures that the content hash is unique for a specific Contract content. Because a signature contains the content hash, it becomes possible to guarantee that a signature is intended for a specific Contract.
 
-1. Create a byte array called `contentBytes`.
-1. Convert `contract.content.group_id` to bytes and append the bytes to `contentBytes`.
-1. Append `contract.content.iv` to `contentBytes`.
-1. Convert `contract.content.validity.not_before` to bytes and append the bytes to `contentBytes`.
-1. Convert `contract.content.validity.not_after` to bytes and append the bytes to `contentBytes`.
-1. Convert `contract.content.created_at` to bytes and append the bytes to `contentBytes`.
-1. Create an array of byte arrays called `grantByteArrays`
-1. For each Grant in `contract.content.grants`
-   1. Create a Grant Hash for the Grant as documented in the [Grant Hash section](#grant_hash).
-   1. Convert the Grant Hash from string to bytes and store them in a byte array named `grantBytes`.
-   1. Append `grantBytes` to `grantByteArrays`.
-1. Sort the byte arrays in `grantByteArrays` in ascending order.
-1. Append the bytes of `grantByteArrays` to `contentBytes`.
-1. Hash the `contentBytes` using the hash algorithm described in `contract.content.algorithm`.
+1. Convert `contract.content` to Canonical JSON data as described in [[RFC8785]].
+1. Hash the Canonical JSON data using the hash algorithm specified in `contract.content.algorithm`.
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and surround it with dollar signs (`$`). When using the `SHA3-512` algorithm this would result in `$1$`. 
    To convert the hash algorithm to an integer, see the [type mapping](#type_mapping_hash_algorithm)
 1. Add `1$` as suffix to the string created in step 13. This is the enum `HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of the [OpenAPI Specification](manager.yaml) as int32. If the string created in step 13 is `$1$`, the result should now be `$1$1$`
-1. Add the Base64 generated in step 12 as suffix to the string generated in step 14.
-
-#### Data types {#data_types}
-
-- `int32`: use `Little-endian` as endianness when converting to a byte array
-- `int64`: use `Little-endian` as endianness when converting to a byte array
-- `string`: use `utf-8` encoding when converting to a byte array
+1. Add the Base64 generated in step 4 as suffix to the string generated in step 5.
 
 ### Grant hash {#grant_hash}
 
-The Grant hash is used in the access token request to identify the Contract and Grant which contains the authorization for the connection to the Service. 
+The Grant hash is used in the access token request to identify the Grant which contains the authorization for the connection to the Service. 
 The `iv` (Initialization vector) field is included in the Grant hash to create a Grant hash that references to a single Contract. 
 The Grant hash can be created by executing the following steps:
 
-1. Create a byte array named `grantBytes`
-1. Convert `contract.content.group_id` to bytes and append the bytes to `grantBytes`.
-1. Convert `contract.content.iv` to bytes and append the bytes to `grantBytes`.
-1. Convert the value of each field of the Grant to bytes and append the bytes to the `grantBytes` in the same order as the fields are defined in the [OpenAPI Specification](manager.yaml)
-   To convert the Grant type to an integer see the [type mapping](#type_mapping_grant). If `grant.data.properties` is set, canonicalize the `properties` object as described in [[RFC8785]]. Hash the canonicalized JSON string using the hash algorithm described in `contract.content.algorithm` and add the bytes to `grantBytes`. 
-1. Hash the `grantBytes` using the hash algorithm described in `contract.content.algorithm`
+1. Create the content hash as described in the [content hash](#content_hash) section. 
+1. Convert the content of `grant.data` to Canonical JSON data as described in [[RFC8785]]
+1. Append the Canonical JSON data to the content hash
+1. Hash the result of step 3 using the hash algorithm specified in `contract.content.algorithm`.
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. The int32 value per hash algorithm type is defined in the [type mapping](#type_mapping_hash_algorithm).. E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
 1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. The int32 value per hash type is defined in the [type mapping](#type_mapping_hash). E.g. The enum `HASH_TYPE_SERVICE_PUBLICATION_GRANT` becomes `2$`.
@@ -522,6 +502,8 @@ The Manager **MUST** only accept mTLS connections from other external Managers w
 The Manager **MUST** support Contracts containing Grants of the type ServicePublicationGrant and ServiceConnectionGrant.
 
 The Manager **MUST** validate Contracts using the rules described in [Contract validation section](#contract_validation)
+
+When storing Contracts, the order of items in arrays **MUST** be persisted to guarantee consistent [Contract hashes](#content_hash) and [Grant hashes](#grant_hash).  
 
 The Manager **MUST** persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
 
