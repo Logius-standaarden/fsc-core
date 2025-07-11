@@ -2,12 +2,13 @@ let respecConfig = {
     useLogo: true,
     useLabel: true,
     license: "cc-by",
-    specStatus: "WV",
+    specStatus: "DEF",
     specType: "ST",
     pubDomain: "fsc",
     shortName: "core",
     publishDate: "2024-12-12",
-    publishVersion: "1.0.0",
+    publishVersion: "1.0.1",
+    previousPublishVersion: "1.0.0",
 
     editors:
         [
