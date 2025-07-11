@@ -279,7 +279,7 @@ The algorithm ensures that the content hash is unique for a specific Contract co
 1. Convert `contract.content.validity.not_before` to bytes and append the bytes to `contentBytes`.
 1. Convert `contract.content.validity.not_after` to bytes and append the bytes to `contentBytes`.
 1. Convert `contract.content.created_at` to bytes and append the bytes to `contentBytes`.
-1. Create an array of bytes arrays called `grantByteArrays`
+1. Create an array of byte arrays called `grantByteArrays`
 1. For each Grant in `contract.content.grants`
    1. Create a Grant Hash for the Grant as documented in the [Grant Hash section](#grant_hash).
    1. Convert the Grant Hash from string to bytes and store them in a byte array named `grantBytes`.
@@ -291,13 +291,14 @@ The algorithm ensures that the content hash is unique for a specific Contract co
 1. Convert the value of `contract.content.algorithm` to an int32 and surround it with dollar signs (`$`). When using the `SHA3-512` algorithm this would result in `$1$`. 
    To convert the hash algorithm to an integer see the [type mapping](#type_mapping_hash_algorithm)
 1. Add `1$` as suffix to the string created in step 13. This is the enum `HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of the [OpenAPI Specification](manager.yaml) as int32. If the string created in step 13 is `$1$`, the result should now be `$1$1$`
-1. Add the Base64 generated in step 12 as suffix to the string generated in step 14.
+1. Add the Base64 generated in step 12 as a suffix to the string generated in step 14.
 
 #### Data types {#data_types}
 
 - `int32`: use `Little-endian` as endianness when converting to a byte array
 - `int64`: use `Little-endian` as endianness when converting to a byte array
 - `string`: use `utf-8` encoding when converting to a byte array
+- `UUIDv7`: the field `contract.content.iv` contains an UUIDv7 in the form of a string. The string **must** be parsed as an UUIDv7. The bytes of the UUIDv7 are added to the byte array of the Content or Grant hash.   
 
 ### Grant hash {#grant_hash}
 
