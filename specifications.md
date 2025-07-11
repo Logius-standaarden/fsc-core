@@ -353,6 +353,21 @@ The Grant hash can be created by executing the following steps:
 | SERVICE_TYPE_DELEGATED_SERVICE | 2            |
 
 
+<section class="informative">
+
+<h3> Certificate renewal</h3>
+
+There are two scenarios in which a certificate renewal can affect Contracts.
+
+1. The certificate used to add an accept signature expires before the Contract expires.  
+In this scenario the Peer has to create a new accept signature using the new certificate and resend it to the other Peers on the Contract. Without a valid certificate, Peers cannot verify the signature, rendering the Contract invalid.
+
+2. A Contract contains a ServiceConnectionGrant(s) with a thumbprint of a public key used by a certificate that expires before the Contract expires.  
+In this scenario, the Peer can renew the certificate without rotating the keypair, ensuring that the public key thumbprint remains unchanged. As a result, the Contract remains unaffected. 
+However, if the keypair is rotated, the public key thumbprint will change and the Outway can no longer use the ServiceConnectionGrant to connect to the Service. As a result, a new Contract will need to be created containing a ServiceConnectionGrant with the new public key thumbprint.
+
+</section>
+
 ## Access token {#access_token}
 
 The access token is a JSON Web Token (JWT) as specified in [[RFC7519]]
