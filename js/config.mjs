@@ -10,6 +10,7 @@ loadRespecWithConfiguration({
     shortName: "core",
     publishDate: "2024-12-12",
     publishVersion: "1.0.0",
+    prevVersion: [],
 
     editors:
         [
