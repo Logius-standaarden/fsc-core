@@ -298,7 +298,7 @@ The algorithm ensures that the content hash is unique for a specific Contract co
 - `int32`: use `Little-endian` as endianness when converting to a byte array
 - `int64`: use `Little-endian` as endianness when converting to a byte array
 - `string`: use `utf-8` encoding when converting to a byte array
-- `UUIDv7`: the field `contract.content.iv` contains an UUIDv7 in the form of a string. The string **must** be parsed as an UUIDv7. The bytes of the UUIDv7 are added to the byte array of the Content or Grant hash.   
+- `UUIDv7`: the field `contract.content.iv` contains a UUIDv7 in the form of a string. The string **must** be parsed as a UUIDv7. The bytes of the UUIDv7 are added to the byte array of the Content or Grant hash.   
 
 ### Grant hash {#grant_hash}
 
