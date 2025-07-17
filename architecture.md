@@ -104,13 +104,13 @@ The Contract is distributed among the three Peers. Once the Contract is signed b
 
 ![Delegate connection](diagrams/seq-delegate-connection.svg "Delegate a connection to a Service")
 
-1. The Delegator creates a Contract with a Delegated Service Connection Grant which contains the details of the Service and the Peer who will be acting as Delegatee (who will consume the Service).
-2. The Delegator adds its own accept signature to the Contract.
-3. The Delegator sends the Contract and accept signature to the Delegatee.
-4. The Delegatee adds its own accept signature.
-5. The Delegatee sends the accept signature to the Delegator.
-6. The Delegatee sends the accept signature to the Service Provider.
-7. The Delegator sends the Contract and accept signature to the Service Provider.
+1. The Delegatee creates a Contract with a Delegated Service Connection Grant which contains the details of the Delegator, the Service and the Delegatee (the Peer who will consume the Service).
+2. The Delegatee adds its own accept signature to the Contract.
+3. The Delegatee sends the Contract and accept signature to the Delegator.
+4. The Delegatee sends the Contract and accept signature to the Service Provider.
+5. The Delegator adds its own accept signature.
+6. The Delegator sends the accept signature to the Delegatee.
+7. The Delegator sends the accept signature to the Service Provider.
 8. The Service Provider adds its own accept signature.
 9. The Service Provider sends the accept signature to the Delegatee.
 10. The Service Provider sends the accept signature to the Delegator.
@@ -122,15 +122,15 @@ Once the Contract is signed by all the Peers, the Outway of the Delegatee can co
 
 ![Delegate connection](diagrams/seq-delegate-connection-delegated-publication.svg "Delegate a connection to a Service that is offered on behalf of another Peer")
 
-1. The Delegator creates a Contract with a Delegated Service Connection Grant which contains the details of the Service and the Peer who will be acting as Delegatee (who will consume the Service).
-2. The Delegator adds its own accept signature to the Contract.
-3. The Delegator sends the Contract and accept signature to the Delegatee.
-4. The Delegator sends the Contract and accept signature to the Service provider.
-5. The Delegator sends the Contract and accept signature to the Delegator of the Service publication.
-6. The Delegatee adds its own accept signature.
-7. The Delegatee sends the accept signature to the Delegator.
-8. The Delegatee sends the accept signature to the Service provider.
-9. The Delegatee sends the accept signature to the Delegator of the Service publication.
+1. The Delegatee creates a Contract with a Delegated Service Connection Grant which contains the details of the Delegator, the Service and the Delegatee (the Peer who will consume the Service).
+2. The Delegatee adds its own accept signature to the Contract.
+3. The Delegatee sends the Contract and accept signature to the Delegator.
+4. The Delegatee sends the Contract and accept signature to the Service provider.
+5. The Delegatee sends the Contract and accept signature to the Delegator of the Service publication.
+6. The Delegator adds its own accept signature.
+7. The Delegator sends the accept signature to the Delegatee.
+8. The Delegator sends the accept signature to the Service provider.
+9. The Delegator sends the accept signature to the Delegator of the Service publication.
 10. The Service provider adds its own accept signature.
 11. The Service provider sends the accept signature to the Delegatee.
 12. The Service provider sends the accept signature to the Delegator.
