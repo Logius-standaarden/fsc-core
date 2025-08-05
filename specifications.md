@@ -81,9 +81,9 @@ The HTTP status codes that **MUST** be used in combination with the HTTP header 
 ### JSON
 
 Since all hashes are created using the JSON Canonicalization Scheme (JCS) [[RFC8785]] representation, the content
-of a Contract MUST conform to the rules as described in [[RFC8259]] and [[RFC7493]].
+of a Contract **MUST** conform to the rules as described in [[RFC8259]] and [[RFC7493]].
 
-When introducing new properties as part of an extension, these MUST also be checked against these rules.
+When introducing new properties as part of an extension, these **MUST** also be checked against these rules.
 
 ## Contracts
 
@@ -215,10 +215,7 @@ Some use cases might require additional information to ensure correct authentica
 
 Use case specific information can be provided using the `properties` field of a Grant. This field can contain any type of data as long as the data is valid JSON, making it flexible and suitable for a broad range of use cases.
 
-The data in Contracts is hashed and signed. To ensure hash consistency, the FSC specification defines the exact order in which fields should be hashed. However, the `properties` object can contain arbitrary data types, making it impossible to predetermine a fixed field ordering as is done for Grants.
-To address this issue, the `properties` object must be converted to a canonical JSON representation as specified in [[RFC8785]]. This canonicalization ensures deterministic hashing regardless of the original field ordering or data structure variations.
-
-#### requirements
+#### Requirements
 
 - Each Grant **MAY** contain a `properties` object. 
 - The `properties` object **MUST** be added to Grants using the key `properties`.
