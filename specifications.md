@@ -213,7 +213,7 @@ Signature requirements:
 Contracts contain the minimum amount of information needed to ensure a secure Service connection or publication. 
 Some use cases might require additional information to ensure correct authentication/authorization or to provide additional functionality. 
 
-Usecase specific information can be provided using the `properties` field of a Grant. This field can contain any type of data as long as the data is valid JSON, making it flexible and suitable for a broad range of use cases.
+Use case specific information can be provided using the `properties` field of a Grant. This field can contain any type of data as long as the data is valid JSON, making it flexible and suitable for a broad range of use cases.
 
 The data in Contracts is hashed and signed. To ensure hash consistency, the FSC specification defines the exact order in which fields should be hashed. However, the `properties` object can contain arbitrary data types, making it impossible to predetermine a fixed field ordering as is done for Grants.
 To address this issue, the `properties` object must be converted to a canonical JSON representation as specified in [[RFC8785]]. This canonicalization ensures deterministic hashing regardless of the original field ordering or data structure variations.
