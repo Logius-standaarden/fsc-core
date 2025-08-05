@@ -78,6 +78,13 @@ The response body must contain an object as described in `.components/schemas/er
 
 The HTTP status codes that **MUST** be used in combination with the HTTP header `Fsc-Error-Code` are defined in the sections 3.7.1.4 and 3.8.2.2.
 
+### JSON
+
+Since all hashes are created using the JSON Canonicalization Scheme (JCS) [[RFC8785]] representation, the content
+of a Contract MUST conform to the rules as described in [[RFC8259]] and [[RFC7493]].
+
+When introducing new properties as part of an extension, these MUST also be checked against these rules.
+
 ## Contracts
 
 The content of a Contract is defined in the object `.components/schemas/contractContent` of the [OpenAPI Specification](manager.yaml)
