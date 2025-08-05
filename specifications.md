@@ -144,7 +144,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `grant.data.directory.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Directory matches the value of the field `grant.data.service.peer_id`
 - A Service name which matches the regular expression `^[a-zA-Z0-9-._]{1,100}$` is provided in the field  `grant.data.service.name` 
-- If `grant.data.properties` is provided, it **MUST** be a valid JSON Object.
+- If `grant.data.properties` is provided, it **MUST** be a valid JSON Object
 
 Signature requirements:  
 
@@ -162,7 +162,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager of the Directory Peer matches the value of the field `grant.data.directory.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager providing the Service matches the value of the field `grant.data.service.peer_id`
 - The validation rules of the field `Service` of the ServicePublicationGrant described in Core must be applied to the field `grant.data.service` of the DelegatedServicePublicationGrant
-- If `grant.data.properties` is provided, it **MUST** be a valid JSON Object.
+- If `grant.data.properties` is provided, it **MUST** be a valid JSON Object
 
 Signature requirements:
 
@@ -180,7 +180,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Service providing Peer matches the value of the field `grant.data.outway.peer_id`
 - The Service provided in the field `grant.data.service.name` is offered by the Peer provided in the field `grant.data.service.peer_id`
 - A Public key fingerprint also called thumbprint is provided in the field `grant.data.outway.public_key_thumbprint`
-- If `grant.data.properties` is provided, it **MUST** be a valid JSON Object.
+- If `grant.data.properties` is provided, it **MUST** be a valid JSON Object
 
 Signature requirements:
 
@@ -199,7 +199,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager of the Peer providing the Service matches with the value of the field `grant.data.service.peer_id`
 - The validation rules of the fields `Outway` and `Service` of the ServiceConnectionGrant described in Core must be applied to corresponding fields `grant.data.outway` and `grant.data.service` of the DelegatedServiceConnectionGrant
 - In case of a Service that is published on behalf of another Peer, The Peer ID provided by the X.509 certificate used by the Manager of the Peer delegating the publication of Service matches with the value of the field `grant.data.service.delegator.peer_id`
-- If `grant.data.properties` is provided, it **MUST** be a valid JSON Object.
+- If `grant.data.properties` is provided, it **MUST** be a valid JSON Object
 
 Signature requirements:
 
