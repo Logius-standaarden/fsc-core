@@ -210,10 +210,14 @@ Signature requirements:
 
 ### Properties
 
-Contracts contain the minimum amount of information needed to ensure a secure Service connection or publication. 
+Contracts contain the minimum amount of information needed to ensure a secure Service Connection or Publication. 
 Some use cases might require additional information to ensure correct authentication/authorization or to provide additional functionality. 
 
-Use case specific information can be provided using the `properties` field of a Grant. This field can contain any type of data as long as the data is valid JSON, making it flexible and suitable for a broad range of use cases.
+Use case specific information can be provided using the `properties` field of a Grant. 
+This field can contain any type of data as long as the data is valid JSON, making it flexible and suitable for a broad range of use cases.
+
+Only a limited set of properties is allowed. These should be documented in an [extension](https://github.com/Logius-standaarden/fsc-extensie-template) 
+and the extension should be supported by the FSC Group you are using.
 
 #### Requirements
 
