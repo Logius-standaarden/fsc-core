@@ -609,6 +609,10 @@ components:
             mapping:
               SERVICE_TYPE_SERVICE: "#/components/schemas/service"
               SERVICE_TYPE_DELEGATED_SERVICE: "#/components/schemas/delegatedService"
+        properties:
+          description: Optional JSON object with arbitrary key-value pairs
+          additionalProperties: true
+          type: object
       required:
         - type
         - outway
@@ -623,6 +627,10 @@ components:
           $ref: "#/components/schemas/directory"
         service:
           $ref: "#/components/schemas/servicePublication"
+        properties:
+          description: Optional JSON object with arbitrary key-value pairs
+          additionalProperties: true
+          type: object
       required:
         - type
         - directory
@@ -646,6 +654,10 @@ components:
               SERVICE_TYPE_DELEGATED_SERVICE: "#/components/schemas/delegatedService"
         delegator:
           $ref: "#/components/schemas/delegator"
+        properties:
+          description: Optional JSON object with arbitrary key-value pairs
+          additionalProperties: true
+          type: object
       required:
         - type
         - outway
@@ -663,6 +675,10 @@ components:
           $ref: "#/components/schemas/servicePublication"
         delegator:
           $ref: "#/components/schemas/delegator"
+        properties:
+          description: Optional JSON object with arbitrary key-value pairs
+          additionalProperties: true
+          type: object
       required:
         - type
         - directory
