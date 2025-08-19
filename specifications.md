@@ -584,18 +584,19 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_MANAGE
 
 #### Codes
 
-| Error code                                          | HTTP status code | Description                                                                                                                                         |
-|-----------------------------------------------------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| ERROR_CODE_INCORRECT_GROUP_ID                       | 422              | The Group ID in the Contract does not match the GroupID of the receiving Manager                                                                    |
-| ERROR_CODE_PEER_NOT_PART_OF_CONTRACT                | 422              | The Peer tried to submit or sign a Contract without being a Peer on the Contract                                                                    |
-| ERROR_CODE_SIGNATURE_CONTRACT_CONTENT_HASH_MISMATCH | 422              | The Peer tried to submit a signature with a Contract content hash that does not match the Contract                                                  |
+| Error code                                          | HTTP status code | Description                                                                                                                                        |
+|-----------------------------------------------------|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| ERROR_CODE_INCORRECT_GROUP_ID                       | 422              | The Group ID in the Contract does not match the GroupID of the receiving Manager                                                                   |
+| ERROR_CODE_SUBMITTING_PEER_NOT_PART_OF_CONTRACT     | 422              | The Peer tried to submit or sign a Contract where the submitting Peer is not on the Contract                                                       |
+| ERROR_CODE_RECEIVING_PEER_NOT_PART_OF_CONTRACT      | 422              | The Peer tried to submit or sign a Contract where the receiving Peer is not on the Contract                                                        |
+| ERROR_CODE_SIGNATURE_CONTRACT_CONTENT_HASH_MISMATCH | 422              | The Peer tried to submit a signature with a Contract content hash that does not match the Contract                                                 |
 | ERROR_CODE_PEER_CERTIFICATE_VERIFICATION_FAILED     | 400              | The Peer provided a x.509 certificate signed by the trust anchor of the Group but the content is invalid. E.g the Peer ID is in a incorrect format |
-| ERROR_CODE_PEER_ID_SIGNATURE_MISMATCH               | 422              | The Peer submitted a signature that includes a Peer ID that does not match the ID of the submitting Peer                                            |
-| ERROR_CODE_SIGNATURE_VERIFICATION_FAILED            | 422              | The Peer submitted a signature that could not be verified                                                                                           |
-| ERROR_CODE_GRANT_COMBINATION_NOT_ALLOWED            | 422              | The Peer submitted a Contract with a combination of Grants that is not allowed                                                                      |
-| ERROR_CODE_URL_PATH_CONTENT_HASH_MISMATCH           | 422              | The Content Hash in the URL path does not match the Content Hash generated from the Contract Content in the request body                            |
-| ERROR_CODE_UNKNOWN_HASH_ALGORITHM_HASH              | 422              | The Hash Algorithm in the Contract Content hash or Grant Hash is not supported                                                                      |
-| ERROR_CODE_UNKNOWN_ALGORITHM_SIGNATURE              | 422              | The Algorithm in the Signature is not supported                                                                                                     |
+| ERROR_CODE_PEER_ID_SIGNATURE_MISMATCH               | 422              | The Peer submitted a signature that includes a Peer ID that does not match the ID of the submitting Peer                                           |
+| ERROR_CODE_SIGNATURE_VERIFICATION_FAILED            | 422              | The Peer submitted a signature that could not be verified                                                                                          |
+| ERROR_CODE_GRANT_COMBINATION_NOT_ALLOWED            | 422              | The Peer submitted a Contract with a combination of Grants that is not allowed                                                                     |
+| ERROR_CODE_URL_PATH_CONTENT_HASH_MISMATCH           | 422              | The Content Hash in the URL path does not match the Content Hash generated from the Contract Content in the request body                           |
+| ERROR_CODE_UNKNOWN_HASH_ALGORITHM_HASH              | 422              | The Hash Algorithm in the Contract Content hash or Grant Hash is not supported                                                                     |
+| ERROR_CODE_UNKNOWN_ALGORITHM_SIGNATURE              | 422              | The Algorithm in the Signature is not supported                                                                                                    |
 
 ## Directory {#directory}
 
