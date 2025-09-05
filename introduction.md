@@ -25,6 +25,10 @@ This specification lists terms and abbreviations as used in this document.
 
 Actor that provides and/or consumes Services. This is an abstraction of e.g. an organization, a department or a security context.
 
+*Distribute-Only-Peer*
+
+Actor who participates only as a Delegator. This Peer is not able to receive management and/or data traffic from other Peers.
+
 *Group:*
 
 System of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services.

@@ -142,7 +142,7 @@ Once the Contract is signed by all the Peers, the Outway of the Delegatee can co
 
 ## Consuming a Service
 
-A Peer can consume a Service by sending request for said Service to an Outway. 
+A Peer can consume a Service by sending a request for said Service to an Outway. 
 The Peer obtains an access token from the Manager of the Peer providing the Service. 
 The Outway proxies the request including the access token to the Inway.
 The Inway will validate the access token and proxy the request to the Service.
@@ -157,6 +157,15 @@ The Inway will validate the access token and proxy the request to the Service.
 6. The Inway returns the response to the Outway.
 7. The Outway returns the response to the client.
 
+## Distribute-Only-Peer
+
+A Distribute-Only-Peer is a Peer who participates only to create and/or sign Contracts. The usecase for this Peer type is an organization who acts as a Delegator and is unable to host an entire FSC setup because of a lack of IT knowledge.
+This situation is not uncommon for Peers who participate as Delegator, they want to delegate the publication and consumption of Services because they miss the required knowledge to do it themselves.
+
+A Distribute-Only-Peer is a Peer who will only send requests and will not receive Signatures and Contracts from other Peers. A Peer can mark itself as a Distribute-Only-Peer by providing a `-` as Manager adres when announcing itself to other Peers.
+When a Peer creates or signs a Contract, the Peer does not need to distribute the Contract/Signature to Distribute-Only-Peers.
+Because a Distribute-Only-Peer is unreachable, it opens up the possibility to create tools which allow Delegators without advanced IT knowledge to participate in an FSC Group. E.g., a mobile app for signing Contracts. 
+
 ## Use cases and required components
 
 Which components a Peer needs depends on the use case.
@@ -165,4 +174,6 @@ A Peer who wants to consume Services needs a Manager and an Outway.
 
 A Peer who wants to offer Services needs a Manager and an Inway.    
 
-A Peer who wants to both consume and offer Services needs a Manager,an Outway and an Inway.  
+A Peer who wants to both consume and offer Services needs a Manager, an Outway and an Inway.  
+
+A Peer who wants to delegate the authorization to publish and/or consume Services to another Peer needs a Manager.
