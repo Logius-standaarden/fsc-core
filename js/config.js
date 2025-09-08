@@ -6,8 +6,9 @@ let respecConfig = {
     specType: "ST",
     pubDomain: "fsc",
     shortName: "core",
-    publishDate: "2024-12-12",
-    publishVersion: "1.0.0",
+    publishDate: "2025-12-12",
+    publishVersion: "1.1.0",
+    previousPublishVersion: "1.0.0",
 
     previousMaturity: "DEF",
     editors:
