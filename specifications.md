@@ -332,7 +332,7 @@ The Grant hash can be created by executing the following steps:
 
 #### Grant types {#type_mapping_grant}
 
-| Hash type                                | int32 value |
+| Grant type                               | int32 value |
 |------------------------------------------|-------------|
 | GRANT_TYPE_SERVICE_PUBLICATION           | 1           |
 | GRANT_TYPE_SERVICE_CONNECTION            | 2           |
