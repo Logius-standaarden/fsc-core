@@ -2,19 +2,19 @@
 
 ## Protocols
 
-The Manager **MUST** support HTTP/1.1[[RFC9112]].
+The Manager MUST support HTTP/1.1[[RFC9112]].
 
-The Manager **MAY** support HTTP/2[[RFC9113]]. 
+The Manager MAY support HTTP/2[[RFC9113]]. 
 
 The protocol used between the Inway and Outway can be either HTTP/1.1[[RFC9112]] or HTTP/2[[RFC9113]]. The protocol is determined by the `protocol` field of a Service as specified in the object `.components/schemas/serviceListingService` of the [OpenAPI Specification](manager.yaml).
 
 ### Port configuration
 
 In order to provide a predictable network configuration FSC limits the selection of network ports to be used by components. 
-The ports used by FSC components **MUST** be `443` or `8443`. 
+The ports used by FSC components MUST be `443` or `8443`. 
 
-Port `443` is **RECOMMENDED** for data traffic i.e. HTTP requests to a Service.  
-Port `8443` is **RECOMMENDED** for management traffic i.e. submitting/signing Contracts.  
+Port `443` is RECOMMENDED for data traffic i.e. HTTP requests to a Service.  
+Port `8443` is RECOMMENDED for management traffic i.e. submitting/signing Contracts.  
 
 Data traffic: Inway, Outway  
 Management Traffic: Directory, Manager
@@ -22,16 +22,16 @@ Management Traffic: Directory, Manager
 ### Group ID {#group_id}
 
 The Group ID is the identifier of the Group. This identifier is chosen by the Group upon creation of the Group.  
-The Group ID **MUST** match the following regular expression `^[a-zA-Z0-9./_-]{1,100}$`
+The Group ID MUST match the following regular expression `^[a-zA-Z0-9./_-]{1,100}$`
 
 ### Peer ID {#peer_id}
 
-Each Peer **MUST** have a unique identifier within the Group, this identifier is called the PeerID. The PeerID is determined by at least one element from the subject field [section 4.1.2.6](https://rfc-editor.org/rfc/rfc5280) of [[RFC5280]] of an X.509 certificate. Each Group **MUST** define which element(s) of the subject field of the X.509 certificate act as PeerID.
+Each Peer MUST have a unique identifier within the Group, this identifier is called the PeerID. The PeerID is determined by at least one element from the subject field [section 4.1.2.6](https://rfc-editor.org/rfc/rfc5280) of [[RFC5280]] of an X.509 certificate. Each Group MUST define which element(s) of the subject field of the X.509 certificate act as PeerID.
 The TA(s) issuing the certificates must ensure that PeerID is always the same for a Peer in each issued certificate for said Peer.    
 
 ### Peer name {#peer_name}
 
-Each Peer **MUST** have a human-readable name which can be used to identify a Peer. Unlike the PeerID the name does not have to be unique. The name of Peer is determined by an element in the subject field [section 4.1.2.6](https://rfc-editor.org/rfc/rfc5280) of [[RFC5280]] of an X.509 certificate. The Group **MUST** define which element of the subject field is used.
+Each Peer MUST have a human-readable name which can be used to identify a Peer. Unlike the PeerID the name does not have to be unique. The name of Peer is determined by an element in the subject field [section 4.1.2.6](https://rfc-editor.org/rfc/rfc5280) of [[RFC5280]] of an X.509 certificate. The Group MUST define which element of the subject field is used.
 
 ### Trust Anchor {#trust_anchor}
 
@@ -39,9 +39,9 @@ The Trust Anchor (TA) is an authoritative entity for which trust is assumed and 
 
 Each Group can have multiple TAs that are defined in a Trust Anchor List.
 
-Every Peer in a Group **MUST** accept the same TA(s) that are defined in the Trust Anchor List defined by the Group.
+Every Peer in a Group MUST accept the same TA(s) that are defined in the Trust Anchor List defined by the Group.
 
-The TA **SHOULD** validate a Peers identity, i.e. the TA **MUST** perform Organization Validation.
+The TA SHOULD validate a Peers identity, i.e. the TA MUST perform Organization Validation.
 
 ### TLS configuration {#tls_configuration}
 
@@ -54,29 +54,29 @@ FSC places specific requirements on the subject fields of a certificate. [sectio
 - Subject Alternative Name [section 4.1.2.6](https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.6) of[[RFC5280]]: This should contain the Fully Qualified Domain Names (FQDN) of a Manager, Inway or Outway. For an Outway this FQDN does not have to resolve externally.
 - Subject Organization: This should contain to the name of the Organization.
 
-The representation and verification of domains specified in the X.509 certificate **MUST** adhere to [[RFC6125]]
+The representation and verification of domains specified in the X.509 certificate MUST adhere to [[RFC6125]]
 
 #### TLS Version
 
-The TLS versions used between Peers in a Group **MUST** be defined in the additional [Group Rules & Restrictions](#group_rules).
+The TLS versions used between Peers in a Group MUST be defined in the additional [Group Rules & Restrictions](#group_rules).
 
 #### Certificate & Public key thumbprints {#certificate_thumbprints}
 
 FSC differentiates between two different types of thumbprints, often also called fingerprints. *Certificate* thumbprints and *Public Key* thumbprints.
 
 Public Key thumbprints are used in FSC contracts, this enables the renewal of the certificate without invalidating the contract, since the Public Key thumbprint remains the same between Certificate renewals.
-Certificate thumbprints are used in the certificate-bound access tokens [section 3](https://www.rfc-editor.org/rfc/rfc8705#section-3) of [[RFC8705]]. FSC uses certificate-bound access tokens to authorize a connection to a Service. Certificate thumbprints are always part of a X.509 certificate and **MUST** be created as described in [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]].
+Certificate thumbprints are used in the certificate-bound access tokens [section 3](https://www.rfc-editor.org/rfc/rfc8705#section-3) of [[RFC8705]]. FSC uses certificate-bound access tokens to authorize a connection to a Service. Certificate thumbprints are always part of a X.509 certificate and MUST be created as described in [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]].
 
 Within FSC both *Certificate thumbprints* and *Public Key* thumbprints uses the `sha256` thumbprint. 
 
 ###  Error Handling {#error_handling}
 
 The Inway and Outway both have a single endpoint which proxies HTTP requests. 
-In case of an error within the scope of FSC these components **MUST** return the HTTP header `Fsc-Error-Code` which **MUST** contain the code specifying the error. 
+In case of an error within the scope of FSC these components MUST return the HTTP header `Fsc-Error-Code` which MUST contain the code specifying the error. 
 
 The response body must contain an object as described in `.components/schemas/error` of the [OpenAPI Specification](manager.yaml).  
 
-The HTTP status codes that **MUST** be used in combination with the HTTP header `Fsc-Error-Code` are defined in the sections 3.7.1.4 and 3.8.2.2.
+The HTTP status codes that MUST be used in combination with the HTTP header `Fsc-Error-Code` are defined in the sections 3.7.1.4 and 3.8.2.2.
 
 ## Contracts
 
@@ -115,7 +115,7 @@ example Contract with a ServiceConnectionGrant
 
 ### Contract Validation {#contract_validation}
 
-- A UUID **MUST** be provided in the field `contract.iv`. The value must be unique. Each Peer is responsible for ensuring that only one Contract can exist with a given `iv`. 
+- A UUID MUST be provided in the field `contract.iv`. The value must be unique. Each Peer is responsible for ensuring that only one Contract can exist with a given `iv`. 
 - A hash algorithm is provided in the field `contract.content.hash_algorithm`.
 - The date provided in `contract.content.created_at` can not be in the future.
 - The Group ID of the Manager matches the Group ID defined in the field `contract.group_id`.
@@ -199,9 +199,9 @@ Signature requirements:
 
 ### Signatures {#signatures}
 
-A signature **MUST** follow the JSON Web Signature (JWS) format specified in [[RFC7515]]
+A signature MUST follow the JSON Web Signature (JWS) format specified in [[RFC7515]]
 
-A signature on a Contract **SHOULD** only be accepted if the Peer is present in one of the Grants as:
+A signature on a Contract SHOULD only be accepted if the Peer is present in one of the Grants as:
 
 *ServicePublicationGrant*
 
@@ -227,11 +227,11 @@ A signature on a Contract **SHOULD** only be accepted if the Peer is present in 
 - `grant.data.delegator.peer_id`
 - `grant.data.service.delegator.peer_id`
 
-The JWS **MUST** specify the certificate thumbprint of the keypair used to create the digital signature using the `x5t#S256` [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]] field of the `JOSE Header` [section 4](https://www.rfc-editor.org/rfc/rfc7515#section-4) of [[RFC7515]].
+The JWS MUST specify the certificate thumbprint of the keypair used to create the digital signature using the `x5t#S256` [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]] field of the `JOSE Header` [section 4](https://www.rfc-editor.org/rfc/rfc7515#section-4) of [[RFC7515]].
 
-The JWS **MUST** use the JWS Compact Serialization described in [section 7.1](https://www.rfc-editor.org/rfc/rfc7515#section-7.1) of [[RFC7515]]
+The JWS MUST use the JWS Compact Serialization described in [section 7.1](https://www.rfc-editor.org/rfc/rfc7515#section-7.1) of [[RFC7515]]
 
-The JWS **MUST** be created using one of the following digital signature algorithms:
+The JWS MUST be created using one of the following digital signature algorithms:
 
 * RS256
 * RS384
@@ -240,7 +240,7 @@ The JWS **MUST** be created using one of the following digital signature algorit
 * ES384
 * ES512
 
-The JWS Payload as defined in [section 2](https://www.rfc-editor.org/rfc/rfc7515#section-2) of [[RFC7515]], **MUST** contain a hash of the `contract.content` as described in the section [Content Hash](#content_hash), one of the signature types described in the [signature type section](#signature_types) and a Unix timestamp of the sign date.
+The JWS Payload as defined in [section 2](https://www.rfc-editor.org/rfc/rfc7515#section-2) of [[RFC7515]], MUST contain a hash of the `contract.content` as described in the section [Content Hash](#content_hash), one of the signature types described in the [signature type section](#signature_types) and a Unix timestamp of the sign date.
 
 JWS Payload example:
 ```JSON
@@ -268,7 +268,7 @@ JWS Payload example:
 
 A Peer should ensure that a signature is intended for the Contract.  
 This validation is done by comparing the hash of the received Contract with the hash in the signature.  
-The Validation **MUST** be done every time a Peer receives a signature.  
+The Validation MUST be done every time a Peer receives a signature.  
 
 The `contract_content_hash` of the signature payload contains the signature hash. The algorithm to create a `contract_content_hash` is described below. 
 The algorithm ensures that the content hash is unique for a specific Contract content. Because a signature contains the content hash it becomes possible to guarantee that a signature is intended for a specific Contract.
@@ -279,7 +279,7 @@ The algorithm ensures that the content hash is unique for a specific Contract co
 1. Convert `contract.content.validity.not_before` to bytes and append the bytes to `contentBytes`.
 1. Convert `contract.content.validity.not_after` to bytes and append the bytes to `contentBytes`.
 1. Convert `contract.content.created_at` to bytes and append the bytes to `contentBytes`.
-1. Create an array of bytes arrays called `grantByteArrays`
+1. Create an array of byte arrays called `grantByteArrays`
 1. For each Grant in `contract.content.grants`
    1. Create a Grant Hash for the Grant as documented in the [Grant Hash section](#grant_hash).
    1. Convert the Grant Hash from string to bytes and store them in a byte array named `grantBytes`.
@@ -291,13 +291,14 @@ The algorithm ensures that the content hash is unique for a specific Contract co
 1. Convert the value of `contract.content.algorithm` to an int32 and surround it with dollar signs (`$`). When using the `SHA3-512` algorithm this would result in `$1$`. 
    To convert the hash algorithm to an integer see the [type mapping](#type_mapping_hash_algorithm)
 1. Add `1$` as suffix to the string created in step 13. This is the enum `HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of the [OpenAPI Specification](manager.yaml) as int32. If the string created in step 13 is `$1$`, the result should now be `$1$1$`
-1. Add the Base64 generated in step 12 as suffix to the string generated in step 14.
+1. Add the Base64 generated in step 12 as a suffix to the string generated in step 14.
 
 #### Data types {#data_types}
 
 - `int32`: use `Little-endian` as endianness when converting to a byte array
 - `int64`: use `Little-endian` as endianness when converting to a byte array
 - `string`: use `utf-8` encoding when converting to a byte array
+- `UUIDv7`: the field `contract.content.iv` contains a UUIDv7 in the form of a string. The string MUST be parsed as a UUIDv7. The bytes of the UUIDv7 are added to the byte array of the Content or Grant hash.   
 
 ### Grant hash {#grant_hash}
 
@@ -352,13 +353,28 @@ The Grant hash can be created by executing the following steps:
 | SERVICE_TYPE_DELEGATED_SERVICE | 2            |
 
 
+<section class="informative">
+
+<h3> Certificate renewal</h3>
+
+There are two scenarios in which a certificate renewal can affect Contracts.
+
+1. The certificate used to add an accept signature expires before the Contract expires.  
+In this scenario the Peer has to create a new accept signature using the new certificate and resend it to the other Peers on the Contract. Without a valid certificate, Peers cannot verify the signature, rendering the Contract invalid.
+
+2. A Contract contains a ServiceConnectionGrant(s) with a thumbprint of a public key used by a certificate that expires before the Contract expires.  
+In this scenario, the Peer can renew the certificate without rotating the keypair, ensuring that the public key thumbprint remains unchanged. As a result, the Contract remains unaffected. 
+However, if the keypair is rotated, the public key thumbprint will change and the Outway can no longer use the ServiceConnectionGrant to connect to the Service. As a result, a new Contract will need to be created containing a ServiceConnectionGrant with the new public key thumbprint.
+
+</section>
+
 ## Access token {#access_token}
 
 The access token is a JSON Web Token (JWT) as specified in [[RFC7519]]
 
-The JWT **MUST** specify the thumbprint of the X.509 certificate used to sign the JWT using the `x5t#S256` [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]] field of the `JOSE Header`  [section 4](https://www.rfc-editor.org/rfc/rfc7515#section-4) of [[RFC7515]].
+The JWT MUST specify the thumbprint of the X.509 certificate used to sign the JWT using the `x5t#S256` [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]] field of the `JOSE Header`  [section 4](https://www.rfc-editor.org/rfc/rfc7515#section-4) of [[RFC7515]].
 
-The JWT **MUST** be created using one of the following digital signature algorithms:
+The JWT MUST be created using one of the following digital signature algorithms:
 
 * RS256
 * RS384
@@ -384,7 +400,7 @@ The payload of the JWT:
 * *svc(string):*
   Name of the Service
 * *aud(string):*
-  The audience [section 4.1.3](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.3) of [[RFC7519]]. This should be URI [[RFC3986]] of the Inway providing the Service. The URI is a URL that **MUST** contain the scheme and port number used by the Inway
+  The audience [section 4.1.3](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.3) of [[RFC7519]]. This should be URI [[RFC3986]] of the Inway providing the Service. The URI is a URL that MUST contain the scheme and port number used by the Inway
 * *exp(int):*
   Expiration time [section 4.1.4](https://www.rfc-editor.org/rfc/rfc7519#section-4.1.4) of [[RFC7519]]
 * *nbf(int):*
@@ -476,49 +492,49 @@ The Manager is responsible for:
 - Listing Peers
 - Listing Services
 
-It is **RECOMMENDED** to implement the Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Manager.
+It is RECOMMENDED to implement the Manager functionality separate from the Inway functionality, in order to be able to have multiple Inways that are configured by one Manager.
 
 ### Behavior
 
 #### Authentication
 
-The Manager **MUST** only accept mTLS connections from other external Managers with an X.509 certificate that is signed by the TA of the Group.
+The Manager MUST only accept mTLS connections from other external Managers with an X.509 certificate that is signed by the TA of the Group.
 
 #### Contracts
 
-The Manager **MUST** support Contracts containing Grants of the type ServicePublicationGrant and ServiceConnectionGrant.
+The Manager MUST support Contracts containing Grants of the type ServicePublicationGrant and ServiceConnectionGrant.
 
-The Manager **MUST** validate Contracts using the rules described in [Contract validation section](#contract_validation)
+The Manager MUST validate Contracts using the rules described in [Contract validation section](#contract_validation)
 
-The Manager **MUST** persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
+The Manager MUST persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
 
-It is **RECOMMENDED** to implement a retry and backoff mechanism in case the Contract propagation fails.
+It is RECOMMENDED to implement a retry and backoff mechanism in case the Contract propagation fails.
 
 #### Signatures
 
-The Manager **MUST** validate the signature according to the rules described in the [signature section](#signatures).
+The Manager MUST validate the signature according to the rules described in the [signature section](#signatures).
 
-The Manager **MUST** generate an error response if a signature is invalid.
+The Manager MUST generate an error response if a signature is invalid.
 
-The Manager **MUST** propagate the signature to each of the Peers in the Contract when the Peer signs the Contract.
+The Manager MUST propagate the signature to each of the Peers in the Contract when the Peer signs the Contract.
 
-It is **RECOMMENDED** to implement a retry and backoff mechanism in case the signature propagation fails.
+It is RECOMMENDED to implement a retry and backoff mechanism in case the signature propagation fails.
 
 #### Providing X.509 certificates
 
-The Manager **MUST** provide X.509 certificates of the keypairs used to sign Contracts and access tokens.
+The Manager MUST provide X.509 certificates of the keypairs used to sign Contracts and access tokens.
 
-The Manager **MUST** provide the complete certificate chain excluding the root CA certificate used by the Group as Trust Anchor.
+The Manager MUST provide the complete certificate chain excluding the root CA certificate used by the Group as Trust Anchor.
 
 #### Providing contracts
 
-The Manager **MUST** provide existing Contracts for a specific Peer. A Contract **SHOULD** only be provided to a Peer if the Peer is present in one of the Grants of the Contract.
+The Manager MUST provide existing Contracts for a specific Peer. A Contract SHOULD only be provided to a Peer if the Peer is present in one of the Grants of the Contract.
 
 #### Tokens {#manager_tokens}
 
-The Manager **MUST** be able to provide an [access token](#access_token) to Peers that have a valid Contract containing a ServiceConnectionGrant or DelegatedServiceConnectionGrant.
+The Manager MUST be able to provide an [access token](#access_token) to Peers that have a valid Contract containing a ServiceConnectionGrant or DelegatedServiceConnectionGrant.
 
-Before issuing an access token the Manager **MUST** validate that:
+Before issuing an access token the Manager MUST validate that:
 
 1. The `scope` provided in the token request contains a Grant hash that matches with a ServiceConnectionGrant or DelegatedServiceConnectionGrant of a valid Contract. 
 1. The `client_id` provided in the token request contains a PeerID that matches with the PeerID specified in the X.509 certificate of the client requesting the access token and later using the access token to make an API request.
@@ -527,40 +543,40 @@ Before issuing an access token the Manager **MUST** validate that:
 1. The Peer ID specified by the X.509 certificate of the client requesting the access token matches the value of the field `grant.data.outway.peer_id`.
 1. The X.509 certificate provided by the client contains the same public key as specified in `grant.data.outway.public_key_fingerprint`
 
-The `cnf.x5t#S256` claim **MUST** contain the certificate thumbprint of the X.509 certificate provided by the client requesting the token according to [section 3.1] of [[RFC8705]].
-The `act` claim **MUST** be set when an access token is generated for a Peer who is connecting to the Service on behalf of another Peer. I.e. the authorization to connect has been granted using a DelegatedServiceConnectionGrant.
-The `pdi` claim **MUST** be set when an access token is generated for a Service which is being offered on behalf of another Peer. 
+The `cnf.x5t#S256` claim MUST contain the certificate thumbprint of the X.509 certificate provided by the client requesting the token according to [section 3.1] of [[RFC8705]].
+The `act` claim MUST be set when an access token is generated for a Peer who is connecting to the Service on behalf of another Peer. I.e. the authorization to connect has been granted using a DelegatedServiceConnectionGrant.
+The `pdi` claim MUST be set when an access token is generated for a Service which is being offered on behalf of another Peer. 
 
-The Manager **MUST** include the address of the Inway in the field `aud` of the access token.
+The Manager MUST include the address of the Inway in the field `aud` of the access token.
 
 #### Services
  
-The name of a Service **MUST** be unique within the scope of a Peer.
+The name of a Service MUST be unique within the scope of a Peer.
 
 The Peer is responsible for checking the uniqueness of a Service name.
 
 #### Service listing
 
-The Manager **MUST** list a Service when a valid Contract containing a ServicePublicationGrant or DelegatedServicePublicationGrant for the Service exists.
+The Manager MUST list a Service when a valid Contract containing a ServicePublicationGrant or DelegatedServicePublicationGrant for the Service exists.
 
 #### Peer listing
 
-The Manager **MUST** list the Peers with whom the Peer has negotiated Contracts or who announced themselves to the Peer.
+The Manager MUST list the Peers with whom the Peer has negotiated Contracts or who announced themselves to the Peer.
 
-The Manager **MUST** persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
+The Manager MUST persist the Peer ID, name and Manager address of each Peer with whom the Peer has negotiated Contracts.
 
-The Manager **MUST** persist the Peer ID, name and Manager address of each Peer who called the `announce` endpoint as specified in the [OpenAPI Specification](manager.yaml).
+The Manager MUST persist the Peer ID, name and Manager address of each Peer who called the `announce` endpoint as specified in the [OpenAPI Specification](manager.yaml).
 
 ### Announce
 
 The `announce` is used to share the `Manager` address and `Peer` information among Peers. The `announce` is also used by the `Directory` to obtain the `Manager` addresses of all `Peers` in the `Group`. 
-Each `Peer` **MUST** call the `announce` endpoint of a Directory to register themselves as participant of the `Group`. 
+Each `Peer` MUST call the `announce` endpoint of a Directory to register themselves as participant of the `Group`. 
 
-In addition to announcing to the `Directory` a Manager **SHOULD** call the `announce` endpoint of the Peers with whom the Peer has negotiated Contracts when the address of Manager changes.
+In addition to announcing to the `Directory` a Manager SHOULD call the `announce` endpoint of the Peers with whom the Peer has negotiated Contracts when the address of Manager changes.
 
 ### Interfaces {#manager_interface}
 
-The Manager functionality **MUST** implement an HTTP interface as specified in the [OpenAPI Specification](manager.yaml).  
+The Manager functionality MUST implement an HTTP interface as specified in the [OpenAPI Specification](manager.yaml).  
 
 ###  FSC manager address 
 
@@ -572,15 +588,15 @@ The Manager implements two error formats
 
 #### OAuth 2.0 error response
 
-The `/token` endpoint **MUST** return an error response as described in [section 5,2](https://www.rfc-editor.org/rfc/rfc6749#section-5.2) of [[RFC6749]].
+The `/token` endpoint MUST return an error response as described in [section 5,2](https://www.rfc-editor.org/rfc/rfc6749#section-5.2) of [[RFC6749]].
 
 #### Other endpoints
 
-The Manager **MUST** return the error response object as described in `.components/schemas/error` of the [OpenAPI Specification](manager.yaml).
+The Manager MUST return the error response object as described in `.components/schemas/error` of the [OpenAPI Specification](manager.yaml).
 
-The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.ManagerErrorCode` in the [OpenAPI Specification](manager.yaml).  
+The code field of the error response MUST contain one of the codes defined as `.components.schemas.ManagerErrorCode` in the [OpenAPI Specification](manager.yaml).  
 
-The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_MANAGER`.  
+The domain field of the error response MUST be equal to `ERROR_DOMAIN_MANAGER`.  
 
 #### Codes
 
@@ -614,11 +630,11 @@ The Directory is used by Peers to:
 
 Service publication is accomplished by offering a Contract to the Directory which contains one or more ServicePublicationGrants with each ServicePublicationGrant containing a single Service. Once the Directory and the Peer offering the Service have both signed the Contract, the Service is published in the Directory.
 
-The Directory **MUST** be able to sign Contracts with Grants of the type ServicePublicationGrant.
+The Directory MUST be able to sign Contracts with Grants of the type ServicePublicationGrant.
 
-The Directory **MUST** validate the ServicePublicationGrant in the Contract using the rules described in [ServicePublicationGrant section](#service_publication_grant)
+The Directory MUST validate the ServicePublicationGrant in the Contract using the rules described in [ServicePublicationGrant section](#service_publication_grant)
 
-Although multiple ServicePublicationGrants are allowed in a single Contract it is **RECOMMENDED** to limit this to one per Contract. Adding multiple ServicePublicationGrants on a single Contract makes the Contract fragile. If the publication of one Service changes the whole Contract will be invalidated. 
+Although multiple ServicePublicationGrants are allowed in a single Contract it is RECOMMENDED to limit this to one per Contract. Adding multiple ServicePublicationGrants on a single Contract makes the Contract fragile. If the publication of one Service changes the whole Contract will be invalidated. 
 
 ## Outway
 
@@ -635,26 +651,26 @@ The Outway is responsible for:
 
 #### Authentication
 
-The Outway **MUST** use mTLS when connecting to Inways with an X.509 certificate signed by the chosen TA of the Group.
+The Outway MUST use mTLS when connecting to Inways with an X.509 certificate signed by the chosen TA of the Group.
 
 #### Routing
 
-The Outway **MUST** proxy the request to the address of the Inway specified in the field `aud` of the access token.
+The Outway MUST proxy the request to the address of the Inway specified in the field `aud` of the access token.
 
-The Outway **MUST** use an [access token](#access_token) provided by the Peer specified in the `grant.data.service.peer_id` field of the ServiceConnectionGrant.
+The Outway MUST use an [access token](#access_token) provided by the Peer specified in the `grant.data.service.peer_id` field of the ServiceConnectionGrant.
 
-The Outway **MUST** include an access token in the HTTP header `Fsc-Authorization` when proxying the HTTP request to the Inway.  
+The Outway MUST include an access token in the HTTP header `Fsc-Authorization` when proxying the HTTP request to the Inway.  
 
-The Outway **MUST** validate that the Group ID specified in the claim `gid` of the access token matches the Group ID of the Outway.
+The Outway MUST validate that the Group ID specified in the claim `gid` of the access token matches the Group ID of the Outway.
 
-The Outway **MUST NOT** alter the path of the HTTP Request.
+The Outway MUST NOT alter the path of the HTTP Request.
 
-Clients **MAY** use TLS when communicating with the Outway.
+Clients MAY use TLS when communicating with the Outway.
 
 #### Obtaining access tokens
 
 Access tokens are obtained using the Client Credentials flow [section 4,4](https://www.rfc-editor.org/rfc/rfc6749#section-4.4) of [[RFC6749]].
-Access tokens **MUST** be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](manager.yaml).
+Access tokens MUST be obtained by calling the `/token` endpoint defined in the [OpenAPI Specification](manager.yaml).
 
 To request a token via the Client Credentials flow the following information must be sent to the Manager which acts as an Authorization Server:
 - GrantHash of a `Service Connection grant` or `Delegated Service Connection grant` provided in the `scope` field.
@@ -664,9 +680,9 @@ To request a token via the Client Credentials flow the following information mus
 The `GrantHash` provided in the request to the Manager acts as a reference to a `Grant` on a `Contract`. 
 The Manager (Authorization Server) will perform the verification steps defined in the [token section](#manager_tokens) before providing an access token.
 
-The component retrieving the access token **MUST** use mTLS to authenticate with the Authorization server (Manager) as defined in [section 2.1](https://datatracker.ietf.org/doc/html/rfc8705#section-2.1) of [[RFC8705]].
-The component retrieving the access token **MUST** use an X.509 certificate signed by the chosen TA of the Group.
-The Manager **MUST** verify this client certificate and issue a token bound to this client certificate according to [section 3](https://www.rfc-editor.org/rfc/rfc8705#section-3).
+The component retrieving the access token MUST use mTLS to authenticate with the Authorization server (Manager) as defined in [section 2.1](https://datatracker.ietf.org/doc/html/rfc8705#section-2.1) of [[RFC8705]].
+The component retrieving the access token MUST use an X.509 certificate signed by the chosen TA of the Group.
+The Manager MUST verify this client certificate and issue a token bound to this client certificate according to [section 3](https://www.rfc-editor.org/rfc/rfc8705#section-3).
 
 ![Obtaining access token](diagrams/seq-obtaining-an-access-token.svg "Obtaining an Access Token")
 
@@ -674,13 +690,13 @@ Which component obtains an access token for a Service is an implementation detai
 
 #### Error response
 
-If the Error has occurred in the Inway or Service the Outway **MUST** return the error without altering the response. 
+If the Error has occurred in the Inway or Service the Outway MUST return the error without altering the response. 
 
-The Outway **MUST** return an error response defined in the [Error handling section](#error_handling) when the error is produced by the Outway.
+The Outway MUST return an error response defined in the [Error handling section](#error_handling) when the error is produced by the Outway.
 
-The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.OutwayErrorCode` in the [OpenAPI Specification](manager.yaml).
+The code field of the error response MUST contain one of the codes defined as `.components.schemas.OutwayErrorCode` in the [OpenAPI Specification](manager.yaml).
 
-The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_OUTWAY`.
+The domain field of the error response MUST be equal to `ERROR_DOMAIN_OUTWAY`.
 
 ##### Codes
 
@@ -704,13 +720,13 @@ The Inway is responsible for:
 
 #### Authentication
 
-The Inway **MUST** only accept connections from Outways using mTLS with an X.509 certificate signed by the chosen TA of the Group.
+The Inway MUST only accept connections from Outways using mTLS with an X.509 certificate signed by the chosen TA of the Group.
 
 #### Authorization
 
-The Inway **MUST** validate the access token provided in the HTTP `Fsc-Authorization`.   
+The Inway MUST validate the access token provided in the HTTP `Fsc-Authorization`.   
 
-The request **MUST** be authorized if the access token meets the following conditions:  
+The request MUST be authorized if the access token meets the following conditions:  
 
 - The access token is signed by the same Peer that owns Inway.
 - The access token is used by an Outway that uses the X.509 certificate to which the access token is bound. This is verified by applying the JWT Certificate Thumbprint Confirmation Method specified in [section 3.1](https://datatracker.ietf.org/doc/html/rfc8705#section-3.1) of [[RFC8705]].
@@ -719,11 +735,11 @@ The request **MUST** be authorized if the access token meets the following condi
 
 #### Routing
 
-The HTTP request **MUST** contain the HTTP Header `Fsc-Authorization` which contains the access token obtained by the Outway.
+The HTTP request MUST contain the HTTP Header `Fsc-Authorization` which contains the access token obtained by the Outway.
 
-The Inway **MUST** proxy the HTTP request to the Service specified in the field `svc` of the access token.
+The Inway MUST proxy the HTTP request to the Service specified in the field `svc` of the access token.
 
-The Inway **MUST** not delete the HTTP Header `Fsc-Authorization` from the HTTP Request before forwarding the request to the Service.
+The Inway MUST not delete the HTTP Header `Fsc-Authorization` from the HTTP Request before forwarding the request to the Service.
 
 The security of the connection between the Inway and the Service is out of scope for this document.        
 
@@ -731,25 +747,25 @@ The security of the connection between the Inway and the Service is out of scope
 
 #### Proxy Endpoint
 
-The HTTP endpoint `/` **MUST** be implemented.
+The HTTP endpoint `/` MUST be implemented.
 
 #### Error response
 
-The Inway **MUST** return the error response of a Service to the Outway without altering the response.
+The Inway MUST return the error response of a Service to the Outway without altering the response.
 
-The Inway **MUST** return an error response defined in the [Error handling section](#error_handling) when the error is produced by the Inway.
+The Inway MUST return an error response defined in the [Error handling section](#error_handling) when the error is produced by the Inway.
 
-The code field of the error response **MUST** contain one of the codes defined as `.components.schemas.InwayErrorCode` in the [OpenAPI Specification](manager.yaml).
+The code field of the error response MUST contain one of the codes defined as `.components.schemas.InwayErrorCode` in the [OpenAPI Specification](manager.yaml).
 
-The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_INWAY`.
+The domain field of the error response MUST be equal to `ERROR_DOMAIN_INWAY`.
 
 ##### Codes
 
 | Error code                         | HTTP status code | Description                                                                                                                                           |
 |------------------------------------|------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ERROR_CODE_ACCESS_TOKEN_MISSING    | 401              | The HTTP header `Fsc-Authorization` does not contain an access token. In this scenario the HTTP header `WWW-Authenticate` **MUST** be set to `Bearer` |
-| ERROR_CODE_ACCESS_TOKEN_INVALID    | 401              | The provided access token is invalid. In this scenario the HTTP header `WWW-Authenticate` **MUST** be set to `Bearer`                                 |
-| ERROR_CODE_ACCESS_TOKEN_EXPIRED    | 401              | The provided access token has expired. In this scenario the HTTP header `WWW-Authenticate` **MUST** be set to `Bearer`                                |
+| ERROR_CODE_ACCESS_TOKEN_MISSING    | 401              | The HTTP header `Fsc-Authorization` does not contain an access token. In this scenario the HTTP header `WWW-Authenticate` MUST be set to `Bearer` |
+| ERROR_CODE_ACCESS_TOKEN_INVALID    | 401              | The provided access token is invalid. In this scenario the HTTP header `WWW-Authenticate` MUST be set to `Bearer`                                 |
+| ERROR_CODE_ACCESS_TOKEN_EXPIRED    | 401              | The provided access token has expired. In this scenario the HTTP header `WWW-Authenticate` MUST be set to `Bearer`                                |
 | ERROR_CODE_WRONG_GROUP_ID_IN_TOKEN | 403              | The Group ID specified in the access token does not match the ID of the Group of the Inway                                                            |
 | ERROR_CODE_SERVICE_NOT_FOUND       | 404              | The Service specified in the access token is not offered by the Inway                                                                                 |
 | ERROR_CODE_SERVICE_UNREACHABLE     | 502              | The Inway is unable to reach the Service                                                                                                              |
