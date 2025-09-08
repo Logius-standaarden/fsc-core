@@ -110,7 +110,7 @@ To connect to a Service, the Peer needs a Contract with a ServiceConnectionGrant
 FSC Core specifies the basics for setting up and managing connections in a Group.
 Auxiliary functionality for either an FSC Peer or an entire FSC Group can be realized with `extensions`. An Extension performs a well scoped feature enhancing the overall working of FSC. 
 
-It is **RECOMMENDED** to use FSC Core with the following extensions, each specified in a dedicated RFC:
+It is RECOMMENDED to use FSC Core with the following extensions, each specified in a dedicated RFC:
 
 - [FSC Logging](https://gitdocumentatie.logius.nl/publicatie/fsc/logging/), keep a log of requests to Services.
 
@@ -118,7 +118,7 @@ It is **RECOMMENDED** to use FSC Core with the following extensions, each specif
 FSC Core provides the foundation for cooperation between organizations (Peers). However, in practice additional decisions have to be made to guarantee a functioning Group within a broader context.
 For example, it may be needed for a Group to have additional restrictions or agreements within the Group. Certain Group rules and restrictions are required for the operation of the Group, others provide optional agreements to enhance collaboration.
 
-The following decisions **MUST** be part of the Profile:
+The following decisions MUST be part of the Profile:
 1. Select one or more [Trust Anchors](#trust_anchor) to include in the Trust Anchor list
 2. Select a [Group ID](#group_id)
 3. Select what determines the [Peer ID](#peer_id)
@@ -128,7 +128,7 @@ The following decisions **MUST** be part of the Profile:
 6. Decide what ports are used for management traffic
 7. Determine requirements for allowed TLS versions and Cipher Suites 
 
-In addition to the mandatory decisions, a Group **MAY** also contain additional agreements or restrictions. These are not technically required for the operation of FSC Core, but can become mandatory within a Group. An example would be a set of additional rules in order to comply with local legislation.
+In addition to the mandatory decisions, a Group MAY also contain additional agreements or restrictions. These are not technically required for the operation of FSC Core, but can become mandatory within a Group. An example would be a set of additional rules in order to comply with local legislation.
 Below are a few examples listed of these additional decisions for inspirational purposes:
 1. Any extensions required by Peers within the Group
 2. Agreements on data retention
