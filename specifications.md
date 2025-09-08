@@ -37,9 +37,9 @@ Each Peer **MUST** have a human-readable name which can be used to identify a Pe
 
 The Trust Anchor (TA) is an authoritative entity for which trust is assumed and not derived. In the case of FSC, which uses an X.509 architecture, it is the root certificate from which the whole chain of trust is derived.
 
-Each Group can have multiple TAs.
+Each Group can have multiple TAs that are defined in a Trust Anchor List.
 
-Every Peer in a Group **MUST** accept the same TA(s).
+Every Peer in a Group **MUST** accept the same TA(s) that are defined in the Trust Anchor List defined by the Group.
 
 The TA **SHOULD** validate a Peers identity, i.e. the TA **MUST** perform Organization Validation.
 
@@ -58,7 +58,7 @@ The representation and verification of domains specified in the X.509 certificat
 
 #### TLS Version
 
-The TLS versions used between Peers in an Group **MUST** be defined in the [Profile](#profiles) of the Group.
+The TLS versions used between Peers in a Group **MUST** be defined in the additional [Group Rules & Restrictions](#group_rules).
 
 #### Certificate & Public key thumbprints {#certificate_thumbprints}
 
@@ -570,7 +570,7 @@ The Manager **MUST** persist the Peer ID, name and Manager address of each Peer 
 ### Announce
 
 The `announce` is used to share the `Manager` address and `Peer` information among Peers. The `announce` is also used by the `Directory` to obtain the `Manager` addresses of all `Peers` in the `Group`. 
-Each `Peer` **MUST** call the `announce` endpoint of the Directory to register themselves as participant of the `Group`. 
+Each `Peer` **MUST** call the `announce` endpoint of a Directory to register themselves as participant of the `Group`. 
 
 In addition to announcing to the `Directory` a Manager **SHOULD** call the `announce` endpoint of the Peers with whom the Peer has negotiated Contracts when the address of Manager changes.
 
@@ -615,7 +615,7 @@ The domain field of the error response **MUST** be equal to `ERROR_DOMAIN_MANAGE
 
 ## Directory {#directory}
 
-The Directory is a Manager chosen by the Group to act as the Directory. 
+The Directory is a Manager chosen by the Group to act as a Directory. 
 
 The Directory is used by Peers to:
 
