@@ -684,7 +684,7 @@ The component retrieving the access token MUST use mTLS to authenticate with the
 The component retrieving the access token MUST use an X.509 certificate signed by the chosen TA of the Group.
 The Manager MUST verify this client certificate and issue a token bound to this client certificate according to [section 3](https://www.rfc-editor.org/rfc/rfc8705#section-3).
 
-![Obtaining access token](diagrams/seq-obtaining-an-access-token.svg "Obtaining an Access Token")
+![Obtaining access token](media/seq-obtaining-an-access-token.svg "Obtaining an Access Token")
 
 Which component obtains an access token for a Service is an implementation detail and out of scope for this document.
 
