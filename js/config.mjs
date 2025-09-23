@@ -4,13 +4,13 @@ loadRespecWithConfiguration({
     useLogo: true,
     useLabel: true,
     license: "cc-by",
-    specStatus: "DEF",
+    specStatus: "WV",
     specType: "ST",
     pubDomain: "fsc",
     shortName: "core",
-    publishDate: "2025-09-23",
-    publishVersion: "1.1.2",
-    previousPublishVersion: "1.1.1",
+    publishDate: "2025-09-08",
+    publishVersion: "1.1.1",
+    previousPublishVersion: "1.1.0",
 
     editors:
         [
@@ -90,3 +90,4 @@ loadRespecWithConfiguration({
         ],
     github: "https://github.com/Logius-standaarden/fsc-core",
 });
+
