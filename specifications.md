@@ -324,8 +324,8 @@ The `iv` (Initialization vector) field is included in the Grant hash to create a
 The Grant hash can be created by executing the following steps:
 
 1. Create the content hash as described in the [content hash](#content_hash) section. 
-1. Convert the content of `grant.data` to Canonical JSON data as described in [[RFC8785]]
-1. Append the Canonical JSON data to the content hash
+1. Convert the content of `grant.data` to a Canonical JSON string as described in [[RFC8785]].
+1. Append the Canonical JSON string to the content hash.
 1. Hash the result of step 3 using the hash algorithm specified in `contract.content.algorithm`.
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
 1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. The int32 value per hash algorithm type is defined in the [type mapping](#type_mapping_hash_algorithm).. E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
