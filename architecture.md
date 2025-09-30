@@ -8,7 +8,7 @@ Connections between Managers, Inways, Outways use Mutual Transport Layer Securit
 Components in the Group are configured to accept the same (Sub-) Certificate Authorities (CA) as defined in the Trust Anchors list (TA). Each TA is a Trusted Third Party that ensures the identity of the Peers by verifying a set of fields of the subject field , [section 4.1.2.6](https://rfc-editor.org/rfc/rfc5280) of [[RFC5279]] that act as [PeerID](#peer_id) in each X.509 certificate.
 When multiple TAs are used the TAs must ensure that the elements of the subject field used to identify a Peer are the same across the TAs. 
 
-![mTLS Connections](diagrams/seq-mtls-connections.svg "mTLS Connections")
+![mTLS Connections](media/seq-mtls-connections.svg "mTLS Connections")
 
 ## Contract Management
 
@@ -16,7 +16,7 @@ Contracts are negotiated between the Managers of Peers. A Directory provides the
 Connections to Services are authorized by Contracts with ServiceConnectionGrants. To create a new contract, the Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Management functionality). For each desired connection, a ServiceConnectionGrant is formulated that contains identifying information about both the Outway from the Service consumer and the Service of the Service provider. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
 Contracts can contain multiple Peers. E.g. if a Peer wants a single Contract for an application, this Contract can contain all the connections required for that application.
 
-![Contract Management](diagrams/seq-contract-management.svg "Contract Management")
+![Contract Management](media/seq-contract-management.svg "Contract Management")
 
 1. The initiating Peer gets the address of the Manager from a Directory.
 2. The Directory return the Manager address to the Peer.
@@ -37,13 +37,13 @@ Accepting, rejecting and revoking is done by adding a digital signature.
 
 The content of a Contract is immutable. When the content of a Contract is subject to change, the Contract is invalidated and replaced by a new one.
 
-![State Contract](diagrams/state-contract.svg "State Contract")
+![State Contract](media/state-contract.svg "State Contract")
 
 ## Creating a Group
 
 A Group is a system of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services. 
 
-In order to create a Group, additional [Group Rules & Restrictions](#group_rules) containing at least the mandatory decisions **MUST** be created.
+In order to create a Group, additional [Group Rules & Restrictions](#group_rules) containing at least the mandatory decisions MUST be created.
 
 ## Service discovery
 
@@ -54,7 +54,7 @@ When publishing services, Managers register Services by offering Contracts with 
 
 Peers query the Directories to discover the Services available in the Group 
 
-![Providing a Service](diagrams/seq-providing-a-service.svg "Providing a Service")
+![Providing a Service](media/seq-providing-a-service.svg "Providing a Service")
 
 1. The Peer creates a Contract with a Service Publication Grant which contains the details of the Service.
 2. The Peer adds its own accept signature to the Contract. 
@@ -69,7 +69,7 @@ The connection Grants contains information about the Service and the public key 
 
 The Contract is distributed among the two Peers. Once the Contract is signed by all Peers, the Outway can connect to the Inway offering the Service.
 
-![Create an authorization to connect](diagrams/seq-create-an-authorization-to-connect.svg "Connecting to a Service")
+![Create an authorization to connect](media/seq-create-an-authorization-to-connect.svg "Connecting to a Service")
 
 1. The Service consumer creates a Contract with a Service Connection Grant which contains the details of the Service.
 2. The Service consumer adds an accept signature to the Contract.
@@ -80,7 +80,7 @@ The Contract is distributed among the two Peers. Once the Contract is signed by 
 When the Service is being offered on behalf of another Peer the Contract is distributed among three Peers. The Peer acting as Delegator in the Service publication will also receive the Contract.
 Once the Contract is signed by all the Peers, the Outway can connect to the Inway offering the Service on behalf the Delegator. 
 
-![Create an authorization to connect](diagrams/seq-create-an-authorization-to-connect-delegated-publication.svg "Connecting to a Service that is offered on behalf of another Peer")
+![Create an authorization to connect](media/seq-create-an-authorization-to-connect-delegated-publication.svg "Connecting to a Service that is offered on behalf of another Peer")
 
 1. The Service consumer creates a Contract with a Service Connection Grant which contains the details of the Service.
 2. The Service consumer adds an accept signature to the Contract.
@@ -102,7 +102,7 @@ The connection Grants contains information about the Service, the public key of 
 
 The Contract is distributed among the three Peers. Once the Contract is signed by all the Peers, the Outway of the Delegatee can connect to the Inway offering the Service on behalf the Delegator.
 
-![Delegate connection](diagrams/seq-delegate-connection.svg "Delegate a connection to a Service")
+![Delegate connection](media/seq-delegate-connection.svg "Delegate a connection to a Service")
 
 1. The Delegator creates a Contract with a Delegated Service Connection Grant which contains the details of the Service and the Peer who will be acting as Delegatee (who will consume the Service).
 2. The Delegator adds its own accept signature to the Contract.
@@ -120,7 +120,7 @@ The Contract is distributed among the three Peers. Once the Contract is signed b
 When the Service is being offered on behalf of another Peer the Contract is distributed among four Peers. The Peer acting as Delegator in the Service publication will also receive the Contract.
 Once the Contract is signed by all the Peers, the Outway of the Delegatee can connect to the Inway offering the Service on behalf the Delegator.
 
-![Delegate connection](diagrams/seq-delegate-connection-delegated-publication.svg "Delegate a connection to a Service that is offered on behalf of another Peer")
+![Delegate connection](media/seq-delegate-connection-delegated-publication.svg "Delegate a connection to a Service that is offered on behalf of another Peer")
 
 1. The Delegator creates a Contract with a Delegated Service Connection Grant which contains the details of the Service and the Peer who will be acting as Delegatee (who will consume the Service).
 2. The Delegator adds its own accept signature to the Contract.
@@ -147,7 +147,7 @@ The Peer obtains an access token from the Manager of the Peer providing the Serv
 The Outway proxies the request including the access token to the Inway.
 The Inway will validate the access token and proxy the request to the Service.
 
-![Consuming a Service](diagrams/seq-consuming-a-service.svg "Consuming a Service")
+![Consuming a Service](media/seq-consuming-a-service.svg "Consuming a Service")
 
 1. The client application sends a request to the Outway.
 2. The Outway creates an connection with the Inway and proxies the request. In this diagram it is assumed that the Outway already has an access token. 

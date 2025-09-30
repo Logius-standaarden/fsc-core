@@ -8,9 +8,9 @@ loadRespecWithConfiguration({
     specType: "ST",
     pubDomain: "fsc",
     shortName: "core",
-    publishDate: "2024-12-12",
-    publishVersion: "1.0.0",
-    prevVersion: [],
+    publishDate: "2025-09-08",
+    publishVersion: "1.1.1",
+    previousPublishVersion: "1.1.0",
 
     editors:
         [
