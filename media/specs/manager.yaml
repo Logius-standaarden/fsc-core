@@ -500,6 +500,10 @@ components:
       description: The content of a Contract
       type: object
       properties:
+        fsc_version:
+          description: The version of the FSC specification that the Contract adheres to.  
+          type: string
+          example: 1.0.0
         iv:
           description: An Initialization vector for the Contract. Must be an UUID.
           type: string
