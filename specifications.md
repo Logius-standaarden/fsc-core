@@ -109,7 +109,10 @@ example Contract with a ServiceConnectionGrant
           },
           "outway": {
             "peer_id": "00000000000000000002",
-            "public_key_thumbprint": "3a56f2e9269ac63f0d4394c46b96539da1625b6a985d38029ff89f34e490960c"
+            "identification" {
+              "type": "OUTWAY_IDENTIFICATION_TYPE_PUBLIC_KEY_THUMBPRINT",
+              "public_key_thumbprint": "3a56f2e9269ac63f0d4394c46b96539da1625b6a985d38029ff89f34e490960c"
+            }
           }
         }
       }
@@ -179,7 +182,8 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager of the Peer providing the Service matches the value of the field `grant.data.service.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager offering the Contract to the Service providing Peer matches the value of the field `grant.data.outway.peer_id`
 - The Service provided in the field `grant.data.service.name` is offered by the Peer provided in the field `grant.data.service.peer_id`
-- A Public key fingerprint also called thumbprint is provided in the field `grant.data.outway.public_key_thumbprint`
+- A Public key thumbprint is provided in the field `grant.data.outway.identification.public_key_thumbprint`. This validation should only be performed when the value of `grant.outway.identification.type` equals `OUTWAY_IDENTIFICATION_TYPE_PUBLIC_KEY_THUMBPRINT` 
+- A domain name is provided in the field `grant.data.outway.identification.domain_name`. This validation should only be performed when the value of `grant.outway.identification.type` equals `OUTWAY_IDENTIFICATION_TYPE_DOMAIN_NAME` 
 - If `grant.data.properties` is provided, it **MUST** be a valid JSON Object
 
 Signature requirements:
@@ -197,7 +201,7 @@ Validation rules:
 - The Peer ID provided by the X.509 certificate used by the Manager of the Peer creating the delegation matches the value of the field `grant.delegator.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager consuming the DelegatedServiceConnectionGrant matches with the value of the field `grant.outway.peer_id`
 - The Peer ID provided by the X.509 certificate used by the Manager of the Peer providing the Service matches with the value of the field `grant.data.service.peer_id`
-- The validation rules of the fields `Outway` and `Service` of the ServiceConnectionGrant described in Core must be applied to corresponding fields `grant.data.outway` and `grant.data.service` of the DelegatedServiceConnectionGrant
+- The validation rules of the fields `grant.data.outway` and `grant.data.service` of the ServiceConnectionGrant must be applied to the fields `grant.data.outway` and `grant.data.service` of the DelegatedServiceConnectionGrant
 - In case of a Service that is published on behalf of another Peer, The Peer ID provided by the X.509 certificate used by the Manager of the Peer delegating the publication of Service matches with the value of the field `grant.data.service.delegator.peer_id`
 - If `grant.data.properties` is provided, it **MUST** be a valid JSON Object
 
@@ -563,7 +567,8 @@ Before issuing an access token the Manager MUST validate that:
 1. The Manager is provided by a Peer with the same PeerID as specified in `grant.data.service.peer_id`.
 1. The Manager is provided by a Peer who has an Inway which is offering the Service specified in `grant.data.service.name`. 
 1. The Peer ID specified by the X.509 certificate of the client requesting the access token matches the value of the field `grant.data.outway.peer_id`.
-1. The X.509 certificate provided by the client contains the same public key as specified in `grant.data.outway.public_key_fingerprint`
+1. The X.509 certificate provided by the client contains a public key with the same public key thumbprint  as specified in `grant.data.outway.identification.public_key_thumbprint`. This validation should only be performed when the value of `grant.outway.identification.type` equals `OUTWAY_IDENTIFICATION_TYPE_PUBLIC_KEY_THUMBPRINT` 
+1. The X.509 certificate provided by the client has a Subject Alternative Name (SAN) that matches the domain name specified in `grant.data.outway.identification.domain_name`. This validation should only be performed when the value of `grant.outway.identification.type` equals `OUTWAY_IDENTIFICATION_TYPE_DOMAIN_NAME`  
 
 The `cnf.x5t#S256` claim **MUST** contain the certificate thumbprint of the X.509 certificate provided by the client requesting the token according to [section 3.1] of [[RFC8705]].
 The `act` claim **MUST** be set when an access token is generated for a Peer who is connecting to the Service on behalf of another Peer. I.e. the authorization to connect has been granted using a DelegatedServiceConnectionGrant.

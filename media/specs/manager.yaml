@@ -685,16 +685,44 @@ components:
         - service
         - delegator
     outway:
-      description: The details of the Outway for which a connection authorization was granted
       type: object
       properties:
         peer_id:
-          $ref: "#/components/schemas/peerID"
+            $ref: "#/components/schemas/peerID"
+        identification:
+          oneOf:
+            - $ref: "#/components/schemas/outwayIdentificationDomainName"
+            - $ref: "#/components/schemas/outwayIdentificationPublicKeyThumbprint"
+          discriminator:
+            propertyName: type
+            mapping:
+              OUTWAY_IDENTIFICATION_TYPE_PUBLIC_KEY_THUMBPRINT: "#/components/schemas/outwayIdentificationPublicKeyThumbprint"
+              OUTWAY_IDENTIFICATION_TYPE_DOMAIN_NAME: "#/components/schemas/outwayIdentificationDomainName"
+      required:
+        - peer_id
+        - identification
+    outwayIdentificationPublicKeyThumbprint:
+      description: The details of the Outway based on a public key thumbprint for which a connection was authorized
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/outwayIdentificationType"
         public_key_thumbprint:
           $ref: "#/components/schemas/publicKeyThumbprint"
       required:
-        - peer_id
+        - type
         - public_key_thumbprint
+    outwayIdentificationDomainName:
+      description: The details of the Outway based on a domain name for which a connection was authorized
+      type: object 
+      properties:
+        type:
+          $ref: "#/components/schemas/outwayIdentificationType"
+        domain_name:
+          $ref: "#/components/schemas/domainName"
+      required:
+        - type
+        - domain_name
     directory:
       description: The details of the Directory
       type: object
@@ -820,6 +848,12 @@ components:
       enum:
         - SERVICE_TYPE_SERVICE
         - SERVICE_TYPE_DELEGATED_SERVICE
+    outwayIdentificationType:
+      description: The type of Outway identification
+      type: string
+      enum:
+        - OUTWAY_IDENTIFICATION_TYPE_PUBLIC_KEY_THUMBPRINT
+        - OUTWAY_IDENTIFICATION_TYPE_DOMAIN_NAME
     hashType:
       description: The type of hash
       type: string
@@ -898,6 +932,12 @@ components:
       example: 3a56f2e9269ac63f0d4394c46b96539da1625b6a985d38029ff89f34e490960c
       maxLength: 64
       minLength: 64
+    domainName:
+      description: A domain name according to RFC 1035
+      type: string
+      minLength: 1
+      maxLength: 255
+      example: example.com
     peer:
       type: object
       properties:
