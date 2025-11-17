@@ -795,6 +795,10 @@ components:
           $ref: "#/components/schemas/serviceName"
         protocol:
           $ref: "#/components/schemas/protocol"
+        properties:
+          description: The properties as specified in the ServicePublicationGrant
+          additionalProperties: true
+          type: object
       required:
         - type
         - peer
@@ -812,6 +816,10 @@ components:
           $ref: "#/components/schemas/serviceName"
         protocol:
           $ref: "#/components/schemas/protocol"
+        properties:
+          description: The properties as specified in the DelegatedServicePublicationGrant
+          additionalProperties: true
+          type: object
       required:
         - type
         - delegator
