@@ -43,4 +43,4 @@ Door de implementatie van de FSC-componenten systematisch aan deze tests te onde
 
 
 
-OpenFSC heeft van deze test suite een [geautomatiseerde implementatie](https://gitlab.com/commonground/fsc/compliance-tester) gemaakt voor iedereen die de OpenFSC bouwblokken gebruikt om FSC te implementeren.
+Er is [een compliance tester]((https://gitlab.com/commonground/fsc/compliance-tester) gemaakt die een gedeelte van de  test suite een automatisch uitvoert. De compliance tester kan als hulpmiddel worden gebruikt om te verifiëren of een implementatie FSC correct heeft geïmplementeerd.  
