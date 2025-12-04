@@ -7,7 +7,7 @@ Het primaire doel van de FSC Test Suite is het garanderen van technische interop
 
 Het algemene nut van deze test-suite is tweeledig:
 1. Compliance en Betrouwbaarheid: De tests waarborgen dat de implementaties van Manager, Inway en Outway componenten voldoen aan de normatieve eisen gesteld in de FSC-Core specificatie. Door het gebruik van standaardoplossingen en het toepassen van de FSC-standaard wordt interoperabiliteit tussen diensten mogelijk gemaakt. Dit is cruciaal, aangezien FSC de fundamentele kaders definieert voor de samenwerking tussen organisaties (Peers).
-1. Beveiliging: FSC legt sterke nadruk op beveiliging, waarbij Peers vertrouwen op een Public Key Infrastructure (PKI) schema en alle verbindingen gebruikmaken van mTLS (Mutual Transport Layer Security). De Test Suite valideert of alle beveiligingsmechanismen, zoals Contract-ondertekening en token-binding, correct zijn geïmplementeerd, wat leidt tot sterke vertrouwelijkheid en integriteit.
+1. Beveiliging: FSC legt sterke nadruk op beveiliging, waarbij Peers vertrouwen op een Public Key Infrastructure (PKI) schema, alle verbindingen gebruikmaken van mTLS (Mutual Transport Layer Security) en bijbehorende autorisaties zijn vastgelegd in digitale contracten. De Test Suite valideert of alle beveiligingsmechanismen, zoals Contract-ondertekening en token-binding, correct zijn geïmplementeerd, wat leidt tot sterke vertrouwelijkheid en integriteit.
 
 In de bredere context van overheidsstandaarden, zoals Digikoppeling, zijn dergelijke voorzieningen bekend als Compliance Voorzieningen (CV). Deze voorzieningen worden gebruikt door organisaties om te controleren of hun adapter of programmatuur voldoet aan de koppelvlakstandaarden.
 
