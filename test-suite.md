@@ -22,7 +22,7 @@ De testen richten zich op de naleving van de specificaties zoals beschreven in F
 | --- | --- | --- |
 | **Manager** | Beheert Contracten en verstrekt toegangstokens. | Valideert Contracten en handtekeningen volgens de regels. Controleert of de Grant Hash in de token-aanvraag overeenkomt met een geldige Grant in een Contract. Zorgt voor de correcte Peer listing en Service listing. |
 | **Inway**   | Reverse proxy; handelt inkomende connecties af. | Authenticatie (accepteert alleen mTLS-connecties van Outways met een certificaat van de gekozen Trust Anchor van de Groep). Autorisatie (valideert het Access Token, inclusief de binding aan het X.509 certificaat en de Group ID). Zorgt voor de juiste routering naar de Service. |
-| **Outway**  | Forward proxy; handelt uitgaande connecties af. | Authenticatie (gebruikt mTLS om met Inways te verbinden). Zorgt voor de juiste routering naar het Inway-adres gespecificeerd in het aud veld van het Access Token. Beheer van Access Tokens (verkrijgen via Client Credentials flow).
+| **Outway**  | Forward proxy; handelt uitgaande connecties af. | Authenticatie (gebruikt mTLS om met Inways te verbinden). Zorgt voor de juiste routering naar het Inway-adres gespecificeerd in het aud veld van het Access Token. Verantwoordelijk voor het verkrijgen van Access Tokens middels de Client Credentials flow.
 | **Integratie** | Alles samen | Test de gehele keten, van het opstellen en ondertekenen van Contracten tot het succesvol consumeren van een Service door de Outway via de Inway.
 
 
