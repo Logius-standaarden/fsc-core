@@ -27,7 +27,7 @@ De testen richten zich op de naleving van de specificaties zoals beschreven in F
 
 
 ### Werking van de Testen
-De FSC Test Suite voert compliance-tests uit, wat betekent dat het de implementatie toetst aan de verplichte bepalingen (aangeduid met MUST) in de FSC-specificatie.
+De FSC Test Suite beschrijft compliance-tests die uitgevoerd kunnen worden om een implementatie te toetsen op de verplichte bepalingen (aangeduid met MUST) in de FSC-specificatie.
 
 De tests valideren specifieke technische eisen, zoals:
 - **Contract Validatie**: Managers moeten een Contract afwijzen als het niet voldoet aan regels zoals het unieke karakter van de UUID in het veld `contract.iv`.
