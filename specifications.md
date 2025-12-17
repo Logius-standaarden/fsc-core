@@ -309,10 +309,10 @@ The Validation MUST be done every time a Peer receives a signature.
 The `contract_content_hash` of the signature payload contains the signature hash. The algorithm to create a `contract_content_hash` is described below. 
 The algorithm ensures that the content hash is unique for a specific Contract content. Because a signature contains the content hash, it becomes possible to guarantee that a signature is intended for a specific Contract.
 
-1. Convert `contract.content` to Canonical JSON data as described in [[RFC8785]].
-1. Hash the Canonical JSON data using the hash algorithm specified in `contract.content.hash_algorithm`.
+1. Convert the Contract `content` to Canonical JSON data as described in [[RFC8785]].
+1. Hash the Canonical JSON data using the hash algorithm specified in `content.hash_algorithm`.
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
-1. Convert the value of `contract.content.hash_algorithm` to an int32 and surround it with dollar signs (`$`). When using the `SHA3-512` algorithm this would result in `$1$`.
+1. Convert the value of `content.hash_algorithm` to an int32 and surround it with dollar signs (`$`). When using the `SHA3-512` algorithm this would result in `$1$`.
    To convert the hash algorithm to an integer, see the [type mapping](#type_mapping_hash_algorithm)
 1. Add `1$` as suffix to the string created in step 13. This is the enum `HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of the [OpenAPI Specification](media/specs/manager.yaml) as int32. If the string created in step 13 is `$1$`, the result should now be `$1$1$`
 1. Add the Base64 generated in step 4 as suffix to the string generated in step 5.
