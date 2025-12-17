@@ -326,9 +326,9 @@ The Grant hash can be created by executing the following steps:
 1. Create the content hash as described in the [content hash](#content_hash) section. 
 1. Convert the content of `grant.data` to a Canonical JSON string as described in [[RFC8785]].
 1. Append the Canonical JSON string to the content hash.
-1. Hash the result of step 3 using the hash algorithm specified in `contract.content.algorithm`.
+1. Hash the result of step 3 using the hash algorithm specified in `content.hash_algorithm`.
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
-1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. The int32 value per hash algorithm type is defined in the [type mapping](#type_mapping_hash_algorithm).. E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
+1. Convert the value of `content.hash_algorithm` to an int32 and enclose it with `$`. The int32 value per hash algorithm type is defined in the [type mapping](#type_mapping_hash_algorithm).. E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
 1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. The int32 value per hash type is defined in the [type mapping](#type_mapping_hash). E.g. The enum `HASH_TYPE_SERVICE_PUBLICATION_GRANT` becomes `2$`.
 1. Combine the strings containing the hash algorithm (step 6) and Hash type (step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_SERVICE_CONNECTION` should result in the string `$1$2$`
 1. Prefix the Base64 string generated in step 5 with the string generated in step 8.
