@@ -530,6 +530,7 @@ components:
           example: 1672527600
           minimum: 0
       required:
+        - fsc_version
         - iv
         - group_id
         - validity
