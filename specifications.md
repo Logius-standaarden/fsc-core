@@ -310,12 +310,12 @@ The Validation MUST be done every time a Peer receives a signature.
 The `contract_content_hash` of the signature payload contains the signature hash. The algorithm to create a `contract_content_hash` is described below. 
 The algorithm ensures that the content hash is unique for a specific Contract content. Because a signature contains the content hash, it becomes possible to guarantee that a signature is intended for a specific Contract.
 
-1. Convert `contract.content` to Canonical JSON data as described in [[RFC8785]].
-1. Hash the Canonical JSON data using the hash algorithm specified in `contract.content.algorithm`.
+1. Convert the Contract `content` to Canonical JSON data as described in [[RFC8785]].
+1. Hash the Canonical JSON data using the hash algorithm specified in `content.hash_algorithm`.
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
-1. Convert the value of `contract.content.algorithm` to an int32 and surround it with dollar signs (`$`). When using the `SHA3-512` algorithm this would result in `$1$`. 
+1. Convert the value of `content.hash_algorithm` to an int32 and surround it with dollar signs (`$`). When using the `SHA3-512` algorithm this would result in `$1$`.
    To convert the hash algorithm to an integer, see the [type mapping](#type_mapping_hash_algorithm)
-1. Add `1$` as suffix to the string created in step 13. This is the enum `HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of the [OpenAPI Specification](media/specs/manager.yaml) as int32. If the string created in step 13 is `$1$`, the result should now be `$1$1$`
+1. Add `1$` as suffix to the string created in step 4. This is the enum `HASH_TYPE_CONTRACT` as defined in the field `.components.schemas.HashType` of the [OpenAPI Specification](media/specs/manager.yaml) as int32. If the string created in step 13 is `$1$`, the result should now be `$1$1$`
 1. Add the Base64 generated in step 4 as suffix to the string generated in step 5.
 
 ### Grant hash {#grant_hash}
@@ -327,9 +327,9 @@ The Grant hash can be created by executing the following steps:
 1. Create the content hash as described in the [content hash](#content_hash) section. 
 1. Convert the content of `grant.data` to a Canonical JSON string as described in [[RFC8785]].
 1. Append the Canonical JSON string to the content hash.
-1. Hash the result of step 3 using the hash algorithm specified in `contract.content.algorithm`.
+1. Hash the result of step 3 using the hash algorithm specified in `content.hash_algorithm`.
 1. Encode the bytes of the hash using Base64 URL encoding with all trailing '=' characters omitted and without the inclusion of any line breaks, whitespace, or other additional characters.
-1. Convert the value of `contract.content.algorithm` to an int32 and enclose it with `$`. The int32 value per hash algorithm type is defined in the [type mapping](#type_mapping_hash_algorithm).. E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
+1. Convert the value of `content.hash_algorithm` to an int32 and enclose it with `$`. The int32 value per hash algorithm type is defined in the [type mapping](#type_mapping_hash_algorithm).. E.g. The enum `HASH_ALGORITHM_SHA3_512` becomes `$1$`.
 1. Determine the `HashType` that matches with value of `Grant.type` and convert it to an int32 and add a `$` as suffix. The int32 value per hash type is defined in the [type mapping](#type_mapping_hash). E.g. The enum `HASH_TYPE_SERVICE_PUBLICATION_GRANT` becomes `2$`.
 1. Combine the strings containing the hash algorithm (step 6) and Hash type (step 7). E.g. The hash algorithm `HASH_ALGORITHM_SHA3_512` and Grant Type `GRANT_TYPE_SERVICE_CONNECTION` should result in the string `$1$2$`
 1. Prefix the Base64 string generated in step 5 with the string generated in step 8.

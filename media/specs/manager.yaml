@@ -33,13 +33,13 @@ paths:
             schema:
               type: object
               properties:
-                contract_content:
+                content:
                   $ref: "#/components/schemas/contractContent"
                 signature:
                   description: An accept signature of the Peer submitting the contract
                   type: string
               required:
-                - contract_content
+                - content
                 - signature
       responses:
         201:
@@ -469,14 +469,14 @@ components:
           schema:
             type: object
             properties:
-              contract_content:
+              content:
                 $ref: "#/components/schemas/contractContent"
               signature:
                 description: The signature
                 type: string
                 example: eyJhbGciOiJSUzUxMiIsIng1dCNTMjU2IjoiRzRYNEM0bmFXZmRERG5qSi9aV2RzNGFPcWhzVTZnUklPNlQxM1pMNEsyST0ifQ.eyJjb250ZW50SGFzaCI6IiQxJDEkWmFxbiszaWFoM2FkMmtuYjJKc2JhR2g2bi9rZ1UrUWpVK0pmTmhuVkdCd1RGbnN1TUNjOUlRcHlPM0xabmt0WUtaWWh4TnpKalh5RWlLMnVWZTZEZ3c9PSIsInR5cGUiOiJhY2NlcHQifQ.Qs7M3EBVWbrzhjPioDhbhNP8BJQqkxPOPq-Pm6oWL_ZO9m74TIeUHk1gQ1QcqZs_zGALjmDLuOSLLEgz3Qh4iK5jadex14z-i3xJObb5vcjVN326CxdJNzRZo60c9KWY4Nrh7ewziXJv8BQ3x4se62p5paCKdN8quWiG9J5gN4F5dmtZyae0rEhQsy-fy5ugLHPhR97cschr8OnlStVQKRYcUqn7obCnKLNOv-L9a02umsw6ha-G8CSMr3z9QZMfYcPABQAaR3XamUIR_T-ZGiZbpuTDaLfqztCP9jrZ7Q6g4J6SmQtxkcbzj4YdXXcwOr9aUO-07LZuH__tHGXU2bzgsObiClP5Fx13VT0zJzM5rdMtS5OnRwvznIFJUG1VkXXIRG9pVpffOM-kO-FsFW6BTWGi5nBJfi21nLUTh-bNVPB9O8WVfVBl8PwZ2HzjNy0asI_6I2jpweRh8-KNLM5ca18YS1VUS8cgfnc7qFcrnI8kxxDqyITOd2-LMRsngvmJpoJkmKjNIHbnJaoXdvMqFss7YHitJQi7wz3VUKLojK8XdaUc40KQtx7VIdBX9ClDdUFY1kXPxM_c0zLGsLn60a-4PLtUBZEPnBgxZd7-9st9ivBkPXylG9ZNqIe6aD4qxBtp91vI2w18X-MmYT-wb73PcF2IySAuzFk-uqI
             required:
-              - contract_content
+              - content
               - signature
   schemas:
     paginationResult:
