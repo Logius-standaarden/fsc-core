@@ -109,7 +109,7 @@ example Contract with a ServiceConnectionGrant
           },
           "outway": {
             "peer_id": "00000000000000000002",
-            "identification" {
+            "identification": {
               "type": "OUTWAY_IDENTIFICATION_TYPE_PUBLIC_KEY_THUMBPRINT",
               "public_key_thumbprint": "3a56f2e9269ac63f0d4394c46b96539da1625b6a985d38029ff89f34e490960c"
             }
