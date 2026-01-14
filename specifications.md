@@ -139,7 +139,7 @@ example Contract with a ServiceConnectionGrant
 
 Per Grant type, different validation rules apply.
 
-#### ServicePublicationGrant {#service_publication_grant}
+#### ServicePublicationGrant {#grant_service_publication}
 
 The content of a ServicePublicationGrant is defined in the object `.components/schemas/grantServicePublication` of the [OpenAPI Specification](media/specs/manager.yaml)
 
@@ -659,13 +659,13 @@ The Directory is used by Peers to:
 
 #### Service publication
 
-Service publication is accomplished by offering a Contract to the Directory which contains one or more ServicePublicationGrants with each ServicePublicationGrant containing a single Service. Once the Directory and the Peer offering the Service have both signed the Contract, the Service is published in the Directory.
+Service publication is accomplished by offering a Contract to the Directory which contains one or more (Delegated)ServicePublicationGrants with each (Delegated)ServicePublicationGrant containing a single Service. Once the Directory and the Peer offering the Service have both signed the Contract, the Service is published in the Directory.
 
-The Directory MUST be able to sign Contracts with Grants of the type ServicePublicationGrant.
+The Directory MUST be able to sign Contracts with Grants of the type (Delegated)ServicePublicationGrant.
 
-The Directory MUST validate the ServicePublicationGrant in the Contract using the rules described in [ServicePublicationGrant section](#service_publication_grant)
+The Directory MUST validate the (Delegated)ServicePublicationGrant in the Contract using the rules described in [ServicePublicationGrant section](#grant_service_publication) or [DelegatedServicePublicationGrant section](#grant_delegated_service_publication)
 
-Although multiple ServicePublicationGrants are allowed in a single Contract it is RECOMMENDED to limit this to one per Contract. Adding multiple ServicePublicationGrants on a single Contract makes the Contract fragile. If the publication of one Service changes the whole Contract will be invalidated. 
+Although multiple (Delegated)ServicePublicationGrants are allowed in a single Contract it is RECOMMENDED to limit this to one per Contract. Adding multiple (Delegated)ServicePublicationGrants on a single Contract makes the Contract fragile. If the publication of one Service changes the whole Contract will be invalidated. 
 
 ## Outway
 
