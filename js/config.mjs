@@ -4,13 +4,13 @@ loadRespecWithConfiguration({
     useLogo: true,
     useLabel: true,
     license: "cc-by",
-    specStatus: "WV",
+    specStatus: "CV",
     specType: "ST",
     pubDomain: "fsc",
     shortName: "core",
-    publishDate: "2025-09-25",
-    publishVersion: "1.1.2",
-    previousPublishVersion: "1.1.1",
+    publishDate: "2026-01-19",
+    publishVersion: "2.0.0",
+    previousPublishVersion: "1.1.2",
 
     editors:
         [
