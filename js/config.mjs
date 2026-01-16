@@ -15,11 +15,6 @@ loadRespecWithConfiguration({
     editors:
         [
             {
-                name: "VNG Realisatie",
-                company: "VNG",
-                companyURL: "https://vng.nl/rubrieken/onderwerpen/standaarden",
-            },
-            {
                 name: "Logius",
                 company: "Logius",
                 companyURL: "https://github.com/Logius-standaarden",
