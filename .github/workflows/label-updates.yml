@@ -11,3 +11,5 @@ jobs:
   update-labels:
     name: Update labels
     uses: Logius-standaarden/Automatisering/.github/workflows/label-updates.yml@main
+    with:
+      technisch_overleg: DK
