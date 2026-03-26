@@ -245,29 +245,20 @@ A signature MUST follow the JSON Web Signature (JWS) format specified in [[RFC75
 
 A signature on a Contract SHOULD only be accepted if the Peer is present in one of the Grants as:
 
-#### ServicePublicationGrant
-
-- `grant.data.directory.peer_id`
-- `grant.data.service.peer_id`
-
-#### DelegatedServicePublicationGrant
-
-- `grant.data.directory.peer_id`
-- `grant.data.service.peer_id`
-- `grant.data.delegator.peer_id`
-
-#### ServiceConnectionGrant
-
-- `grant.data.outway.peer_id`
-- `grant.data.service.peer_id`
-- `grant.data.service.delegator.peer_id`
-
-#### DelegatedServiceConnectionGrant
-
-- `grant.data.outway.peer_id`
-- `grant.data.service.peer_id`
-- `grant.data.delegator.peer_id`
-- `grant.data.service.delegator.peer_id`
+- ServicePublicationGrant
+  - `grant.data.directory.peer_id`
+  - `grant.data.service.peer_id`
+- DelegatedServicePublicationGrant
+  - `grant.data.directory.peer_id`
+  - `grant.data.service.peer_id`
+  - `grant.data.delegator.peer_id`
+- ServiceConnectionGrant
+  - `grant.data.outway.peer_id`
+  - `grant.data.service.peer_id`
+  - `grant.data.service.delegator.peer_id`
+- DelegatedServiceConnectionGrant
+  - `grant.data.outway.peer_id`
+  - `grant.data.service.peer_id`
 
 The JWS MUST specify the certificate thumbprint of the keypair used to create the digital signature using the `x5t#S256` [section 4.1.8](https://www.rfc-editor.org/rfc/rfc7515#section-4.1.8) of [[RFC7515]] field of the `JOSE Header` [section 4](https://www.rfc-editor.org/rfc/rfc7515#section-4) of [[RFC7515]].
 
