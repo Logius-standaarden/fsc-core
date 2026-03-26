@@ -4,9 +4,9 @@ This chapter describes the basic architecture of an FSC system.
 
 ## Identity and Trust  {#trustanchor}
 
-Connections between Managers, Inways, Outways use Mutual Transport Layer Security (mTLS) with X.509 certificates. 
+Connections between Managers, Inways, Outways use Mutual Transport Layer Security (mTLS) with X.509 certificates.
 Components in the Group are configured to accept the same (Sub-) Certificate Authorities (CA) as defined in the Trust Anchors list (TA). Each TA is a Trusted Third Party that ensures the identity of the Peers by verifying a set of fields of the subject field , [section 4.1.2.6](https://rfc-editor.org/rfc/rfc5280) of [[RFC5279]] that act as [PeerID](#peer_id) in each X.509 certificate.
-When multiple TAs are used the TAs must ensure that the elements of the subject field used to identify a Peer are the same across the TAs. 
+When multiple TAs are used the TAs must ensure that the elements of the subject field used to identify a Peer are the same across the TAs.
 
 ![mTLS Connections](media/seq-mtls-connections.svg "mTLS Connections")
 
@@ -25,7 +25,7 @@ Contracts can contain multiple Peers. E.g. if a Peer wants a single Contract for
 
 ### Contract states
 
-Any Peer can submit a Contract to other Peers. This Contract becomes valid when the Peers mentioned in the Contract accept the Contract by placing an accept signature. 
+Any Peer can submit a Contract to other Peers. This Contract becomes valid when the Peers mentioned in the Contract accept the Contract by placing an accept signature.
 
 A Contract becomes invalid when at least one Peer mentioned in the Contract revokes the Contract.
 
@@ -41,26 +41,26 @@ The content of a Contract is immutable. When the content of a Contract is subjec
 
 ## Creating a Group
 
-A Group is a system of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services. 
+A Group is a system of Peers using Inways, Outways and Managers that confirm to the FSC specification to make use of each other's Services.
 
 In order to create a Group, additional [Group Rules & Restrictions](#group_rules) containing at least the mandatory decisions MUST be created.
 
 ## Service discovery
 
 Every Group is defined by at least one Directory, which contains the Services and Peers in the Group.
-Peers can make themselves known to a Directory by having their Manager call the [Announce](#announce) endpoint of the Directory. 
+Peers can make themselves known to a Directory by having their Manager call the [Announce](#announce) endpoint of the Directory.
 
 When publishing services, Managers register Services by offering Contracts with a [ServicePublicationGrant](#service_publication_grant) or [DelegatedServicePublicationGrant](#grant_delegated_service_publication) to the Directory.
 
-Peers query the Directories to discover the Services available in the Group 
+Peers query the Directories to discover the Services available in the Group
 
 ![Providing a Service](media/seq-providing-a-service.svg "Providing a Service")
 
 1. The Peer creates a Contract with a Service Publication Grant which contains the details of the Service.
-2. The Peer adds its own accept signature to the Contract. 
+2. The Peer adds its own accept signature to the Contract.
 3. The Peer sends the Contract and accept signature to the Directory.
 4. The Directory adds its own accept signature.
-5. The Directory sends the accept signature to the Peer. 
+5. The Directory sends the accept signature to the Peer.
 
 ## Create an authorization to connect to a Service
 
@@ -78,7 +78,7 @@ The Contract is distributed among the two Peers. Once the Contract is signed by 
 5. The Service provider sends the accept signature to the Service consumer.
 
 When the Service is being offered on behalf of another Peer, the Contract is distributed among three Peers. The Peer acting as Delegator in the Service publication will also receive the Contract.
-Once the Contract is signed by all the Peers, the Outway can connect to the Inway offering the Service on behalf of the Delegator. 
+Once the Contract is signed by all the Peers, the Outway can connect to the Inway offering the Service on behalf of the Delegator.
 
 ![Create an authorization to connect](media/seq-create-an-authorization-to-connect-delegated-publication.svg "Connecting to a Service that is offered on behalf of another Peer")
 
@@ -142,15 +142,15 @@ Once the Contract is signed by all the Peers, the Outway of the Delegatee can co
 
 ## Consuming a Service
 
-A Peer can consume a Service by sending a request for said Service to an Outway. 
-The Peer obtains an access token from the Manager of the Peer providing the Service. 
+A Peer can consume a Service by sending a request for said Service to an Outway.
+The Peer obtains an access token from the Manager of the Peer providing the Service.
 The Outway proxies the request including the access token to the Inway.
 The Inway will validate the access token and proxy the request to the Service.
 
 ![Consuming a Service](media/seq-consuming-a-service.svg "Consuming a Service")
 
 1. The client application sends a request to the Outway.
-2. The Outway creates a connection with the Inway and proxies the request. In this diagram, it is assumed that the Outway already has an access token. 
+2. The Outway creates a connection with the Inway and proxies the request. In this diagram, it is assumed that the Outway already has an access token.
 3. The Inway validates the provided access token before proxying the request to the Service.
 4. The Inway proxies the request to the Service.
 5. The Service returns the response to the Inway.
@@ -161,8 +161,8 @@ The Inway will validate the access token and proxy the request to the Service.
 
 Which components a Peer needs depends on the use case.
 
-A Peer who wants to consume Services needs a Manager and an Outway.  
+A Peer who wants to consume Services needs a Manager and an Outway.
 
-A Peer who wants to offer Services needs a Manager and an Inway.    
+A Peer who wants to offer Services needs a Manager and an Inway.
 
-A Peer who wants to both consume and offer Services needs a Manager, an Outway and an Inway.  
+A Peer who wants to both consume and offer Services needs a Manager, an Outway and an Inway.
