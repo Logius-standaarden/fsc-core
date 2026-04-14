@@ -4,11 +4,11 @@ loadRespecWithConfiguration({
     useLogo: true,
     useLabel: true,
     license: "cc-by",
-    specStatus: "VV",
+    specStatus: "DEF",
     specType: "ST",
     pubDomain: "fsc",
     shortName: "core",
-    publishDate: "2026-01-19",
+    publishDate: "2026-04-21",
     publishVersion: "2.0.0",
     previousPublishVersion: "1.1.2",
 
