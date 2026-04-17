@@ -17,7 +17,7 @@ loadRespecWithConfiguration({
             {
                 name: "Logius",
                 company: "Logius",
-                companyURL: "https://github.com/Logius-standaarden",
+                companyURL: "https://www.logius.nl",
             }
         ],
     authors:
