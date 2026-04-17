@@ -1,4 +1,6 @@
-let respecConfig = {
+import { loadRespecWithConfiguration } from "https://logius-standaarden.github.io/publicatie/respec/organisation-config.mjs";
+
+loadRespecWithConfiguration({
     useLogo: true,
     useLabel: true,
     license: "cc-by",
@@ -6,22 +8,16 @@ let respecConfig = {
     specType: "ST",
     pubDomain: "fsc",
     shortName: "core",
-    publishDate: "2025-09-25",
-    publishVersion: "1.1.2",
-    previousPublishVersion: "1.1.1",
+    publishDate: "2026-04-21",
+    publishVersion: "2.0.0",
+    previousPublishVersion: "1.1.2",
 
-    previousMaturity: "DEF",
     editors:
         [
             {
-                name: "VNG Realisatie",
-                company: "VNG",
-                companyURL: "https://vng.nl/rubrieken/onderwerpen/standaarden",
-            },
-            {
                 name: "Logius",
                 company: "Logius",
-                companyURL: "https://github.com/Logius-standaarden",
+                companyURL: "https://www.logius.nl",
             }
         ],
     authors:
@@ -88,4 +84,4 @@ let respecConfig = {
             },
         ],
     github: "https://github.com/Logius-standaarden/fsc-core",
-};
+});

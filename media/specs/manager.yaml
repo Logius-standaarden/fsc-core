@@ -33,13 +33,13 @@ paths:
             schema:
               type: object
               properties:
-                contract_content:
+                content:
                   $ref: "#/components/schemas/contractContent"
                 signature:
                   description: An accept signature of the Peer submitting the contract
                   type: string
               required:
-                - contract_content
+                - content
                 - signature
       responses:
         201:
@@ -469,14 +469,14 @@ components:
           schema:
             type: object
             properties:
-              contract_content:
+              content:
                 $ref: "#/components/schemas/contractContent"
               signature:
                 description: The signature
                 type: string
                 example: eyJhbGciOiJSUzUxMiIsIng1dCNTMjU2IjoiRzRYNEM0bmFXZmRERG5qSi9aV2RzNGFPcWhzVTZnUklPNlQxM1pMNEsyST0ifQ.eyJjb250ZW50SGFzaCI6IiQxJDEkWmFxbiszaWFoM2FkMmtuYjJKc2JhR2g2bi9rZ1UrUWpVK0pmTmhuVkdCd1RGbnN1TUNjOUlRcHlPM0xabmt0WUtaWWh4TnpKalh5RWlLMnVWZTZEZ3c9PSIsInR5cGUiOiJhY2NlcHQifQ.Qs7M3EBVWbrzhjPioDhbhNP8BJQqkxPOPq-Pm6oWL_ZO9m74TIeUHk1gQ1QcqZs_zGALjmDLuOSLLEgz3Qh4iK5jadex14z-i3xJObb5vcjVN326CxdJNzRZo60c9KWY4Nrh7ewziXJv8BQ3x4se62p5paCKdN8quWiG9J5gN4F5dmtZyae0rEhQsy-fy5ugLHPhR97cschr8OnlStVQKRYcUqn7obCnKLNOv-L9a02umsw6ha-G8CSMr3z9QZMfYcPABQAaR3XamUIR_T-ZGiZbpuTDaLfqztCP9jrZ7Q6g4J6SmQtxkcbzj4YdXXcwOr9aUO-07LZuH__tHGXU2bzgsObiClP5Fx13VT0zJzM5rdMtS5OnRwvznIFJUG1VkXXIRG9pVpffOM-kO-FsFW6BTWGi5nBJfi21nLUTh-bNVPB9O8WVfVBl8PwZ2HzjNy0asI_6I2jpweRh8-KNLM5ca18YS1VUS8cgfnc7qFcrnI8kxxDqyITOd2-LMRsngvmJpoJkmKjNIHbnJaoXdvMqFss7YHitJQi7wz3VUKLojK8XdaUc40KQtx7VIdBX9ClDdUFY1kXPxM_c0zLGsLn60a-4PLtUBZEPnBgxZd7-9st9ivBkPXylG9ZNqIe6aD4qxBtp91vI2w18X-MmYT-wb73PcF2IySAuzFk-uqI
             required:
-              - contract_content
+              - content
               - signature
   schemas:
     paginationResult:
@@ -500,6 +500,10 @@ components:
       description: The content of a Contract
       type: object
       properties:
+        fsc_version:
+          description: The version of the FSC specification that the Contract adheres to.  
+          type: string
+          example: 1.0.0
         iv:
           description: An Initialization vector for the Contract. Must be an UUID.
           type: string
@@ -526,6 +530,7 @@ components:
           example: 1672527600
           minimum: 0
       required:
+        - fsc_version
         - iv
         - group_id
         - validity
@@ -609,6 +614,10 @@ components:
             mapping:
               SERVICE_TYPE_SERVICE: "#/components/schemas/service"
               SERVICE_TYPE_DELEGATED_SERVICE: "#/components/schemas/delegatedService"
+        properties:
+          description: Optional JSON object with arbitrary key-value pairs
+          additionalProperties: true
+          type: object
       required:
         - type
         - outway
@@ -623,6 +632,10 @@ components:
           $ref: "#/components/schemas/directory"
         service:
           $ref: "#/components/schemas/servicePublication"
+        properties:
+          description: Optional JSON object with arbitrary key-value pairs
+          additionalProperties: true
+          type: object
       required:
         - type
         - directory
@@ -646,6 +659,10 @@ components:
               SERVICE_TYPE_DELEGATED_SERVICE: "#/components/schemas/delegatedService"
         delegator:
           $ref: "#/components/schemas/delegator"
+        properties:
+          description: Optional JSON object with arbitrary key-value pairs
+          additionalProperties: true
+          type: object
       required:
         - type
         - outway
@@ -663,22 +680,54 @@ components:
           $ref: "#/components/schemas/servicePublication"
         delegator:
           $ref: "#/components/schemas/delegator"
+        properties:
+          description: Optional JSON object with arbitrary key-value pairs
+          additionalProperties: true
+          type: object
       required:
         - type
         - directory
         - service
         - delegator
     outway:
-      description: The details of the Outway for which a connection authorization was granted
       type: object
       properties:
         peer_id:
-          $ref: "#/components/schemas/peerID"
+            $ref: "#/components/schemas/peerID"
+        identification:
+          oneOf:
+            - $ref: "#/components/schemas/outwayIdentificationDomainName"
+            - $ref: "#/components/schemas/outwayIdentificationPublicKeyThumbprint"
+          discriminator:
+            propertyName: type
+            mapping:
+              OUTWAY_IDENTIFICATION_TYPE_PUBLIC_KEY_THUMBPRINT: "#/components/schemas/outwayIdentificationPublicKeyThumbprint"
+              OUTWAY_IDENTIFICATION_TYPE_DOMAIN_NAME: "#/components/schemas/outwayIdentificationDomainName"
+      required:
+        - peer_id
+        - identification
+    outwayIdentificationPublicKeyThumbprint:
+      description: The details of the Outway based on a public key thumbprint for which a connection was authorized
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/outwayIdentificationType"
         public_key_thumbprint:
           $ref: "#/components/schemas/publicKeyThumbprint"
       required:
-        - peer_id
+        - type
         - public_key_thumbprint
+    outwayIdentificationDomainName:
+      description: The details of the Outway based on a domain name for which a connection was authorized
+      type: object 
+      properties:
+        type:
+          $ref: "#/components/schemas/outwayIdentificationType"
+        domain_name:
+          $ref: "#/components/schemas/domainName"
+      required:
+        - type
+        - domain_name
     directory:
       description: The details of the Directory
       type: object
@@ -775,6 +824,10 @@ components:
           $ref: "#/components/schemas/serviceName"
         protocol:
           $ref: "#/components/schemas/protocol"
+        properties:
+          description: The properties as specified in the ServicePublicationGrant
+          additionalProperties: true
+          type: object
       required:
         - type
         - peer
@@ -792,6 +845,10 @@ components:
           $ref: "#/components/schemas/serviceName"
         protocol:
           $ref: "#/components/schemas/protocol"
+        properties:
+          description: The properties as specified in the DelegatedServicePublicationGrant
+          additionalProperties: true
+          type: object
       required:
         - type
         - delegator
@@ -804,6 +861,12 @@ components:
       enum:
         - SERVICE_TYPE_SERVICE
         - SERVICE_TYPE_DELEGATED_SERVICE
+    outwayIdentificationType:
+      description: The type of Outway identification
+      type: string
+      enum:
+        - OUTWAY_IDENTIFICATION_TYPE_PUBLIC_KEY_THUMBPRINT
+        - OUTWAY_IDENTIFICATION_TYPE_DOMAIN_NAME
     hashType:
       description: The type of hash
       type: string
@@ -882,6 +945,12 @@ components:
       example: 3a56f2e9269ac63f0d4394c46b96539da1625b6a985d38029ff89f34e490960c
       maxLength: 64
       minLength: 64
+    domainName:
+      description: A domain name according to RFC 1035
+      type: string
+      minLength: 1
+      maxLength: 255
+      example: example.com
     peer:
       type: object
       properties:
