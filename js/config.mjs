@@ -8,21 +8,16 @@ loadRespecWithConfiguration({
     specType: "ST",
     pubDomain: "fsc",
     shortName: "core",
-    publishDate: "2025-09-08",
-    publishVersion: "1.1.1",
-    previousPublishVersion: "1.1.0",
+    publishDate: "2026-04-21",
+    publishVersion: "2.0.0",
+    previousPublishVersion: "1.1.2",
 
     editors:
         [
             {
-                name: "VNG Realisatie",
-                company: "VNG",
-                companyURL: "https://vng.nl/rubrieken/onderwerpen/standaarden",
-            },
-            {
                 name: "Logius",
                 company: "Logius",
-                companyURL: "https://github.com/Logius-standaarden",
+                companyURL: "https://www.logius.nl",
             }
         ],
     authors:
