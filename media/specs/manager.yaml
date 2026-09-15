@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
   title: FSC Core
-  version: 1.0.0
+  version: 2.0.0
   description: Manager REST API
 servers:
-  - url: https://{managerUrl}:8443/v1
+  - url: https://{managerUrl}:8443/v2
     variables:
       managerUrl:
         default: localhost
