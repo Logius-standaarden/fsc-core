@@ -94,7 +94,7 @@ example Contract with a ServiceConnectionGrant
 ```json
 {
   "content": {
-    "fsc_version": "1.0.0",
+    "fsc_version": "3.0.0",
     "iv": "06338364-8305-7b74-8000-de4963503139",
     "group_id": "fsc-example-group",
       "validity": {
