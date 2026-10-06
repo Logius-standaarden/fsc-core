@@ -94,7 +94,7 @@ example Contract with a ServiceConnectionGrant
 ```json
 {
   "content": {
-    "fsc_version": "1.0.0",
+    "fsc_version": "3.0.0",
     "iv": "06338364-8305-7b74-8000-de4963503139",
     "group_id": "fsc-example-group",
       "validity": {
@@ -355,13 +355,6 @@ The Grant hash can be created by executing the following steps:
 | Hash Algorithm          | int32 value |
 |-------------------------|-------------|
 | HASH_ALGORITHM_SHA3_512 | 1           |
-
-#### Service types {#type_mapping_service}
-
-| Service Type                   | int32 values |
-|--------------------------------|--------------|
-| SERVICE_TYPE_SERVICE           | 1            |
-| SERVICE_TYPE_DELEGATED_SERVICE | 2            |
 
 <section class="informative">
 

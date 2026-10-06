@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
   title: FSC Core
-  version: 1.0.0
+  version: 3.0.0
   description: Manager REST API
 servers:
-  - url: https://{managerUrl}:8443/v1
+  - url: https://{managerUrl}:8443/v3
     variables:
       managerUrl:
         default: localhost
@@ -503,7 +503,7 @@ components:
         fsc_version:
           description: The version of the FSC specification that the Contract adheres to.  
           type: string
-          example: 1.0.0
+          example: 3.0.0
         iv:
           description: An Initialization vector for the Contract. Must be an UUID.
           type: string
@@ -658,7 +658,12 @@ components:
               SERVICE_TYPE_SERVICE: "#/components/schemas/service"
               SERVICE_TYPE_DELEGATED_SERVICE: "#/components/schemas/delegatedService"
         delegator:
-          $ref: "#/components/schemas/delegator"
+          oneOf:
+            - $ref: "#/components/schemas/delegator"
+          discriminator:
+            propertyName: type
+            mapping:
+              DELEGATOR_TYPE_DELEGATOR: "#/components/schemas/delegator"
         properties:
           description: Optional JSON object with arbitrary key-value pairs
           additionalProperties: true
@@ -679,7 +684,12 @@ components:
         service:
           $ref: "#/components/schemas/servicePublication"
         delegator:
-          $ref: "#/components/schemas/delegator"
+          oneOf:
+            - $ref: "#/components/schemas/delegator"
+          discriminator:
+            propertyName: type
+            mapping:
+              DELEGATOR_TYPE_DELEGATOR: "#/components/schemas/delegator"
         properties:
           description: Optional JSON object with arbitrary key-value pairs
           additionalProperties: true
@@ -761,7 +771,12 @@ components:
         name:
           $ref: "#/components/schemas/serviceName"
         delegator:
-          $ref: "#/components/schemas/delegator"
+          oneOf:
+            - $ref: "#/components/schemas/delegator"
+          discriminator:
+            propertyName: type
+            mapping:
+              DELEGATOR_TYPE_DELEGATOR: "#/components/schemas/delegator"
       required:
         - type
         - peer_id
@@ -785,9 +800,12 @@ components:
       description: The details of a Delegator
       type: object
       properties:
+        type:
+          $ref: "#/components/schemas/delegatorType"
         peer_id:
           $ref: "#/components/schemas/peerID"
       required:
+        - type
         - peer_id
     delegatorServiceListing:
       description: The details of a Delegator
@@ -855,6 +873,11 @@ components:
         - peer
         - name
         - protocol
+    delegatorType:
+      description: The type of Delegator
+      type: string
+      enum:
+        - DELEGATOR_TYPE_DELEGATOR
     serviceType:
       description: The type of Service
       type: string
