@@ -356,13 +356,6 @@ The Grant hash can be created by executing the following steps:
 |-------------------------|-------------|
 | HASH_ALGORITHM_SHA3_512 | 1           |
 
-#### Service types {#type_mapping_service}
-
-| Service Type                   | int32 values |
-|--------------------------------|--------------|
-| SERVICE_TYPE_SERVICE           | 1            |
-| SERVICE_TYPE_DELEGATED_SERVICE | 2            |
-
 <section class="informative">
 
 <h3> Certificate renewal</h3>
