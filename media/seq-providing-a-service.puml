@@ -2,7 +2,7 @@
 
 autonumber
 header: Core
-title: Providing a Service
+title: Publishing a service
 
 box "Peer"
   participant "Manager" as managerPeer

@@ -2,7 +2,7 @@
 
 autonumber
 header: Core
-title: Create an authorization to connect to a Service
+title: Create a Contract with a ServiceConnectionGrant
 
 box "Consuming Peer"
   participant "Manager" as managerConsumingPeer

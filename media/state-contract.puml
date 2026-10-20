@@ -1,5 +1,5 @@
 @startuml
-Title Contract States
+Title Contract state transistions
 
 [*]      --> PROPOSED : Proposal sent to involved Peers
 PROPOSED --> REJECTED : End date passed
