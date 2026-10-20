@@ -16,7 +16,7 @@ Contracts are negotiated between the Managers of Peers. A Directory provides the
 Connections to Services are authorized by Contracts with ServiceConnectionGrants. To create a new contract, the Manager uses a selection of desired connections as input. (Typically this input comes from a user interface interacting with the Management functionality). For each desired connection, a ServiceConnectionGrant is formulated that contains identifying information about both the Outway from the Service consumer and the Service of the Service provider. One Contract may contain multiple Grants. Grants typically match the connections mentioned in a legal agreement like a Data Processing Agreement (DPA). Valid Contracts are used to configure Inways and Outways and enable the possibility to automatically create on demand connections between Peers, as defined in the Grants.
 Contracts can contain multiple Peers. E.g. if a Peer wants a single Contract for an application, this Contract can contain all the connections required for that application.
 
-![Contract Management](media/seq-contract-management.svg "Contract Management")
+![Contract negotiation flow](media/seq-contract-management.svg "Contract negotiation flow")
 
 1. The initiating Peer gets the address of the Manager from a Directory.
 2. The Directory returns the Manager address to the Peer.
@@ -37,7 +37,7 @@ Accepting, rejecting and revoking is done by adding a digital signature.
 
 The content of a Contract is immutable. When the content of a Contract is subject to change, the Contract is invalidated and replaced by a new one.
 
-![State Contract](media/state-contract.svg "State Contract")
+![Contract state transitions](media/state-contract.svg "Possible state transitions")
 
 ## Creating a Group
 
@@ -54,7 +54,7 @@ When publishing services, Managers register Services by offering Contracts with 
 
 Peers query the Directories to discover the Services available in the Group
 
-![Providing a Service](media/seq-providing-a-service.svg "Providing a Service")
+![Publishing a Service](media/seq-providing-a-service.svg "Publishing a Service")
 
 1. The Peer creates a Contract with a Service Publication Grant which contains the details of the Service.
 2. The Peer adds its own accept signature to the Contract.
@@ -69,7 +69,7 @@ The connection Grants contains information about the Service and the public key 
 
 The Contract is distributed among the two Peers. Once the Contract is signed by all Peers, the Outway can connect to the Inway offering the Service.
 
-![Create an authorization to connect](media/seq-create-an-authorization-to-connect.svg "Connecting to a Service")
+![Create a Contract with a ServiceConnectionGrant](media/seq-create-an-authorization-to-connect.svg "Create a Contract with a ServiceConnectionGrant")
 
 1. The Service consumer creates a Contract with a Service Connection Grant. This Grant contains the details of the Service and the consumer.
 2. The Service consumer adds an accept signature to the Contract.
@@ -80,7 +80,7 @@ The Contract is distributed among the two Peers. Once the Contract is signed by 
 When the Service is being offered on behalf of another Peer, the Contract is distributed among three Peers. The Peer acting as Delegator in the Service publication will also receive the Contract.
 Once the Contract is signed by all the Peers, the Outway can connect to the Inway offering the Service on behalf of the Delegator.
 
-![Create an authorization to connect](media/seq-create-an-authorization-to-connect-delegated-publication.svg "Connecting to a Service that is offered on behalf of another Peer")
+![Create a Contract with a ServiceConnectionGrant for a Service offered on behalf of another Peer](media/seq-create-an-authorization-to-connect-delegated-publication.svg "Create a Contract with a ServiceConnectionGrant for a Service that is offered on behalf of another Peer")
 
 1. The Service consumer creates a Contract with a Service Connection Grant. This Grant contains the details of the Service, the Delegator of the Service publication and the consumer.
 2. The Service consumer adds an accept signature to the Contract.
@@ -102,7 +102,7 @@ The connection Grants contains information about the Service, the public key of 
 
 The Contract is distributed among the three Peers. Once the Contract is signed by all the Peers, the Outway of the Delegatee can connect to the Inway offering the Service on behalf the Delegator.
 
-![Delegate connection](media/seq-delegate-connection.svg "Delegate a connection to a Service")
+![Create a Contract with a DelegatedServiceConnectionGrant](media/seq-delegate-connection.svg "Create a Contract with a DelegatedServiceConnectionGrant")
 
 1. The Delegatee creates a Contract with a Delegated Service Connection Grant. This Grant contains the details of the Delegator, the Service and the Delegatee (the Peer who will consume the Service).
 2. The Delegatee adds its own accept signature to the Contract.
@@ -120,7 +120,7 @@ The Contract is distributed among the three Peers. Once the Contract is signed b
 When the Service is being offered on behalf of another Peer the Contract is distributed among four Peers. The Peer acting as Delegator in the Service publication will also receive the Contract.
 Once the Contract is signed by all the Peers, the Outway of the Delegatee can connect to the Inway offering the Service on behalf of the Delegator.
 
-![Delegate connection](media/seq-delegate-connection-delegated-publication.svg "Delegate a connection to a Service that is offered on behalf of another Peer")
+![Create a Contract with a DelegatedServiceConnectionGrant for a Service offered on behalf of another Peer](media/seq-delegate-connection-delegated-publication.svg "Create a Contract with a DelegatedServiceConnectionGrant for a Service that is offered on behalf of another Peer")
 
 1. The Delegatee creates a Contract with a Delegated Service Connection Grant. This Grant contains the details of the Delegator, the Service, the Delegator of the Service publication, and the Delegatee (the Peer who will consume the Service).
 2. The Delegatee adds its own accept signature to the Contract.
