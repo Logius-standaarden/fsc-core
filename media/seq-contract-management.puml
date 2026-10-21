@@ -2,7 +2,7 @@
 
 autonumber
 header: Core
-title: Contract Management
+title: Contract negotiation flow
 
 box "Initiating Peer"
   participant "Manager" as m1

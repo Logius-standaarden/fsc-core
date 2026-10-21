@@ -1,7 +1,7 @@
 @startuml
 
 autonumber
-title: Delegate the authorization to connect to a Service published on behalf of another Peer
+title: Create a Contract with a DelegatedServiceConnectionGrant for a Service that is offered on behalf of another Peer
 header: Core
 
 box "Delegatee"
